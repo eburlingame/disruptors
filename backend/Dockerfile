@@ -19,4 +19,4 @@ WORKDIR /source
 COPY ./static/ /source/
 COPY ./app/ /source/
 COPY ./tests/ /source/
-COPY .env /source/
+# COPY .env /source/

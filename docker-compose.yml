@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  redis:
+    restart: always
+    env_file:
+      - .env
+    image: redis:6.0.9-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    ports:
+      - 6379:6379
+
+  frontend:
+    build:
+      context: ./frontend/
+    env_file:
+      - .env
+    command: yarn start
+    volumes:
+      - ./frontend/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+
+  backend:
+    build:
+      context: "./backend/"
+    env_file:
+      - .env
+    command: bash -c "
+      uvicorn app.main:app
+      --host 0.0.0.0 --port 8080
+      --lifespan=on --use-colors --loop uvloop --http httptools
+      --reload  --reload-dir /source/app --reload-dir /source/tests
+      "
+    volumes:
+      - ./backend/:/source/
+      - .env:/source/.env
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+
+volumes:
+  redisdata:

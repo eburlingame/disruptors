@@ -1,0 +1,16 @@
+# frontend build
+FROM node:current-alpine3.12
+
+WORKDIR /usr/app
+
+ENV PATH /usr/app/node_modules/.bin:$PATH
+ENV NODE_ENV development
+
+COPY package*.json ./
+RUN yarn install --frozen-lockfile --production=false
+RUN yarn global add typescript
+RUN yarn global add react-scripts@3.4.1
+
+COPY . .
+EXPOSE 3000
+CMD yarn run start
