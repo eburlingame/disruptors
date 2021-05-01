@@ -2,11 +2,11 @@ name: Build and push
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
   pull_request:
-    branches: [ master ]
-    
+    branches: [master]
+
   workflow_dispatch:
 
 jobs:
@@ -19,13 +19,14 @@ jobs:
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build and push Docker image
         with:
-          tags: latest
           dockerfile: Dockerfile
-          image: ${{ secrets.DOCKER_REGISTRY }}/disruptors
+          image: disruptors
+          tags: latest
           registry: ${{ secrets.DOCKER_REGISTRY }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Trigger the deployment pipline
         run: |
           curl --request POST \
