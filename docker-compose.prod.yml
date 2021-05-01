@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  redis:
+    restart: always
+    env_file:
+      - .env
+    image: redis:6.0.9-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    ports:
+      - 6379:6379
+
+  web:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .env:/source/.env
+    ports:
+      - 8080:8080
+    environment:
+        NODE_ENV: production
+    depends_on:
+      - redis
+    command: bash -c "
+      uvicorn app.main:app
+      --host 0.0.0.0 --port 8080
+      --lifespan=on --use-colors --loop uvloop --http httptools
+      "
+
+volumes:
+  redisdata:

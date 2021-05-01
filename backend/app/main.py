@@ -10,7 +10,7 @@ global_settings = config.Settings()
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+app.mount("/static", StaticFiles(directory="frontend/static", html=True), name="static")
 
 
 async def init_redis_pool() -> Redis:
@@ -36,7 +36,8 @@ async def shutdown_event():
 
 @app.get("/")
 async def index():
-    return FileResponse("static/index.html")
+    # TODO: Figure out how to serve other static files at the root (like favicon.ico)
+    return FileResponse("frontend/index.html")
 
 
 @app.websocket("/ws")
