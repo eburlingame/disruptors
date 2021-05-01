@@ -25,3 +25,13 @@ jobs:
           registry: ${{ secrets.DOCKER_REGISTRY }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the deployment pipline
+        run: |
+          curl --request POST \
+          --form "token=$DEPLOY_TRIGGER_TOKEN" \
+          -F "variables[ANSIBLE_PLAYBOOK]=disruptors.deploy.yml" \
+          --form ref=master "$DEPLOY_TRIGGER_URL"
