@@ -23,7 +23,7 @@ jobs:
           image: disruptors
           tags: latest
           registry: ${{ secrets.DOCKER_REGISTRY }}
-          username: ${{ secret.DOCKER_USER }}
+          username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
       # - name: Trigger the deployment pipline
