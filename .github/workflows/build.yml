@@ -22,13 +22,13 @@ jobs:
           dockerfile: Dockerfile
           image: disruptors
           tags: latest
-          registry: docker.pkg.github.com
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secret.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Trigger the deployment pipline
-        run: |
-          curl --request POST \
-          --form "token=${{ secrets.DEPLOY_TRIGGER_TOKEN }}" \
-          -F "variables[ANSIBLE_PLAYBOOK]=disruptors.deploy.yml" \
-          --form ref=master "${{ secrets.DEPLOY_TRIGGER_URL }}"
+      # - name: Trigger the deployment pipline
+      #   run: |
+      #     curl --request POST \
+      #     --form "token=${{ secrets.DEPLOY_TRIGGER_TOKEN }}" \
+      #     -F "variables[ANSIBLE_PLAYBOOK]=disruptors.deploy.yml" \
+      #     --form ref=master "${{ secrets.DEPLOY_TRIGGER_URL }}"
