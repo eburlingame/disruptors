@@ -20,7 +20,7 @@ jobs:
         name: Build and push Docker image
         with:
           dockerfile: Dockerfile
-          image: eburlingame/disruptors
+          image: disruptors
           tags: latest
           registry: docker.pkg.github.com
           username: ${{ github.actor }}
