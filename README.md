@@ -14,7 +14,12 @@ And optionally:
 
 ### Running locally
 
-It *should* be as easy as: 
+First, copy the `.env.example` to `.env` in the root directory.
+```
+cp .env.example .env
+```
+
+Then, it *should* be as easy as: 
 ```
 docker-compose up
 ```
@@ -23,11 +28,16 @@ This will do an initial build of the client and server containers, then start th
 
 If you add `Python` or `npm` dependencies (or change the build configuration), you will need to rebuild the containers. You can do this with: 
 
-`docker-compose up --build`
+```
+docker-compose up --build
+```
 
 or 
 
-`docker-compose build` then `docker-compose up`
+```
+docker-compose build
+docker-compose up
+```
 
 ## Structure
 

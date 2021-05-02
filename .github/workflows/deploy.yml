@@ -1,0 +1,38 @@
+name: Build and push
+
+on:
+  push:
+    branches: [master]
+
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out code
+
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build and push Docker image
+        with:
+          dockerfile: Dockerfile
+          image: disruptors
+          tags: latest
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the deployment pipline
+        run: |
+          curl --request POST \
+          --form "token=${{ secrets.DEPLOY_TRIGGER_TOKEN }}" \
+          -F "variables[ANSIBLE_PLAYBOOK]=disruptors.deploy.yml" \
+          --form ref=master "${{ secrets.DEPLOY_TRIGGER_URL }}"
