@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, Request, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
@@ -10,7 +11,10 @@ global_settings = config.Settings()
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="frontend/static", html=True), name="static")
+if os.getenv("ENVIRONMENT", "dev") != "dev":
+    app.mount(
+        "/static", StaticFiles(directory="frontend/static", html=True), name="static"
+    )
 
 
 async def init_redis_pool() -> Redis:
