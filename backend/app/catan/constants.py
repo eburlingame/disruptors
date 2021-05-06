@@ -14,13 +14,23 @@ class ResourceType(Enum):
     BRICK = "brick"
     WOOD = "wood"
     ORE = "ore"
-    GRAIN = "grain"
-    WOOL = "wool"
+    WHEAT = "wheat"
+    SHEEP = "sheep"
 
 
-class TileType(ResourceType):
+class TileType(Enum):
+    BRICK = "brick"
+    WOOD = "wood"
+    ORE = "ore"
+    WHEAT = "wheat"
+    SHEEP = "sheep"
     DESERT = "desert"
 
 
-class PortResource(ResourceType):
+class PortResource(Enum):
+    BRICK = "brick"
+    WOOD = "wood"
+    ORE = "ore"
+    WHEAT = "wheat"
+    SHEEP = "sheep"
     ANY = "any"

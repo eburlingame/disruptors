@@ -35,10 +35,10 @@ If the client reloads or reconnected, it will send a `reopenSession` command wit
     - GAME_OVER
   - board
     - tiles
-      - tileType: brick | wood | ore | grain | wool | desert
+      - tileType: brick | wood | ore | wheat | sheep | desert
       - diceNumber
       - ports:
-        - portResource: brick | wood | ore | grain | wool | any
+        - portResource: brick | wood | ore | wheat | sheep | any
         - portRatio: 1 | 2 | 3
     - construction
       - settlements
@@ -51,8 +51,8 @@ If the client reloads or reconnected, it will send a `reopenSession` command wit
       - brickCount
       - woodCount
       - oreCount
-      - grainCount
-      - woolCount
+      - wheatCount
+      - sheepCount
     - developmentCards:
       - devCardType: knight | victoryPoint
 
