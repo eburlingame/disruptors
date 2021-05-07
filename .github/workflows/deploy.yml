@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  API_IMAGE: ghcr.io/${{ github.repository }}-api:sha-${{ github.sha }}
-  CLIENT_IMAGE: ghcr.io/${{ github.repository }}-client:sha-${{ github.sha }}
+  API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ github.sha }}
+  CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ github.sha }}
 
-  LATEST_API_IMAGE: ghcr.io/${{ github.repository }}-api:latest
-  LATEST_CLIENT_IMAGE: ghcr.io/${{ github.repository }}-client:latest
+  LATEST_API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:latest
+  LATEST_CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:latest
 
 jobs:
   backend-build:
