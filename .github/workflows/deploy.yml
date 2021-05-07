@@ -24,10 +24,10 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: false
-          tags: backend
+          tags: backend:latest
 
       - name: Run pytest
-        run: docker run backend sh -c "pytest"
+        run: docker run backend:latest sh -c "pytest"
 
   build:
     needs: [test-backend]
