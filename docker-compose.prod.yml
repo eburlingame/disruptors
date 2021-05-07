@@ -1,5 +1,6 @@
 version: "3"
 
+# "Prod-like" compose file (uses prod Dockerfiles, no hot reloading)
 services:
   redis:
     restart: always
@@ -12,16 +13,26 @@ services:
     ports:
       - 6379:6379
 
-  web:
-    build: .
+  frontend:
+    container_name: "disruptors-client"
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile.prod
     env_file:
       - .env
-    volumes:
-      - .env:/source/.env
+    depends_on:
+      - backend
+    ports:
+      - 3000:80
+
+  backend:
+    container_name: "disruptors-api"
+    build:
+      context: ./backend/
+    env_file:
+      - .env
     ports:
       - 8080:8080
-    environment:
-        NODE_ENV: production
     depends_on:
       - redis
     command: bash -c "

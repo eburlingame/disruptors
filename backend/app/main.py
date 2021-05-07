@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI, Depends, Request, WebSocket
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
 from aioredis import create_redis_pool, Redis
 
 from app import config
@@ -10,11 +9,6 @@ global_settings = config.Settings()
 
 
 app = FastAPI()
-
-if os.getenv("ENVIRONMENT", "dev") != "dev":
-    app.mount(
-        "/static", StaticFiles(directory="frontend/static", html=True), name="static"
-    )
 
 
 async def init_redis_pool() -> Redis:
@@ -36,12 +30,6 @@ async def starup_event():
 async def shutdown_event():
     app.state.redis.close()
     await app.state.redis.wait_closed()
-
-
-@app.get("/")
-async def index():
-    # TODO: Figure out how to serve other static files at the root (like favicon.ico)
-    return FileResponse("frontend/index.html")
 
 
 @app.websocket("/ws")
