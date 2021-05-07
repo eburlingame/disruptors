@@ -12,8 +12,8 @@ RUN set -ex && pip install pipenv --upgrade
 RUN set -ex && pip install --upgrade pip setuptools wheel
 RUN set -ex && pipenv install --system --sequential --ignore-pipfile --dev
 
-# FROM pipenv as final
-# WORKDIR /source
-# COPY ./app/ /source/
-# COPY ./tests/ /source/
-# COPY .env /source/
+FROM pipenv as final
+WORKDIR /source
+COPY ./app/ app/
+COPY ./tests/ tests/
+COPY .env .
