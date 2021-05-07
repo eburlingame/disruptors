@@ -17,20 +17,24 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push tag container
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v2
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          registry: docker.pkg.github.com
-          repository: ${{ github.repository }}/disruptors/disruptors-api
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          tag_with_sha: true
-          tag_with_ref: true
+          tags: 
+            - ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
 
   backend-test:
     runs-on: ubuntu-latest
+    needs: [backend-build]
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
@@ -39,12 +43,20 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-      # TODO: Probably should just use the image from above
+      - name: Login to GitHub container registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run pytest
         run: |
           cd backend/
-          docker build . -t backend
-          docker run backend sh -c "pytest"
+          docker pull IMAGE
+          docker run IMAGE sh -c "pytest"
+        env:
+          IMAGE: ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -56,17 +68,23 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Login to GitHub container registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push tag container
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v2
         with:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
           registry: docker.pkg.github.com
-          repository: ${{ github.repository }}/disruptors/disruptors-client
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          tag_with_sha: true
-          tag_with_ref: true
+          tags: 
+            - ${{ github.repository }}/disruptors/disruptors-client:sha-${{ github.sha }}
 
   deploy:
     needs:
