@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  API_IMAGE: ${{ github.repository }}/disruptors/disruptors-client:sha-${{ github.sha }}
-  CLIENT_IMAGE: ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
+  API_IMAGE: ${{ github.repository }}/disruptors-client:sha-${{ github.sha }}
+  CLIENT_IMAGE: ${{ github.repository }}/disruptors-api:sha-${{ github.sha }}
 
-  LATEST_API_IMAGE: ${{ github.repository }}/disruptors/disruptors-client:sha-latest
-  LATEST_CLIENT_IMAGE: ${{ github.repository }}/disruptors/disruptors-api:sha-latest
+  LATEST_API_IMAGE: ${{ github.repository }}/disruptors-client:sha-latest
+  LATEST_CLIENT_IMAGE: ${{ github.repository }}/disruptors-api:sha-latest
 
 jobs:
   backend-build:
