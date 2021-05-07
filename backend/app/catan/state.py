@@ -29,7 +29,7 @@ class ResourceAmounts(BaseModel):
 
 
 class GamePlayer(BaseModel):
-    playerId: str
+    player_id: str
     resources: ResourceAmounts = ResourceAmounts()
     roads: List[Road] = []
     settlements: List[Settlement] = []
@@ -37,7 +37,7 @@ class GamePlayer(BaseModel):
 
 
 class GameConfig(BaseModel):
-    cardDiscardLimit: int = 7
+    card_discard_limit: int = 7
 
 
 class GameState(BaseModel):

@@ -4,17 +4,17 @@ from app.catan.actions import *
 from app.catan.errors import *
 
 
-def newGame(gameId: str, playerIds: List[str], gameConfig: GameConfig):
-    gamePlayers = list(map(lambda playerId: GamePlayer(playerId=playerId), playerIds))
+def new_game(gameId: str, player_ids: List[str], game_config: GameConfig):
+    game_players = list(map(lambda player_id: GamePlayer(player_id=player_id), player_ids))
 
     return GameState(
         id=gameId,
         phase=GamePhase.CREATED,
         board=fixedBoard(),
-        config=gameConfig,
-        players=gamePlayers,
+        config=game_config,
+        players=game_players,
     )
 
 
-def dispatchGameAction(game: GameState, playerId: str, action: GameAction):
-    return action.apply(game, playerId)
+def dispatch_game_action(game: GameState, player_id: str, action: GameAction):
+    return action.apply(game, player_id)

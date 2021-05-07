@@ -23,7 +23,7 @@ class TileCoordinate(BaseModel):
 
 class EdgeCoordinate(BaseModel):
     tile: TileCoordinate
-    edgeIndex: int
+    edge_index: int
 
 
 # Vertex indexes:
@@ -36,20 +36,20 @@ class EdgeCoordinate(BaseModel):
 
 class VertexCoordinate(BaseModel):
     tile: TileCoordinate
-    vertexIndex: int
+    vertex_index: int
 
 
 class Port(BaseModel):
-    vertexIndex: int
+    vertex_index: int
     resource: PortResource
     ratio: int
 
 
 class GameTile(BaseModel):
     location: TileCoordinate
-    tileType: TileType
+    tile_type: TileType
     ports: List[Port] = []
-    diceNumber: int
+    dice_number: int
 
 
 class GameBoard(BaseModel):
