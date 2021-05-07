@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from aioredis import create_redis_pool, Redis
 
+from app.session import WebsocketSession
 from app import config
 
 global_settings = config.Settings()
@@ -22,7 +23,7 @@ async def init_redis_pool() -> Redis:
 
 
 @app.on_event("startup")
-async def starup_event():
+async def startup_event():
     app.state.redis = await init_redis_pool()
 
 
@@ -35,9 +36,9 @@ async def shutdown_event():
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Hello from server: {data}")
+    
+    session = WebsocketSession(app=app, websocket=websocket)
+    session.listen()
 
 
 @app.get("/health-check")
