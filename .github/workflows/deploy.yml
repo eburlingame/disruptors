@@ -6,6 +6,13 @@ on:
 
   workflow_dispatch:
 
+env:
+  API_IMAGE: ${{ github.repository }}/disruptors/disruptors-client:sha-${{ github.sha }}
+  CLIENT_IMAGE: ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
+
+  LATEST_API_IMAGE: ${{ github.repository }}/disruptors/disruptors-client:sha-latest
+  LATEST_CLIENT_IMAGE: ${{ github.repository }}/disruptors/disruptors-api:sha-latest
+
 jobs:
   backend-build:
     runs-on: ubuntu-latest
@@ -29,8 +36,7 @@ jobs:
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          tags: 
-            - ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
+          tags: ${{ env.API_IMAGE }}
 
   backend-test:
     runs-on: ubuntu-latest
@@ -55,8 +61,6 @@ jobs:
           cd backend/
           docker pull IMAGE
           docker run IMAGE sh -c "pytest"
-        env:
-          IMAGE: ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -83,8 +87,7 @@ jobs:
           registry: docker.pkg.github.com
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          tags: 
-            - ${{ github.repository }}/disruptors/disruptors-client:sha-${{ github.sha }}
+          tags: ${{ env.CLIENT_IMAGE }}
 
   deploy:
     needs:
@@ -101,12 +104,12 @@ jobs:
       - name: Push latest container images
         run: |
           echo "Push api container to latest tag"
-          docker pull ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
-          docker push ${{ github.repository }}/disruptors/disruptors-api:latest
+          docker pull $API_IMAGE
+          docker push $LATEST_API_IMAGE
 
           echo "Push client container to latest tag"
-          docker pull ${{ github.repository }}/disruptors/disruptors-client:sha-${{ github.sha }}
-          docker push ${{ github.repository }}/disruptors/disruptors-client:latest
+          docker pull $CLIENT_IMAGE
+          docker push $LATEST_CLIENT_IMAGE
 
       - name: Trigger the deployment pipline
         run: |
