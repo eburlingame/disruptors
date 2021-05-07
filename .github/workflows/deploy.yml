@@ -60,7 +60,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: ./frontend/Dockerfile.prod
           registry: docker.pkg.github.com
           repository: ${{ github.repository }}/disruptors-client
           username: ${{ github.actor }}
@@ -76,6 +76,20 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Push latest container images
+        run: |
+          echo "Push api container to latest tag"
+          docker pull ${{ github.repository }}/disruptors-client/disruptors-api:sha-${{ github.sha }}
+          docker push ${{ github.repository }}/disruptors-client/disruptors-api:latest
+
+          echo "Push client container to latest tag"
+          docker pull ${{ github.repository }}/disruptors-client/disruptors-client:sha-${{ github.sha }}
+          docker push ${{ github.repository }}/disruptors-client/disruptors-client:latest
+
       - name: Trigger the deployment pipline
         run: |
           curl --request POST \
