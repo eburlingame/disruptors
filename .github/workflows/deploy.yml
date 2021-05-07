@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ github.sha }}
-  CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ github.sha }}
+  API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ GITHUB_SHA::8 }}
+  CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ GITHUB_SHA::8 }}
 
   LATEST_API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:latest
   LATEST_CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:latest
@@ -111,10 +111,12 @@ jobs:
         run: |
           echo "Push api container to latest tag"
           docker pull $API_IMAGE
+          docker tag $API_IMAGE $LATEST_API_IMAGE
           docker push $LATEST_API_IMAGE
 
           echo "Push client container to latest tag"
           docker pull $CLIENT_IMAGE
+          docker tag $CLIENT_IMAGE $LATEST_CLIENT_IMAGE
           docker push $LATEST_CLIENT_IMAGE
 
       - name: Trigger the deployment pipline
