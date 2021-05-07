@@ -23,7 +23,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           registry: docker.pkg.github.com
-          repository: ${{ github.repository }}/disruptors-api
+          repository: ${{ github.repository }}/disruptors/disruptors-api
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           tag_with_sha: true
@@ -62,7 +62,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
           registry: docker.pkg.github.com
-          repository: ${{ github.repository }}/disruptors-client
+          repository: ${{ github.repository }}/disruptors/disruptors-client
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           tag_with_sha: true
@@ -83,12 +83,12 @@ jobs:
       - name: Push latest container images
         run: |
           echo "Push api container to latest tag"
-          docker pull ${{ github.repository }}/disruptors-client/disruptors-api:sha-${{ github.sha }}
-          docker push ${{ github.repository }}/disruptors-client/disruptors-api:latest
+          docker pull ${{ github.repository }}/disruptors/disruptors-api:sha-${{ github.sha }}
+          docker push ${{ github.repository }}/disruptors/disruptors-api:latest
 
           echo "Push client container to latest tag"
-          docker pull ${{ github.repository }}/disruptors-client/disruptors-client:sha-${{ github.sha }}
-          docker push ${{ github.repository }}/disruptors-client/disruptors-client:latest
+          docker pull ${{ github.repository }}/disruptors/disruptors-client:sha-${{ github.sha }}
+          docker push ${{ github.repository }}/disruptors/disruptors-client:latest
 
       - name: Trigger the deployment pipline
         run: |
