@@ -37,6 +37,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           tags: ${{ env.API_IMAGE }}
+          push: true
 
   backend-test:
     runs-on: ubuntu-latest
@@ -84,10 +85,8 @@ jobs:
         with:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
-          registry: docker.pkg.github.com
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
           tags: ${{ env.CLIENT_IMAGE }}
+          push: true
 
   deploy:
     needs:
