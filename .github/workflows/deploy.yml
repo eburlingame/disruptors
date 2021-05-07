@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ GITHUB_SHA::8 }}
-  CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ GITHUB_SHA::8 }}
+  API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ github.sha::8 }}
+  CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ github.sha::8 }}
 
   LATEST_API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:latest
   LATEST_CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:latest
