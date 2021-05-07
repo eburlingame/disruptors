@@ -1,8 +1,9 @@
-name: Build
+name: Test
 
 on:
   push:
     branches:
+      - "master"
       - "features/**"
 
   pull_request:
@@ -30,6 +31,6 @@ jobs:
           file: ./backend/Dockerfile
           push: false
           tags: backend
-          
+
       - name: Run pytest
         run: docker run backend sh -c "pytest"
