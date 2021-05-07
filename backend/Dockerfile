@@ -16,4 +16,4 @@ FROM pipenv as final
 WORKDIR /source
 COPY ./app/ app/
 COPY ./tests/ tests/
-COPY .env .
+# COPY .env .
