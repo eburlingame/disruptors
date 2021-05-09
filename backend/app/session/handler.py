@@ -10,6 +10,15 @@ class SessionHandler:
         self.app = app
         self.redis = app.state.redis
 
-    async def process_request(self, req: SocketRequest) -> Union[SocketResponse, UnknownError]:
+    def sucess_response(self, request: SocketRequest, response_data):
+        return SocketResponse(
+            reqId=request.reqId, sucess=True, v=request.v, d=response_data
+        )
+
+    async def process_request(
+        self, req: SocketRequest
+    ) -> Union[SocketResponse, UnknownError]:
         self.app.logger.info("Processing request: %s" % req.json())
-        return SocketResponse(reqId=req.reqId, sucess=True, v=req.v)
+        return self.sucess_response(request=req, response_data={"test": "test"})
+
+    

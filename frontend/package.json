@@ -18,8 +18,11 @@
     "react-dom": "^17.0.2",
     "react-icons": "^3.0.0",
     "react-scripts": "4.0.3",
+    "recoil": "^0.2.0",
     "typescript": "^3.9.5",
-    "web-vitals": "^0.2.2"
+    "uuid": "^8.3.2",
+    "web-vitals": "^0.2.2",
+    "websocket-as-promised": "^2.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -41,5 +44,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/recoil": "^0.0.1",
+    "@types/uuid": "^8.3.0"
   }
 }
