@@ -3,7 +3,8 @@ from fastapi import FastAPI, Depends, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from aioredis import create_redis_pool, Redis
 
-from app.session.session import WebsocketSession
+from app.socket.socket import WebsocketSession
+from app.persistor import RedisPersistor
 from app import config
 
 global_settings = config.Settings()
@@ -38,7 +39,8 @@ async def shutdown_event():
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
-    session = WebsocketSession(app=app, websocket=websocket)
+    persistor = RedisPersistor(app=app, redis=app.state.redis)
+    session = WebsocketSession(app=app, websocket=websocket, persistor=persistor)
     await session.listen()
 
 

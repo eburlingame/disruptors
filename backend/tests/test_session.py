@@ -4,7 +4,7 @@ import fakeredis.aioredis
 from fastapi import status
 
 from app.main import app
-from app.session.handler import SessionHandler
+from app.socket.handlers. import SessionHandler
 
 
 @pytest.fixture

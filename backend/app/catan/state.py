@@ -4,7 +4,6 @@ from typing import List, Optional
 from pydantic import BaseModel
 from app.catan.constants import *
 from app.catan.gen_board import *
-from app.catan.actions import *
 from app.catan.errors import *
 
 

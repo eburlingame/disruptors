@@ -1,17 +1,24 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 from typing import Any, Union
-from app.session.types import *
-from app.session.handler import SessionHandler
+
+from app.socket.types import *
+from app.persistor import Persistor
+
+from app.socket.handlers.session_handler import SessionHandler
+from app.socket.handlers.game_handler import GameHandler
 
 from pydantic.error_wrappers import ValidationError
 
 
 class WebsocketSession:
-    def __init__(self, app: FastAPI, websocket: WebSocket):
+    def __init__(self, app: FastAPI, websocket: WebSocket, persistor: Persistor):
         self.app = app
         self.websocket = websocket
-        self.handler = SessionHandler(app)
+        self.persistor = persistor
+
+        self.session_handler = SessionHandler(app, persistor)
+        self.game_handler = GameHandler(app, persistor)
 
     async def listen(self):
         self.app.logger.info("Websocket connection opened")
@@ -39,9 +46,18 @@ class WebsocketSession:
     async def process_message(self, msg: str) -> Union[SocketResponse, UnknownError]:
         try:
             request = self.parse_request(str(msg))
-            self.app.logger.debug("Recieved request: " + request.json())
+            self.app.logger.info("Recieved request: " + request.json())
 
-            response = await self.handler.process_request(request)
+            verb_namespace = request.v.split(".")[0]
+            self.app.logger.info(verb_namespace)
+
+            response = UnknownError(msg="An unknown error occured")
+            if verb_namespace == "session":
+                response = await self.session_handler.process_request(request)
+
+            elif verb_namespace == "game":
+                pass
+
             return response
 
         except ValidationError as e:
