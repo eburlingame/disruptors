@@ -28,44 +28,40 @@ export const useSetupSession = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<null | string>(null);
 
-  const openSession = async () => {
-    console.log("here");
+  useEffect(() => {
+    const openSession = async () => {
+      if (socket) {
+        console.log("Opening websocket");
+        await socket.open();
 
-    if (socket) {
-      console.log("Opening websocket");
-      await socket.open();
+        /// Check in local storage for an existing sessionId, and send it along
+        let payload = {};
+        const existingSessionId = loadPersistentSessionId();
 
-      /// Check in local storage for an existing sessionId, and send it along
-      let payload = {};
-      const existingSessionId = loadPersistentSessionId();
+        if (existingSessionId) {
+          console.log(`Attempting to reopen session ${existingSessionId}`);
+          payload = { sessionId: existingSessionId };
+        }
 
-      if (existingSessionId) {
-        console.log(`Attempting to reopen session ${existingSessionId}`);
-        payload = { sessionId: existingSessionId };
-      }
+        const response = await socket.sendRequest(
+          { v: "session.open", d: payload },
+          { requestId: uuid() }
+        );
 
-      const response = await socket.sendRequest(
-        { v: "session.open", d: payload },
-        { requestId: uuid() }
-      );
+        if (response) {
+          const { sessionId } = response.d;
 
-      if (response) {
-        const { sessionId } = response.d;
-
-        if (sessionId) {
-          console.log(`Session ${sessionId} open`);
-          setPersistentSessionId(sessionId);
-          setIsOpen(true);
-          setSessionId(sessionId);
+          if (sessionId) {
+            console.log(`Session ${sessionId} open`);
+            setPersistentSessionId(sessionId);
+            setIsOpen(true);
+            setSessionId(sessionId);
+          }
         }
       }
-    }
-  };
+    };
 
-  useEffect(() => {
-    if (socket) {
-      openSession();
-    }
+    openSession();
   }, [socket]);
 
   return {

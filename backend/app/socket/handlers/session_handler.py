@@ -31,21 +31,15 @@ class SessionHandler(Handler):
             self.app.logger.info("Opening session")
             response = await self.open_session(req=req)
 
-        elif req.v == "session.createGame":
-            self.app.logger.info("Creating game")
-            response = await self.create_game(req=req)
-
         return response
 
-    async def open_session(self, req: SocketRequest):
+    async def open_session(self, req: SocketRequest) -> SocketResponse:
         session_id = None
 
         # Try to lookup the session id (if one was passed in)
         if req.d:
             contents = OpenSessionPayload.parse_obj(req.d)
-            session_id = await self.session.open_existing_session(
-                session_id=contents.sessionId
-            )
+            session_id = await self.session.open_existing_session(contents.sessionId)
         else:
             session_id = await self.session.open_new_session()
 

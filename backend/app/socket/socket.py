@@ -4,6 +4,7 @@ from typing import Any, Union
 
 from app.socket.types import *
 from app.persistor import Persistor
+from app.session import Session
 
 from app.socket.handlers.session_handler import SessionHandler
 from app.socket.handlers.game_handler import GameHandler
@@ -11,14 +12,17 @@ from app.socket.handlers.game_handler import GameHandler
 from pydantic.error_wrappers import ValidationError
 
 
-class WebsocketSession:
-    def __init__(self, app: FastAPI, websocket: WebSocket, persistor: Persistor):
+class SocketHandler:
+    def __init__(
+        self, app: FastAPI, websocket: WebSocket, session: Session, persistor: Persistor
+    ):
         self.app = app
         self.websocket = websocket
+        self.session = session
         self.persistor = persistor
 
-        self.session_handler = SessionHandler(app, persistor)
-        self.game_handler = GameHandler(app, persistor)
+        self.session_handler = SessionHandler(app, session, persistor)
+        self.game_handler = GameHandler(app, session, persistor)
 
     async def listen(self):
         self.app.logger.info("Websocket connection opened")
@@ -30,18 +34,12 @@ class WebsocketSession:
             data = await self.websocket.receive_text()
             await self.process_incoming(data)
 
-    async def send_response(self, response: SocketResponse):
-        await self.websocket.send_text(response.json())
-
     async def process_incoming(self, s: str):
         result = await self.process_message(s)
 
         if isinstance(result, BaseModel):
             self.app.logger.debug("Sending response: " + result.json())
             await self.send_response(result)
-
-    def parse_request(self, msg: str):
-        return SocketRequest.parse_raw(msg)
 
     async def process_message(self, msg: str) -> Union[SocketResponse, UnknownError]:
         try:
@@ -52,12 +50,13 @@ class WebsocketSession:
             self.app.logger.info(verb_namespace)
 
             response = UnknownError(msg="An unknown error occured")
+
             if verb_namespace == "session":
                 response = await self.session_handler.process_request(request)
-
             elif verb_namespace == "game":
-                pass
+                response = await self.game_handler.process_request(request)
 
+            self.app.logger.info(response)
             return response
 
         except ValidationError as e:
@@ -67,3 +66,9 @@ class WebsocketSession:
         except Exception as e:
             self.app.logger.warn("Unknown error occured: " + str(e))
             return UnknownError(msg="Unknown error occured: " + str(e)).json()
+
+    async def send_response(self, response: SocketResponse):
+        await self.websocket.send_text(response.json())
+
+    def parse_request(self, msg: str):
+        return SocketRequest.parse_raw(msg)
