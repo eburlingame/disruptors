@@ -18,11 +18,18 @@ class PersistedGamePlayer(BaseModel):
     isHost: bool
 
 
+class PersistedGameRoom(BaseModel):
+    playerIds: List[PersistedGamePlayer]
+    gameRoomId: str
+    gameRoomCode: str
+    game: str
+    gameConfig: Dict
+
+
 class PersistedGame(BaseModel):
     gameId: str
-    gameCode: str
-    playerIds: List[PersistedGamePlayer]
-    gameConfig: Dict
+    gameRoomId: str
+    gameState: Any
 
 
 class SocketRequest(BaseModel):
