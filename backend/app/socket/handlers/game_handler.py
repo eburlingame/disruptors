@@ -28,26 +28,18 @@ class GameHandler(Handler):
 
         response = None
 
-        if req.v == "session.open":
-            self.app.logger.info("Opening session")
-            response = await self.open_session(req=req)
-
-        elif req.v == "session.createGame":
+        if req.v == "game.create":
             self.app.logger.info("Creating game")
             response = await self.create_game(req=req)
 
         return response
 
-    async def open_session(self, req: SocketRequest):
-        session_id = None
-
-        # Try to lookup the session id (if one was passed in)
-        if req.d:
-            contents = OpenSessionPayload.parse_obj(req.d)
-            session_id = await self.session.open_existing_session(
-                session_id=contents.sessionId
-            )
-        else:
-            session_id = await self.session.open_new_session()
-
-        return self.sucess_response(req, {"sessionId": session_id})
+    async def create_game(self, req: SocketRequest):
+        # Create game id
+        # Create game code
+        # Create player id
+        # Create default game configuration
+        # Persist new game
+        # Attach it to the session
+        # Attach player id to the session
+        pass

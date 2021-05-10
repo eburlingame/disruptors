@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
 
-from app.catan.constants import *
-from app.catan.board import *
+from app.games.catan.constants import *
+from app.games.catan.board import *
 
 
 class TileCoordinate(BaseModel):

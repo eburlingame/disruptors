@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, Union, Optional, List
-from app.catan.state import GameConfig
+from typing import Any, Union, Optional, List, Dict
 
 
 class PersistedPlayer(BaseModel):
@@ -23,7 +22,7 @@ class PersistedGame(BaseModel):
     gameId: str
     gameCode: str
     playerIds: List[PersistedGamePlayer]
-    gameConfig: GameConfig
+    gameConfig: Dict
 
 
 class SocketRequest(BaseModel):

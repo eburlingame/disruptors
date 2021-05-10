@@ -3,8 +3,8 @@ from httpx import AsyncClient
 import fakeredis.aioredis
 from fastapi import status
 
-from app.catan.gen_board import fixedBoard
-from app.catan.operations import *
+from app.games.catan.gen_board import fixedBoard
+from app.games.catan.operations import *
 
 
 def test_gen_fixed_board():

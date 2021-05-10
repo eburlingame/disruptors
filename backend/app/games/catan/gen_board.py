@@ -1,4 +1,4 @@
-from app.catan.board import *
+from app.games.catan.board import *
 
 
 def fixedBoard():

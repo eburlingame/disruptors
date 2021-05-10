@@ -49,6 +49,7 @@ class SocketHandler:
             verb_namespace = request.v.split(".")[0]
             self.app.logger.info(verb_namespace)
 
+            # Send the request to the appropriate handler
             response = UnknownError(msg="An unknown error occured")
 
             if verb_namespace == "session":

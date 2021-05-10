@@ -2,9 +2,9 @@ from enum import Enum
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
-from app.catan.constants import *
-from app.catan.gen_board import *
-from app.catan.errors import *
+from app.games.catan.constants import *
+from app.games.catan.gen_board import *
+from app.games.catan.errors import *
 
 
 class Road(BaseModel):
@@ -40,7 +40,6 @@ class GameConfig(BaseModel):
 
 
 class GameState(BaseModel):
-    id: str
     config: GameConfig
     phase: GamePhase
     board: GameBoard

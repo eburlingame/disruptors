@@ -5,10 +5,10 @@ from typing import List, Optional
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
-from app.catan.state import *
-from app.catan.constants import *
-from app.catan.gen_board import *
-from app.catan.errors import *
+from app.games.catan.state import *
+from app.games.catan.constants import *
+from app.games.catan.gen_board import *
+from app.games.catan.errors import *
 
 
 def parse_action(serialized_action: dict):
