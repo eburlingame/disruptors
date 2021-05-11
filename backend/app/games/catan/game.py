@@ -30,7 +30,6 @@ class Catan(BaseGame):
         )
 
         return GameState(
-            id=gameId,
             phase=GamePhase.CREATED,
             board=fixedBoard(),
             config=game_config,

@@ -1,10 +1,11 @@
 import pytest
-from httpx import AsyncClient
-import fakeredis.aioredis
-from fastapi import status
 
 from app.games.catan.gen_board import fixedBoard
-from app.games.catan.operations import *
+from app.games.catan.game import Catan
+from app.games.catan.state import GameConfig, GameState
+from app.games.catan.actions import parse_action
+from app.games.catan.constants import GamePhase
+from app.games.catan.errors import ActionParseError
 
 
 def test_gen_fixed_board():
@@ -18,11 +19,10 @@ def test_gen_fixed_board():
 
 
 def generic_game():
-    return new_game(gameId="abcd", game_config=GameConfig(), player_ids=["player1"])
+    return Catan().start_game(game_config=GameConfig(), player_ids=["player1"])
 
 
 def assert_new_game(game):
-    assert game.id == "abcd"
     assert len(game.players) == 1
     assert game.config.card_discard_limit == 7
     assert game.board.tiles[0].dice_number == 10
@@ -44,10 +44,11 @@ def test_serialize_new_game():
 
 
 def test_start_game():
+    catan = Catan()
     game = generic_game()
 
     action = parse_action({"actionId": "1234", "name": "startGame"})
-    game = dispatch_game_action(game, "player1", action)
+    game = catan.dispatch_game_action(game, "player1", action)
 
     assert game.phase == GamePhase.SETUP_ROUND_1
 
