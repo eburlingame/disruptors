@@ -2,10 +2,9 @@ from enum import Enum
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
-from app.catan.constants import *
-from app.catan.gen_board import *
-from app.catan.actions import *
-from app.catan.errors import *
+from app.games.catan.constants import *
+from app.games.catan.gen_board import *
+from app.games.catan.errors import *
 
 
 class Road(BaseModel):
@@ -29,7 +28,7 @@ class ResourceAmounts(BaseModel):
 
 
 class GamePlayer(BaseModel):
-    playerId: str
+    player_id: str
     resources: ResourceAmounts = ResourceAmounts()
     roads: List[Road] = []
     settlements: List[Settlement] = []
@@ -37,11 +36,10 @@ class GamePlayer(BaseModel):
 
 
 class GameConfig(BaseModel):
-    cardDiscardLimit: int = 7
+    card_discard_limit: int = 7
 
 
 class GameState(BaseModel):
-    id: str
     config: GameConfig
     phase: GamePhase
     board: GameBoard

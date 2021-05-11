@@ -5,30 +5,30 @@ from typing import List, Optional
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
-from app.catan.state import *
-from app.catan.constants import *
-from app.catan.gen_board import *
-from app.catan.errors import *
+from app.games.catan.state import *
+from app.games.catan.constants import *
+from app.games.catan.gen_board import *
+from app.games.catan.errors import *
 
 
-def parseAction(serializedAction: dict):
+def parse_action(serialized_action: dict):
     actions = {"startGame": StartGame}
 
-    if "name" not in serializedAction:
+    if "name" not in serialized_action:
         raise ActionParseError("Invalid action defintition")
 
-    actionName = serializedAction["name"]
-    if actionName in actions:
+    action_name = serialized_action["name"]
+    if action_name in actions:
         try:
-            clazz = actions[actionName]
-            parsed = clazz.parse_obj(serializedAction)
+            clazz = actions[action_name]
+            parsed = clazz.parse_obj(serialized_action)
 
         except ValidationError as e:
-            raise ActionParseError("Invalid {actionName}: {e}")
+            raise ActionParseError("Invalid {action_name}: {e}")
 
         return parsed
 
-    raise ActionParseError("Unknown action '{actionName}'")
+    raise ActionParseError("Unknown action '{action_name}'")
 
 
 class GameAction(BaseModel):

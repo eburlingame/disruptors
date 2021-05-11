@@ -1,9 +1,12 @@
-import os
+import os, logging
 from fastapi import FastAPI, Depends, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from aioredis import create_redis_pool, Redis
-
 from app import config
+
+from app.socket.socket import SocketHandler
+from app.persistor import RedisPersistor
+from app.session import Session
 
 global_settings = config.Settings()
 
@@ -22,8 +25,9 @@ async def init_redis_pool() -> Redis:
 
 
 @app.on_event("startup")
-async def starup_event():
+async def startup_event():
     app.state.redis = await init_redis_pool()
+    app.logger = logging.getLogger("uvicorn")
 
 
 @app.on_event("shutdown")
@@ -35,9 +39,14 @@ async def shutdown_event():
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Hello from server: {data}")
+
+    persistor = RedisPersistor(app=app, redis=app.state.redis)
+    session = Session(app=app, persistor=persistor)
+    handler = SocketHandler(
+        app=app, websocket=websocket, session=session, persistor=persistor
+    )
+
+    await handler.listen()
 
 
 @app.get("/health-check")

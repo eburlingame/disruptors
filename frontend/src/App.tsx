@@ -1,12 +1,24 @@
 import * as React from "react";
 import { ChakraProvider, Box, theme } from "@chakra-ui/react";
-import { ColorModeSwitcher } from "./ColorModeSwitcher";
-import { Logo } from "./Logo";
+import { RecoilRoot } from "recoil";
+import { SessionBootstrapper } from "./hooks/session";
+import { BrowserRouter as Router } from "react-router-dom";
 
-export const App = () => (
-  <ChakraProvider theme={theme}>
-    <Box textAlign="center" fontSize="xl">
-      Hello world!
-    </Box>
-  </ChakraProvider>
-);
+import Routes from "./Routes";
+import { SocketBootstrapper } from "./hooks/socket";
+
+export const App = () => {
+  return (
+    <RecoilRoot>
+      <SocketBootstrapper>
+        <SessionBootstrapper>
+          <ChakraProvider theme={theme}>
+            <Router>
+              <Routes />
+            </Router>
+          </ChakraProvider>
+        </SessionBootstrapper>
+      </SocketBootstrapper>
+    </RecoilRoot>
+  );
+};
