@@ -1,6 +1,6 @@
+from typing import Any, Union
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
-from typing import Any, Union
 from aioredis import Redis
 
 from app.games.load import games_by_name
@@ -24,39 +24,11 @@ class GameHandler(BaseHandler):
 
         response = None
 
-        if req.v == "game.create":
+        if req.v == "game.start":
             self.app.logger.info("Creating game")
-            response = await self.create_game(req=req)
+            response = await self.start_game(req=req)
 
         return response
 
-    async def create_game(self, req: SocketRequest):
-        game_room_id = gen_uuid()
-        game_room_code = gen_room_code()
-        host_player_id = gen_uuid()
-
-        game_class = games_by_name["Catan"]
-        game = game_class()
-
-        game_room = PersistedGameRoom(
-            game="Catan",
-            roomId=game_room_id,
-            gameRoomCode=game_room_code,
-            gameConfig=game.new_game_config(),
-            playerIds=[PersistedGamePlayer(playerId=host_player_id, isHost=True)],
-        )
-
-        await self.persistor.put_room(room=game_room)
-
-        await self.session.join_room(
-            player_id=host_player_id, game_room_id=game_room_id
-        )
-
-        return self.sucess_response(
-            request=req,
-            response_data={
-                "gameRoomId": game_room_id,
-                "gameRoomCode": game_room_code,
-                "playerId": host_player_id,
-            },
-        )
+    async def start_game(self, req: SocketRequest):
+        pass

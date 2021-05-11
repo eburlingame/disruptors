@@ -39,10 +39,18 @@ class Session:
 
         return session_id
 
-    async def join_room(self, player_id: str, game_room_id: str):
-        self.app.logger.info("Attaching session to game room: %s" % game_room_id)
+    async def join_room(self, player_id: str, game_room_code: str):
+        self.app.logger.info("Attaching session to game room: %s" % game_room_code)
 
-        self.state.gameRoomId = game_room_id
+        self.state.gameRoomCode = game_room_code
         self.state.playerId = player_id
+
+        await self.persistor.put_session(self.state)
+
+    async def leave_room(self, player_id: str, game_room_code: str):
+        self.app.logger.info("Attaching session to game room: %s" % game_room_code)
+
+        self.state.gameRoomCode = None
+        self.state.playerId = None
 
         await self.persistor.put_session(self.state)

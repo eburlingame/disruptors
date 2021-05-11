@@ -2,28 +2,23 @@ from pydantic import BaseModel
 from typing import Any, Union, Optional, List, Dict
 
 
-class PersistedPlayer(BaseModel):
-    playerId: str
-    name: str
-
-
 class PersistedSession(BaseModel):
     sessionId: str
+    gameRoomCode: Union[str, None]
     playerId: Union[str, None]
-    gameRoomId: Union[str, None]
 
 
 class PersistedGamePlayer(BaseModel):
     playerId: str
+    name: str
     isHost: bool
 
 
 class PersistedGameRoom(BaseModel):
-    playerIds: List[PersistedGamePlayer]
-    roomId: str
     gameRoomCode: str
     game: str
     gameConfig: BaseModel
+    players: List[PersistedGamePlayer]
 
 
 class PersistedGame(BaseModel):
@@ -59,7 +54,3 @@ class UnknownError(BaseModel):
 
 class OpenSessionPayload(BaseModel):
     sessionId: Optional[str]
-
-
-class CreateGamePayload(BaseModel):
-    gameName: Optional[str]

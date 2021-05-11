@@ -7,17 +7,17 @@ export const useCreateGame = () => {
   const { sendCommand, loading, error } = useCommand();
 
   const createGame = async (gameName: string) => {
-    const result = await sendCommand("game.create", { gameName });
+    const result = await sendCommand("room.create", { gameName });
 
     if (!result.sucess) return;
 
-    const { gameRoomCode, gameRoomId } = result.data;
+    const { gameRoomCode, playerId } = result.data;
 
-    if (gameRoomCode && gameRoomId) {
-      setGameRoomState({ gameRoomId, gameRoomCode });
+    if (gameRoomCode && playerId) {
+      setGameRoomState({ gameRoomCode, playerId });
     }
 
-    return { gameRoomCode, gameRoomId };
+    return { gameRoomCode, playerId };
   };
 
   return { createGame, creating: loading, error };

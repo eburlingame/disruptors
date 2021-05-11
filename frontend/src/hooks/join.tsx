@@ -7,17 +7,17 @@ export const useJoinRoom = () => {
   const { sendCommand, loading, error } = useCommand();
 
   const joinRoom = async (roomCode: string) => {
-    const result = await sendCommand("game.join", { roomCode });
+    const result = await sendCommand("room.join", { gameRoomCode: roomCode });
 
     if (!result.sucess) return;
 
-    const { gameRoomCode, gameRoomId } = result.data;
+    const { gameRoomCode, playerId } = result.data;
 
-    if (gameRoomCode && gameRoomId) {
-      setGameRoomState({ gameRoomId, gameRoomCode });
+    if (gameRoomCode && playerId) {
+      setGameRoomState({ gameRoomCode, playerId });
     }
 
-    return { gameRoomCode, gameRoomId };
+    return { gameRoomCode };
   };
 
   return { joinRoom, joining: loading, error };

@@ -2,7 +2,7 @@ import { atom } from "recoil";
 
 export type GameRoom = {
   gameRoomCode: string | null;
-  gameRoomId: string | null;
+  playerId: string | null;
 };
 
 export const gameRoomAtom = atom<GameRoom>({
@@ -10,5 +10,6 @@ export const gameRoomAtom = atom<GameRoom>({
   default: {
     gameRoomCode: null,
     gameRoomId: null,
+    playerId: null,
   },
 });

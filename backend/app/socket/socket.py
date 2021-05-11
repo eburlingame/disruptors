@@ -7,6 +7,7 @@ from app.persistor import Persistor
 from app.session import Session
 
 from app.socket.handlers.session_handler import SessionHandler
+from app.socket.handlers.room_handler import RoomHandler
 from app.socket.handlers.game_handler import GameHandler
 
 from pydantic.error_wrappers import ValidationError
@@ -22,6 +23,7 @@ class SocketHandler:
         self.persistor = persistor
 
         self.session_handler = SessionHandler(app, session, persistor)
+        self.room_handler = RoomHandler(app, session, persistor)
         self.game_handler = GameHandler(app, session, persistor)
 
     async def listen(self):
@@ -37,7 +39,7 @@ class SocketHandler:
     async def process_incoming(self, s: str):
         result = await self.process_message(s)
 
-        if isinstance(result, BaseModel):
+        if result is not None and isinstance(result, BaseModel):
             self.app.logger.debug("Sending response: " + result.json())
             await self.send_response(result)
 
@@ -54,6 +56,9 @@ class SocketHandler:
 
             if verb_namespace == "session":
                 response = await self.session_handler.process_request(request)
+
+            elif verb_namespace == "room":
+                response = await self.room_handler.process_request(request)
 
             elif verb_namespace == "game":
                 response = await self.game_handler.process_request(request)
