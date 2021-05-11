@@ -1,11 +1,30 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React from "react";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import WebSocketAsPromised from "websocket-as-promised";
 import { v4 as uuid } from "uuid";
 
 const WS_API_URL = "ws://localhost:8080/ws";
 
-export const useSocket = () => {
+export type Session = {
+  isOpen: boolean;
+  isLoading: boolean;
+  sessionId: string | null;
+};
+
+const SocketContext = createContext<WebSocketAsPromised | null>(null);
+
+export const useSocket = () => useContext(SocketContext);
+
+export const useSetupSocket = () => {
   const [socketId, setSocketId] = useState(0);
   const socket = useRef<WebSocketAsPromised | null>(null);
 
@@ -23,4 +42,16 @@ export const useSocket = () => {
   }, []);
 
   return socket.current;
+};
+
+export const SocketBootstrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const socket = useSetupSocket();
+
+  return (
+    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+  );
 };

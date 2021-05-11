@@ -11,9 +11,7 @@ const HomePage = ({}) => {
   return (
     <Layout title="Welcome">
       <Center mt="8">
-        <Link to="/join">
-          <Button>Join a game</Button>
-        </Link>
+        <Button>Join a game</Button>
 
         <Link to="/create">
           <Button>Create a game</Button>

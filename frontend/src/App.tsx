@@ -5,17 +5,20 @@ import { SessionBootstrapper } from "./hooks/session";
 import { BrowserRouter as Router } from "react-router-dom";
 
 import Routes from "./Routes";
+import { SocketBootstrapper } from "./hooks/socket";
 
 export const App = () => {
   return (
     <RecoilRoot>
-      <SessionBootstrapper>
-        <ChakraProvider theme={theme}>
-          <Router>
-            <Routes />
-          </Router>
-        </ChakraProvider>
-      </SessionBootstrapper>
+      <SocketBootstrapper>
+        <SessionBootstrapper>
+          <ChakraProvider theme={theme}>
+            <Router>
+              <Routes />
+            </Router>
+          </ChakraProvider>
+        </SessionBootstrapper>
+      </SocketBootstrapper>
     </RecoilRoot>
   );
 };

@@ -41,7 +41,7 @@ class SocketHandler:
             self.app.logger.debug("Sending response: " + result.json())
             await self.send_response(result)
 
-    async def process_message(self, msg: str) -> Union[SocketResponse, UnknownError]:
+    async def process_message(self, msg: str) -> BaseModel:
         try:
             request = self.parse_request(str(msg))
             self.app.logger.info("Recieved request: " + request.json())
@@ -50,10 +50,11 @@ class SocketHandler:
             self.app.logger.info(verb_namespace)
 
             # Send the request to the appropriate handler
-            response = UnknownError(msg="An unknown error occured")
+            response = UnknownError(error="An unknown error occured")
 
             if verb_namespace == "session":
                 response = await self.session_handler.process_request(request)
+
             elif verb_namespace == "game":
                 response = await self.game_handler.process_request(request)
 
@@ -61,12 +62,12 @@ class SocketHandler:
             return response
 
         except ValidationError as e:
-            self.app.logger.warn("Error paring given message: " + str(e))
-            return UnknownError(msg="Error paring given message: " + str(e)).json()
+            self.app.logger.warn("Error parsing given message: " + str(e))
+            return UnknownError(error="Error parsing given message: " + str(e)).json()
 
-        except Exception as e:
-            self.app.logger.warn("Unknown error occured: " + str(e))
-            return UnknownError(msg="Unknown error occured: " + str(e)).json()
+        # except Exception as e:
+        #     self.app.logger.warn("Unknown error occured: " + str(e))
+        #     return UnknownError(error="Unknown error occured: " + str(e)).json()
 
     async def send_response(self, response: SocketResponse):
         await self.websocket.send_text(response.json())

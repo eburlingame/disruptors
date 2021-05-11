@@ -1,28 +1,21 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 from typing import Any, Union
-from app.socket.handler import Handler
+from app.socket.base_handler import BaseHandler
 from app.socket.types import *
 from app.persistor import Persistor
 from app.session import Session
 from aioredis import Redis
-from app.util import gen_uuid, gen_game_code
+from app.util import gen_uuid
 
 
-class SessionHandler(Handler):
+class SessionHandler(BaseHandler):
     def __init__(self, app: FastAPI, session: Session, persistor: Persistor):
         self.app = app
         self.persistor = persistor
         self.session = session
 
-    def sucess_response(self, request: SocketRequest, response_data):
-        return SocketResponse(
-            reqId=request.reqId, sucess=True, v=request.v, d=response_data
-        )
-
-    async def process_request(
-        self, req: SocketRequest
-    ) -> Union[SocketResponse, UnknownError]:
+    async def process_request(self, req: SocketRequest) -> BaseModel:
         self.app.logger.info("Processing request: %s" % req.json())
 
         response = None

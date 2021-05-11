@@ -3,23 +3,19 @@ from pydantic import BaseModel
 from typing import Any, Union
 from aioredis import Redis
 
-from app.socket.handler import Handler
+from app.games.load import games_by_name
+from app.socket.base_handler import BaseHandler
 from app.socket.types import *
 from app.persistor import Persistor
 from app.session import Session
-from app.util import gen_uuid, gen_game_code
+from app.util import gen_uuid, gen_room_code
 
 
-class GameHandler(Handler):
+class GameHandler(BaseHandler):
     def __init__(self, app: FastAPI, session: Session, persistor: Persistor):
         self.app = app
         self.persistor = persistor
         self.session = session
-
-    def sucess_response(self, request: SocketRequest, response_data):
-        return SocketResponse(
-            reqId=request.reqId, sucess=True, v=request.v, d=response_data
-        )
 
     async def process_request(
         self, req: SocketRequest
@@ -35,11 +31,32 @@ class GameHandler(Handler):
         return response
 
     async def create_game(self, req: SocketRequest):
-        # Create game id
-        # Create game code
-        # Create player id
-        # Create default game configuration
-        # Persist new game
-        # Attach it to the session
-        # Attach player id to the session
-        pass
+        game_room_id = gen_uuid()
+        game_room_code = gen_room_code()
+        host_player_id = gen_uuid()
+
+        game_class = games_by_name["Catan"]
+        game = game_class()
+
+        game_room = PersistedGameRoom(
+            game="Catan",
+            roomId=game_room_id,
+            gameRoomCode=game_room_code,
+            gameConfig=game.new_game_config(),
+            playerIds=[PersistedGamePlayer(playerId=host_player_id, isHost=True)],
+        )
+
+        await self.persistor.put_room(room=game_room)
+
+        await self.session.join_room(
+            player_id=host_player_id, game_room_id=game_room_id
+        )
+
+        return self.sucess_response(
+            request=req,
+            response_data={
+                "gameRoomId": game_room_id,
+                "gameRoomCode": game_room_code,
+                "playerId": host_player_id,
+            },
+        )

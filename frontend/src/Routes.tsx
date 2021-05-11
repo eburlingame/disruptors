@@ -32,7 +32,7 @@ const Routes = () => {
         <CreateGamePage />
       </Route>
 
-      <Route path="/game/:gameId">
+      <Route path="/room/:roomCode">
         <GamePage />
       </Route>
 

@@ -10,7 +10,7 @@ class PersistedPlayer(BaseModel):
 class PersistedSession(BaseModel):
     sessionId: str
     playerId: Union[str, None]
-    activeGameId: Union[str, None]
+    gameRoomId: Union[str, None]
 
 
 class PersistedGamePlayer(BaseModel):
@@ -20,16 +20,16 @@ class PersistedGamePlayer(BaseModel):
 
 class PersistedGameRoom(BaseModel):
     playerIds: List[PersistedGamePlayer]
-    gameRoomId: str
+    roomId: str
     gameRoomCode: str
     game: str
-    gameConfig: Dict
+    gameConfig: BaseModel
 
 
 class PersistedGame(BaseModel):
     gameId: str
     gameRoomId: str
-    gameState: Any
+    gameState: BaseModel
 
 
 class SocketRequest(BaseModel):
@@ -39,15 +39,22 @@ class SocketRequest(BaseModel):
 
 
 class SocketResponse(BaseModel):
+    sucess: bool = True
     reqId: str
-    sucess: bool
     v: str
     d: Optional[Any]
 
 
+class SocketErrorResponse(BaseModel):
+    sucess: bool = False
+    error: str
+    reqId: str
+    v: str
+
+
 class UnknownError(BaseModel):
     sucess: bool = False
-    msg: str
+    error: str
 
 
 class OpenSessionPayload(BaseModel):

@@ -32,20 +32,17 @@ class Session:
         session_id = None
 
         if session:
+            self.state = session
             session_id = session.sessionId
         else:
             session_id = await self.open_new_session()
 
         return session_id
 
-    async def attach_game(self, game_id: str):
-        self.app.logger.info("Attaching game to session %s" % game_id)
-        self.state.activeGameId = game_id
+    async def join_room(self, player_id: str, game_room_id: str):
+        self.app.logger.info("Attaching session to game room: %s" % game_room_id)
 
-        await self.persistor.put_session(self.state)
-
-    async def attach_player(self, player_id: str):
-        self.app.logger.info("Attaching player to session %s" % player_id)
+        self.state.gameRoomId = game_room_id
         self.state.playerId = player_id
 
         await self.persistor.put_session(self.state)
