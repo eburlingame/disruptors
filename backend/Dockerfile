@@ -1,18 +1,14 @@
-FROM ubuntu:groovy as builder
-RUN echo "deb http://archive.ubuntu.com/ubuntu groovy universe " >> /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get upgrade -y
+FROM node:current-alpine3.12 as backend
+WORKDIR /usr/app
 
-FROM builder as pipenv
-RUN apt-get install -y python3-pip
-WORKDIR /pipfiles
-COPY Pipfile Pipfile
-COPY Pipfile.lock Pipfile.lock
-RUN set -ex && pip install pipenv --upgrade
-RUN set -ex && pip install --upgrade pip setuptools wheel
-RUN set -ex && pipenv install --system --sequential --ignore-pipfile --dev
+ENV NODE_ENV production
+ENV PATH /usr/app/node_modules/.bin:$PATH
+COPY . .
+RUN yarn install --frozen-lockfile --production=false
+RUN yarn global add typescript
+RUN tsc --build tsconfig.json
 
-FROM pipenv as final
-WORKDIR /source
-COPY ./app/ app/
-COPY ./tests/ tests/
+ENV NODE_ENV production
+ENV API_PORT 3000
+EXPOSE 3000
+CMD ["node", "build/index.js"]

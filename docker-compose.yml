@@ -28,18 +28,14 @@ services:
 
   backend:
     build:
-      context: "./backend/"
+      context: ./backend/
     env_file:
       - .env
-    command: bash -c "
-      uvicorn app.main:app
-      --host 0.0.0.0 --port 8080
-      --lifespan=on --use-colors --loop uvloop --http httptools
-      --reload  --reload-dir /source/app --reload-dir /source/tests
-      "
+    command: yarn dev
     volumes:
-      - ./backend/:/source/
-      - .env:/source/.env
+      - .env:/usr/app/.env
+      - ./backend/:/usr/app
+      - ./backend/node_modules:/usr/app/node_modules
     ports:
       - 8080:8080
     depends_on:
