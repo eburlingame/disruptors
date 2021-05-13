@@ -14,8 +14,7 @@ pydantic = "*"
 pytest-asyncio = "*"
 pytest-cov = "*"
 httpx = "*"
-aioredis = "*"
-aiofiles = "*"
+redis = "3.5.3"
 fakeredis = "*"
 
 [dev-packages]

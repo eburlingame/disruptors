@@ -8,5 +8,8 @@ class BaseHandler:
             reqId=request.reqId, sucess=True, v=request.v, d=response_data
         )
 
+    async def check_for_updates(self) -> Union[BaseModel, None]:
+        return None
+
     async def process_request(self, req: SocketRequest) -> BaseModel:
         raise Exception("Unimplemented")

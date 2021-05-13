@@ -5,7 +5,6 @@ from app.socket.base_handler import BaseHandler
 from app.socket.types import *
 from app.persistor import Persistor
 from app.session import Session
-from aioredis import Redis
 from app.util import gen_uuid
 
 
@@ -14,6 +13,9 @@ class SessionHandler(BaseHandler):
         self.app = app
         self.persistor = persistor
         self.session = session
+
+    async def check_for_updates(self) -> Union[BaseModel, None]:
+        return None
 
     async def process_request(self, req: SocketRequest) -> BaseModel:
         self.app.logger.info("Processing request: %s" % req.json())
@@ -36,4 +38,11 @@ class SessionHandler(BaseHandler):
         else:
             session_id = await self.session.open_new_session()
 
-        return self.sucess_response(req, {"sessionId": session_id})
+        return self.sucess_response(
+            req,
+            {
+                "sessionId": session_id,
+                "playerId": self.session.state.playerId,
+                "gameRoomCode": self.session.state.gameRoomCode,
+            },
+        )

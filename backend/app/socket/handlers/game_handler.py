@@ -1,7 +1,7 @@
 from typing import Any, Union
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
-from aioredis import Redis
+from redis import Redis
 
 from app.games.load import games_by_name
 from app.socket.base_handler import BaseHandler

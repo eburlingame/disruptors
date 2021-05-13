@@ -1,7 +1,7 @@
 import os, logging
 from fastapi import FastAPI, Depends, Request, WebSocket
 from fastapi.responses import HTMLResponse
-from aioredis import create_redis_pool, Redis
+from redis import Redis
 from app import config
 
 from app.socket.socket import SocketHandler
@@ -14,26 +14,27 @@ global_settings = config.Settings()
 app = FastAPI()
 
 
-async def init_redis_pool() -> Redis:
-    redis = await create_redis_pool(
-        global_settings.redis_url,
+async def init_redis_connection() -> Redis:
+    redis = Redis(
+        host=global_settings.redis_url,
+        port=global_settings.redis_port,
         password=global_settings.redis_password,
         encoding="utf-8",
         db=global_settings.redis_db,
     )
+
     return redis
 
 
 @app.on_event("startup")
 async def startup_event():
-    app.state.redis = await init_redis_pool()
+    app.state.redis = await init_redis_connection()
     app.logger = logging.getLogger("uvicorn")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     app.state.redis.close()
-    await app.state.redis.wait_closed()
 
 
 @app.websocket("/ws")

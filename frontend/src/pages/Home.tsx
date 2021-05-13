@@ -1,12 +1,21 @@
 import { Button } from "@chakra-ui/button";
 import { Center } from "@chakra-ui/layout";
-import React from "react";
+import React, { useEffect } from "react";
 import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import Layout from "../components/Layout";
+import { gameRoomAtom } from "../state/atoms";
 
 const HomePage = ({}) => {
   const history = useHistory();
+  const gameRoomState = useRecoilValue(gameRoomAtom);
+
+  useEffect(() => {
+    if (gameRoomState.gameRoomCode && gameRoomState.gameRoomCode.length === 4) {
+      history.push(`/room/${gameRoomState.gameRoomCode}`);
+    }
+  }, [gameRoomState.gameRoomCode]);
 
   return (
     <Layout title="Welcome">

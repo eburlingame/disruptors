@@ -1,7 +1,9 @@
 import React from "react";
 import { useEffect, createContext, useState, useContext } from "react";
+import { useRecoilState } from "recoil";
 
 import { v4 as uuid } from "uuid";
+import { gameRoomAtom } from "../state/atoms";
 import { loadPersistentSessionId, setPersistentSessionId } from "./persist";
 import { useSocket } from "./socket";
 
@@ -28,6 +30,8 @@ export const useSetupSession = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<null | string>(null);
 
+  const [gameRoomState, setGameRoomState] = useRecoilState(gameRoomAtom);
+
   useEffect(() => {
     const openSession = async () => {
       if (socket) {
@@ -49,13 +53,19 @@ export const useSetupSession = () => {
         );
 
         if (response) {
-          const { sessionId } = response.d;
+          const { sessionId, playerId, gameRoomCode } = response.d;
 
           if (sessionId) {
             console.log(`Session ${sessionId} open`);
+
             setPersistentSessionId(sessionId);
-            setIsOpen(true);
             setSessionId(sessionId);
+
+            if (playerId && gameRoomCode) {
+              setGameRoomState({ playerId, gameRoomCode });
+            }
+
+            setIsOpen(true);
           }
         }
       }
