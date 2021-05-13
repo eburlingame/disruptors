@@ -11,10 +11,10 @@ export const useCreateGame = () => {
 
     if (!result.sucess) return;
 
-    const { gameRoomCode, playerId } = result.data;
+    const { gameRoomCode, playerId, players } = result.data;
 
-    if (gameRoomCode && playerId) {
-      setGameRoomState({ gameRoomCode, playerId });
+    if (gameRoomCode && playerId && players) {
+      setGameRoomState({ gameRoomCode, playerId, players });
     }
 
     return { gameRoomCode, playerId };

@@ -1,6 +1,6 @@
 import { Button } from "@chakra-ui/button";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { Center } from "@chakra-ui/layout";
+import { Box, Center, VStack } from "@chakra-ui/layout";
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import { useRecoilState } from "recoil";
@@ -49,16 +49,23 @@ const GamePage = ({}) => {
     history.push("/");
   };
 
+  console.log(gameRoomState);
+
   if (joining) {
     return <Layout title="">Joining the game room...</Layout>;
   }
 
   return (
     <Layout title="Game">
-      <Center mt="8">
-        {roomCode}
+      <VStack mt="8">
+        <Box>{roomCode}</Box>
         <Button onClick={onLeave}>Leave</Button>
-      </Center>
+        <Box>
+          {gameRoomState.players.map((p) => (
+            <Box>{p.playerId}</Box>
+          ))}
+        </Box>
+      </VStack>
 
       <ErrorAlert
         title={"Error loading game"}

@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI
 from redis import Redis
 from pydantic import BaseModel
@@ -57,4 +58,21 @@ class RedisPersistor(Persistor):
         self.redis.delete(self.format_room_key(game_room_code))
 
     async def subscribe_to_room(self, game_room_code: str):
-        self.redis.subscribe(self.format_room_key(game_room_code))
+        self.pubsub.subscribe(self.format_room_key(game_room_code))
+
+    async def room_has_updated(self):
+        if self.pubsub:
+            try:
+                msg = self.pubsub.get_message(
+                    timeout=0.01, ignore_subscribe_messages=True
+                )
+                if msg:
+                    self.app.logger.info(msg)
+            except:
+                
+                return None
+
+        return None
+
+    async def subscribe_from_room(self, game_room_code: str):
+        self.pubsub.unsubscribe(self.format_room_key(game_room_code))

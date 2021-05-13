@@ -40,6 +40,11 @@ class SocketResponse(BaseModel):
     d: Optional[Any]
 
 
+class SocketUpdate(BaseModel):
+    v: str
+    d: Optional[Any]
+
+
 class SocketErrorResponse(BaseModel):
     sucess: bool = False
     error: str

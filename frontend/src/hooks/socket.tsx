@@ -37,6 +37,8 @@ export const useSetupSocket = () => {
       extractRequestId: (data) => data && data.reqId,
     });
 
+    socket.current.onUnpackedMessage.addListener((msg) => console.log(msg));
+
     /// Increment the socketId counter to force a re-renders
     setSocketId((id) => id + 1);
   }, []);

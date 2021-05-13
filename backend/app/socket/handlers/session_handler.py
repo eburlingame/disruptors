@@ -38,11 +38,20 @@ class SessionHandler(BaseHandler):
         else:
             session_id = await self.session.open_new_session()
 
+        roomData = None
+        if self.session.state.gameRoomCode:
+            room = await self.persistor.get_room(self.session.state.gameRoomCode)
+
+            roomData = {
+                "gameRoomCode": room.gameRoomCode,
+                "players": room.players,
+            }
+
         return self.sucess_response(
             req,
             {
                 "sessionId": session_id,
                 "playerId": self.session.state.playerId,
-                "gameRoomCode": self.session.state.gameRoomCode,
+                "room": roomData,
             },
         )

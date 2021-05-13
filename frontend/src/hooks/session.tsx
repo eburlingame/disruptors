@@ -53,7 +53,7 @@ export const useSetupSession = () => {
         );
 
         if (response) {
-          const { sessionId, playerId, gameRoomCode } = response.d;
+          const { sessionId, playerId, room } = response.d;
 
           if (sessionId) {
             console.log(`Session ${sessionId} open`);
@@ -61,8 +61,12 @@ export const useSetupSession = () => {
             setPersistentSessionId(sessionId);
             setSessionId(sessionId);
 
-            if (playerId && gameRoomCode) {
-              setGameRoomState({ playerId, gameRoomCode });
+            if (playerId && room) {
+              setGameRoomState({
+                playerId,
+                gameRoomCode: room.gameRoomCode,
+                players: room.players,
+              });
             }
 
             setIsOpen(true);

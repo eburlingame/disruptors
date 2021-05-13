@@ -48,7 +48,7 @@ class Session:
         await self.persistor.put_session(self.state)
 
     async def leave_room(self, player_id: str, game_room_code: str):
-        self.app.logger.info("Attaching session to game room: %s" % game_room_code)
+        self.app.logger.info("Detaching session to game room: %s" % game_room_code)
 
         self.state.gameRoomCode = None
         self.state.playerId = None

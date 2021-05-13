@@ -1,6 +1,6 @@
 import asyncio
 from asyncio.exceptions import CancelledError
-from asyncio.tasks import FIRST_COMPLETED
+from asyncio.tasks import FIRST_COMPLETED, FIRST_EXCEPTION
 from app.socket.base_handler import BaseHandler
 from fastapi import FastAPI, WebSocket
 from starlette.websockets import WebSocketDisconnect
@@ -37,12 +37,12 @@ class SocketHandler:
         socket_task = asyncio.create_task(self.listen_to_socket())
         handler_task = asyncio.create_task(self.listen_to_handlers())
 
-        # Kick off both tasks, and continue once the websocket task has completed
-        await asyncio.wait(
-            {socket_task, handler_task},
-            return_when=FIRST_COMPLETED,
-        )
+        self.socket_open = True
 
+        # Kick off both tasks, and continue once the websocket task has completed
+        await asyncio.wait({socket_task, handler_task}, return_when=FIRST_EXCEPTION)
+
+        self.socket_open = False
         handler_task.cancel()
         self.app.logger.info("Socket listening tasks stopped")
 
@@ -58,17 +58,27 @@ class SocketHandler:
                 return True
 
     async def listen_to_handlers(self):
-        while True:
+        while self.socket_open:
             try:
+                self.app.logger.info("polling")
+
+                msg = await self.persistor.room_has_updated()
+                if msg:
+                    self.app.logger.info(msg)
+
                 # Call update on the handlers so they can process pubsub messages
-                await self.process_outgoing(self.session_handler)
-                await self.process_outgoing(self.room_handler)
-                await self.process_outgoing(self.game_handler)
+                # await self.process_outgoing(self.session_handler)
+                # await self.process_outgoing(self.room_handler)
+                # await self.process_outgoing(self.game_handler)
 
                 await asyncio.sleep(0.1)
 
             except CancelledError:
+                self.app.logger.info("canceled")
                 return True
+
+            except Exception as e:
+                self.app.logger.error(str(e))
 
     async def process_incoming(self, s: str):
         result = await self.process_message(s)
@@ -99,7 +109,7 @@ class SocketHandler:
 
     async def call_handler(self, request: SocketRequest):
         # Send the request to the appropriate handler
-        response = UnknownError(error="An unknown error occured")
+        response = UnknownError(error="Unrecognized command")
 
         verb_namespace = request.v.split(".")[0]
 

@@ -29,9 +29,7 @@ class RoomHandler(BaseHandler):
         self.persistor = persistor
         self.session = session
 
-    async def process_request(
-        self, req: SocketRequest
-    ) -> Union[SocketResponse, UnknownError]:
+    async def process_request(self, req: SocketRequest) -> BaseModel:
         self.app.logger.info("Processing request: %s" % req.json())
 
         response = None
@@ -49,6 +47,15 @@ class RoomHandler(BaseHandler):
             response = await self.leave_room(req=req)
 
         return response
+
+    async def check_for_updates(self) -> Union[BaseModel, None]:
+        if self.session.state and self.session.state.gameRoomCode:
+            updated_room = await self.persistor.room_has_updated(
+                self.session.state.gameRoomCode
+            )
+
+            if updated_room:
+                return SocketUpdate(v="room.updated", d=self.room_response_data())
 
     async def create_room(self, req: SocketRequest):
         game_room_code = gen_room_code()
@@ -75,12 +82,11 @@ class RoomHandler(BaseHandler):
             player_id=host_player_id, game_room_code=game_room_code
         )
 
+        await self.persistor.subscribe_to_room(game_room_code=game_room_code)
+
         return self.sucess_response(
             request=req,
-            response_data={
-                "gameRoomCode": game_room_code,
-                "playerId": host_player_id,
-            },
+            response_data=self.room_response_data(game_room),
         )
 
     async def join_room(self, req: SocketRequest):
@@ -101,6 +107,7 @@ class RoomHandler(BaseHandler):
                 )
 
                 await self.persistor.put_room(room=game_room)
+                await self.persistor.subscribe_to_room(game_room_code=game_room_code)
 
             await self.session.join_room(
                 player_id=player_id, game_room_code=game_room_code
@@ -152,3 +159,10 @@ class RoomHandler(BaseHandler):
             request=req,
             response_data={},
         )
+
+    def room_response_data(self, room: PersistedGameRoom):
+        return {
+            "gameRoomCode": room.gameRoomCode,
+            "playerId": self.session.state.playerId,
+            "players": room.players,
+        }
