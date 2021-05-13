@@ -57,11 +57,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run pytest
+      - name: Build test image
         run: |
           cd backend/
           docker pull $API_IMAGE
-          docker run $API_IMAGE sh -c "pytest"
 
   frontend-build:
     runs-on: ubuntu-latest
