@@ -4,7 +4,8 @@ import { Box, Center, Container, VStack } from "@chakra-ui/layout";
 import React from "react";
 import { useHistory } from "react-router";
 import Layout from "../components/Layout";
-import { useCreateGame } from "../hooks/create";
+
+import { useCreateGame } from "../hooks/room";
 
 const CreateGamePage = ({}) => {
   const history = useHistory();
@@ -14,8 +15,8 @@ const CreateGamePage = ({}) => {
   const onCreateGame = async () => {
     const result = await createGame("");
 
-    if (result && result.gameRoomCode) {
-      history.push(`/room/${result.gameRoomCode}`);
+    if (result && result.room && result.room.roomCode) {
+      history.push(`/room/${result.room.roomCode}`);
     }
   };
 

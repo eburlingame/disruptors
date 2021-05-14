@@ -5,17 +5,17 @@ import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import Layout from "../components/Layout";
-import { gameRoomAtom } from "../state/atoms";
+import { useSessionState } from "../hooks/session";
 
 const HomePage = ({}) => {
   const history = useHistory();
-  const gameRoomState = useRecoilValue(gameRoomAtom);
+  const sessionState = useSessionState();
 
   useEffect(() => {
-    if (gameRoomState.gameRoomCode && gameRoomState.gameRoomCode.length === 4) {
-      history.push(`/room/${gameRoomState.gameRoomCode}`);
+    if (sessionState.room && sessionState.room.roomCode.length === 4) {
+      history.push(`/room/${sessionState.room.roomCode}`);
     }
-  }, [gameRoomState.gameRoomCode]);
+  }, [sessionState.room]);
 
   return (
     <Layout title="Welcome">

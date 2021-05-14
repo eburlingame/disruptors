@@ -1,23 +1,21 @@
 import { Button } from "@chakra-ui/button";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { Box, Center, VStack } from "@chakra-ui/layout";
-import React, { useEffect, useState } from "react";
+import { Box, VStack } from "@chakra-ui/layout";
+import React, { useEffect } from "react";
 import { useHistory, useParams } from "react-router";
-import { useRecoilState } from "recoil";
 import ErrorAlert from "../components/ErrorAlert";
 import Layout from "../components/Layout";
-import { useJoinRoom } from "../hooks/join";
-import { useLeaveRoom } from "../hooks/leave";
-import { useSession } from "../hooks/session";
-import { gameRoomAtom } from "../state/atoms";
+import { useSessionLoadingState, useSessionState } from "../hooks/session";
+
+import { useJoinRoom, useLeaveRoom } from "../hooks/room";
 
 const GamePage = ({}) => {
   const history = useHistory();
   const errorModalDisclosure = useDisclosure();
 
-  const { isOpen } = useSession();
+  const { isOpen } = useSessionLoadingState();
   const { roomCode } = useParams<{ roomCode: string }>();
-  const [gameRoomState, setGameRoomState] = useRecoilState(gameRoomAtom);
+  const sessionState = useSessionState();
 
   const { joinRoom, joining, error: joinError } = useJoinRoom();
   const { leaveRoom, leaving } = useLeaveRoom();
@@ -29,14 +27,11 @@ const GamePage = ({}) => {
     };
 
     if (isOpen) {
-      if (
-        gameRoomState.gameRoomCode === null ||
-        gameRoomState.gameRoomCode !== roomCode
-      ) {
+      if (!sessionState.room || sessionState.room.roomCode !== roomCode) {
         attemptJoinRoom();
       }
     }
-  }, [roomCode, gameRoomState.gameRoomCode, isOpen]);
+  }, [roomCode, sessionState.room, isOpen]);
 
   useEffect(() => {
     if (joinError) {
@@ -49,7 +44,7 @@ const GamePage = ({}) => {
     history.push("/");
   };
 
-  console.log(gameRoomState);
+  console.log(sessionState);
 
   if (joining) {
     return <Layout title="">Joining the game room...</Layout>;
@@ -61,7 +56,7 @@ const GamePage = ({}) => {
         <Box>{roomCode}</Box>
         <Button onClick={onLeave}>Leave</Button>
         <Box>
-          {gameRoomState.players.map((p) => (
+          {sessionState.room?.players.map((p) => (
             <Box>{p.playerId}</Box>
           ))}
         </Box>

@@ -1,9 +1,9 @@
 import * as React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { useSession } from "./hooks/session";
+import { useSessionLoadingState } from "./hooks/session";
 
 const ProtectedRoute = ({ children, ...rest }: any) => {
-  const { isOpen } = useSession();
+  const { isOpen } = useSessionLoadingState();
 
   return (
     <Route

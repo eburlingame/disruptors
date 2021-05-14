@@ -2,6 +2,8 @@ import { v4 as uuid } from "uuid";
 
 import { useEffect, useState } from "react";
 import { useSocket } from "./socket";
+import { SessionState, sessionStateAtom } from "../state/atoms";
+import { useRecoilState } from "recoil";
 
 export type RequestResponse = {
   sucess: boolean;
@@ -72,4 +74,20 @@ export const useCommand = () => {
   };
 
   return { sendCommand, loading, error };
+};
+
+export const useProcessCommandReponse = () => {
+  const [sessionState, setSessionState] = useRecoilState(sessionStateAtom);
+
+  return async (result: SendCommandResult) => {
+    if (!result.sucess) return;
+
+    const newSessionState: SessionState = result.data;
+
+    if (newSessionState) {
+      setSessionState(newSessionState);
+    }
+
+    return newSessionState;
+  };
 };

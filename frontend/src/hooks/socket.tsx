@@ -10,7 +10,6 @@ import {
 } from "react";
 
 import WebSocketAsPromised from "websocket-as-promised";
-import { v4 as uuid } from "uuid";
 
 const WS_API_URL = "ws://localhost:8080/ws";
 

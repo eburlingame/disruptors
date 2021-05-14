@@ -1,36 +1,28 @@
 import React from "react";
-import { useEffect, createContext, useState, useContext } from "react";
+import { useEffect } from "react";
+import { useRecoilValue } from "recoil";
 import { useRecoilState } from "recoil";
 
 import { v4 as uuid } from "uuid";
-import { gameRoomAtom } from "../state/atoms";
+import { sessionLoadingStateAtom, sessionStateAtom } from "../state/atoms";
+import { useCommand, useProcessCommandReponse } from "./command";
 import { loadPersistentSessionId, setPersistentSessionId } from "./persist";
 import { useSocket } from "./socket";
 
-export type Session = {
-  isOpen: boolean;
-  isLoading: boolean;
-  sessionId: string | null;
-};
+export const useSessionState = () => useRecoilValue(sessionStateAtom);
 
-const defaultSession: Session = {
-  isOpen: false,
-  isLoading: true,
-  sessionId: null,
-};
-
-const SessionContext = createContext<Session>(defaultSession);
-
-export const useSession = () => useContext(SessionContext);
+export const useSessionLoadingState = () =>
+  useRecoilValue(sessionLoadingStateAtom);
 
 export const useSetupSession = () => {
   const socket = useSocket();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<null | string>(null);
+  const [loadingState, setLoadingState] = useRecoilState(
+    sessionLoadingStateAtom
+  );
 
-  const [gameRoomState, setGameRoomState] = useRecoilState(gameRoomAtom);
+  const { sendCommand, loading, error } = useCommand();
+  const processCommandResponse = useProcessCommandReponse();
 
   useEffect(() => {
     const openSession = async () => {
@@ -47,29 +39,15 @@ export const useSetupSession = () => {
           payload = { sessionId: existingSessionId };
         }
 
-        const response = await socket.sendRequest(
-          { v: "session.open", d: payload },
-          { requestId: uuid() }
-        );
+        const result = await sendCommand("session.open", payload);
 
-        if (response) {
-          const { sessionId, playerId, room } = response.d;
+        if (result.sucess) {
+          const { sessionId } = result.data;
 
           if (sessionId) {
-            console.log(`Session ${sessionId} open`);
-
             setPersistentSessionId(sessionId);
-            setSessionId(sessionId);
-
-            if (playerId && room) {
-              setGameRoomState({
-                playerId,
-                gameRoomCode: room.gameRoomCode,
-                players: room.players,
-              });
-            }
-
-            setIsOpen(true);
+            await processCommandResponse(result);
+            setLoadingState({ isOpen: true, isLoading: false });
           }
         }
       }
@@ -77,12 +55,6 @@ export const useSetupSession = () => {
 
     openSession();
   }, [socket]);
-
-  return {
-    isOpen,
-    isLoading,
-    sessionId,
-  };
 };
 
 export const SessionBootstrapper = ({
@@ -90,11 +62,12 @@ export const SessionBootstrapper = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const session = useSetupSession();
+  useSetupSession();
 
-  return (
-    <SessionContext.Provider value={session}>
-      {children}
-    </SessionContext.Provider>
-  );
+  const sessionState = useSessionState();
+  console.log(sessionState);
+  // useEffect(() => {
+  // }, [sessionState]);
+
+  return <>{children}</>;
 };

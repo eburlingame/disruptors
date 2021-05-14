@@ -1,21 +1,44 @@
 import { atom } from "recoil";
 
-export type GameRoomPlayer = {
+/// Theses should match the types from handler.ts on the server
+export type RoomPlayer = {
   playerId: string;
-  isHost: string;
+  name: string;
+  isHost: boolean;
 };
 
-export type GameRoom = {
-  gameRoomCode: string | null;
-  playerId: string | null;
-  players: GameRoomPlayer[];
+export type Room = {
+  roomCode: string;
+  players: RoomPlayer[];
+  game: string;
+  gameConfig: any;
 };
 
-export const gameRoomAtom = atom<GameRoom>({
-  key: "gameRoom",
+export type SessionState = {
+  sessionId: string;
+  you?: RoomPlayer;
+  room?: Room;
+  game?: {
+    state: any;
+  };
+};
+
+export const sessionStateAtom = atom<SessionState>({
+  key: "sessionState",
   default: {
-    gameRoomCode: null,
-    playerId: null,
-    players: [],
+    sessionId: "",
+  },
+});
+
+export type SessionLoadingState = {
+  isOpen: boolean;
+  isLoading: boolean;
+};
+
+export const sessionLoadingStateAtom = atom<SessionLoadingState>({
+  key: "sessionLoadingState",
+  default: {
+    isOpen: false,
+    isLoading: true,
   },
 });
