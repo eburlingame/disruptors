@@ -22,6 +22,13 @@ export type SendCommandResult =
       error: string;
     };
 
+/// Ad-hoc repsonses can be sent any time to update the client
+export type AdhocResponse = {
+  sucess: true;
+  v: string;
+  d: string;
+};
+
 export const useCommand = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

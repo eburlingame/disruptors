@@ -21,6 +21,7 @@ export const useSetupSession = () => {
     sessionLoadingStateAtom
   );
 
+  // TODO: Handle errors when opening session
   const { sendCommand, loading, error } = useCommand();
   const processCommandResponse = useProcessCommandReponse();
 
@@ -65,9 +66,9 @@ export const SessionBootstrapper = ({
   useSetupSession();
 
   const sessionState = useSessionState();
-  console.log(sessionState);
-  // useEffect(() => {
-  // }, [sessionState]);
+  useEffect(() => {
+    console.log(sessionState);
+  }, [sessionState]);
 
   return <>{children}</>;
 };

@@ -1,4 +1,5 @@
 import { Context } from "src";
+import { PubSubCallback } from "src/pubsub";
 
 export type RoomPlayer = {
   playerId: string;
@@ -16,12 +17,15 @@ export type PersistedRoom = {
 const ROOM_PREFIX = "session|";
 
 export default (context: Context) => {
-  const { redis } = context;
+  const { redis, pubsub } = context;
 
   const roomKey = (roomCode: string) => ROOM_PREFIX + roomCode;
 
   const putRoom = async (room: PersistedRoom) => {
-    await redis.set(roomKey(room.roomCode), JSON.stringify(room));
+    const key = roomKey(room.roomCode);
+
+    await redis.set(key, JSON.stringify(room));
+    await redis.publish(key, JSON.stringify(room));
   };
 
   const getRoom = async (roomCode: string): Promise<PersistedRoom | null> => {
@@ -39,5 +43,20 @@ export default (context: Context) => {
     return redis.del(roomKey(session.roomCode));
   };
 
-  return { putRoom, getRoom, deleteRoom };
+  const subscribeToRoom = (
+    roomCode: string,
+    sessionId: string,
+    cb: PubSubCallback
+  ): Promise<boolean> => {
+    return pubsub.subscribe(roomKey(roomCode), sessionId, cb);
+  };
+
+  const unsubscribeFromRoom = (
+    roomCode: string,
+    sessionId: string
+  ): Promise<boolean> => {
+    return pubsub.unsubscribe(roomKey(roomCode), sessionId);
+  };
+
+  return { putRoom, getRoom, deleteRoom, subscribeToRoom, unsubscribeFromRoom };
 };

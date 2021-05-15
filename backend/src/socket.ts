@@ -1,7 +1,7 @@
 import Websocket from "ws";
 import Joi from "joi";
 import { Context } from "./index";
-import CommandHandler, { Handler } from "./handler";
+import Handler from "./handler";
 
 export type Request = {
   reqId: string;
@@ -20,6 +20,7 @@ export type ParseError = {
   error: string;
 };
 
+/// Responses are send after a request is received
 export type Response =
   | {
       sucess: true;
@@ -34,13 +35,22 @@ export type Response =
       error: string;
     };
 
+/// Ad-hoc repsonses can be sent any time to update the client
+export type AdhocResponse = {
+  sucess: true;
+  v: string;
+  d: string;
+};
+
+export type BroadcastFn = (payload: object) => Promise<void>;
+
 export default class Socket {
   private socket: Websocket;
   private handler: Handler;
 
   constructor(context: Context, ws: Websocket) {
     this.socket = ws;
-    this.handler = CommandHandler(context);
+    this.handler = new Handler(context, this.broadcast.bind(this));
 
     ws.on("message", this.onMessage.bind(this));
     ws.on("error", this.onError.bind(this));
@@ -64,6 +74,10 @@ export default class Socket {
     return this.sendMessage(response);
   }
 
+  async broadcast(payload: object) {
+    return this.sendMessage(payload);
+  }
+
   async onMessage(message: string) {
     const request = JSON.parse(message);
     const { value, error } = requestSchema.validate(request);
@@ -72,7 +86,7 @@ export default class Socket {
       return this.sendParseError({ sucess: false, error: error.message });
     }
 
-    const handlerResult = await this.handler(value);
+    const handlerResult = await this.handler.handle(value);
 
     if (handlerResult) {
       this.sendResponse(handlerResult);
