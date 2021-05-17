@@ -44,8 +44,6 @@ const GamePage = ({}) => {
     history.push("/");
   };
 
-  console.log(sessionState);
-
   if (joining) {
     return <Layout title="">Joining the game room...</Layout>;
   }

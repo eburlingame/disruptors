@@ -14,7 +14,7 @@ export type PersistedRoom = {
   gameConfig: any;
 };
 
-const ROOM_PREFIX = "session|";
+const ROOM_PREFIX = "room|";
 
 export default (context: Context) => {
   const { redis, pubsub } = context;

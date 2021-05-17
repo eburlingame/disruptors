@@ -57,28 +57,36 @@ export default class Socket {
     ws.on("close", this.onClose.bind(this));
   }
 
-  async onOpen() {
+  private async onOpen() {
     console.log("Websocket connection opened");
   }
 
-  async sendMessage(message: object) {
+  private async onError(e: any) {
+    console.warn("Socket error: ", e);
+  }
+
+  private async onClose() {
+    await this.handler.onClose();
+  }
+
+  private async sendMessage(message: object) {
     const payload = JSON.stringify(message);
     this.socket.send(payload);
   }
 
-  async sendParseError(error: ParseError) {
+  private async sendParseError(error: ParseError) {
     return this.sendMessage(error);
   }
 
-  async sendResponse(response: Response) {
+  private async sendResponse(response: Response) {
     return this.sendMessage(response);
   }
 
-  async broadcast(payload: object) {
+  private async broadcast(payload: object) {
     return this.sendMessage(payload);
   }
 
-  async onMessage(message: string) {
+  private async onMessage(message: string) {
     const request = JSON.parse(message);
     const { value, error } = requestSchema.validate(request);
 
@@ -92,8 +100,4 @@ export default class Socket {
       this.sendResponse(handlerResult);
     }
   }
-
-  async onError(e: any) {}
-
-  async onClose() {}
 }

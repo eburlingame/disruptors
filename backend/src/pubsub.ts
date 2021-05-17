@@ -2,9 +2,14 @@ import { Redis } from "ioredis";
 
 export type PubSubCallback = (msg: string) => Promise<void>;
 
+/* This is a basic wrapper around the Redis PubSub functionality. It is responsible for subscribing and unsubscribing to the 
+   room/game channels.
+  
+   Since multiple sessions may need to listen to a room or a game, we maintain a Map of ChannelId -> SessionId -> Callback function
+*/
 export default class PubSub {
   private redis: Redis;
-  private callbacks: Map<string, Map<string, PubSubCallback>>;
+  private callbacks: Map<string, Map<string, PubSubCallback>>; // Maps channel id to a map of sessionId -> callback functions
 
   constructor(redis: Redis) {
     this.redis = redis;
@@ -48,7 +53,6 @@ export default class PubSub {
   }
 
   async unsubscribe(channel: string, key: string): Promise<boolean> {
-    await this.redis.unsubscribe(channel);
     const callbacks = this.callbacks.get(channel);
 
     if (callbacks) {
@@ -56,9 +60,9 @@ export default class PubSub {
 
       if (callbacks.size === 0) {
         this.callbacks.delete(channel);
+        await this.redis.unsubscribe(channel);
       }
     }
-
     return true;
   }
 }

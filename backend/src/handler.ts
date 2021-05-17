@@ -95,10 +95,19 @@ export default class Handler {
 
     /// Finally, call the handler function and return its response
     try {
-      return handler(request, value);
+      const result = await handler(request, value);
+      return result;
     } catch (e) {
       console.warn(e);
       return errorResponse(request, e.message);
+    }
+  }
+
+  async onClose(): Promise<void> {
+    const session = await this.getSession();
+
+    if (session.roomCode) {
+      this.rooms.unsubscribeFromRoom(session.roomCode, session.sessionId);
     }
   }
 
