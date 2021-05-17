@@ -33,7 +33,7 @@ export const useCommand = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const socket = useSocket();
+  const { ws: socket } = useSocket();
 
   const sendCommand = async (
     verb: string,

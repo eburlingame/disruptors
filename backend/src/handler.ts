@@ -1,4 +1,4 @@
-import Joi, { exist } from "joi";
+import Joi from "joi";
 import { Context } from "./";
 import { BroadcastFn, Request, Response } from "./socket";
 import { v4 as uuid } from "uuid";
@@ -104,16 +104,18 @@ export default class Handler {
   }
 
   async onClose(): Promise<void> {
-    const session = await this.getSession();
+    if (this.session) {
+      const session = await this.sessions.getSession(this.session.sessionId);
 
-    if (session.roomCode) {
-      this.rooms.unsubscribeFromRoom(session.roomCode, session.sessionId);
+      if (session && session.roomCode) {
+        this.rooms.unsubscribeFromRoom(session.roomCode, session.sessionId);
+      }
     }
   }
 
   /// Helper functions
 
-  private async getSession(): Promise<PersistedSession> {
+  private async getCurrentSession(): Promise<PersistedSession> {
     if (this.session) {
       const latestSession = await this.sessions.getSession(
         this.session.sessionId
@@ -161,7 +163,6 @@ export default class Handler {
   private async onRoomUpdates(msg: string) {
     /// Send out the current state when the room has been updated
     console.log("Game room was updated externally");
-    console.log(adhocResponse("room.updated", await this.commonState()));
     return this.broadcastFn(
       adhocResponse("room.updated", await this.commonState())
     );
@@ -199,7 +200,7 @@ export default class Handler {
 
   private async createRoom(request: Request, data: { roomName: string }) {
     /// Default to an empty session
-    let session: PersistedSession = await this.getSession(); /// Persist the session
+    let session: PersistedSession = await this.getCurrentSession(); /// Persist the session
 
     const playerId = session.playerId || uuid();
     const roomCode = genRoomCode();
@@ -228,7 +229,7 @@ export default class Handler {
 
   private async joinRoom(request: Request, { roomCode }: { roomCode: string }) {
     /// Default to an empty session
-    let session = await this.getSession();
+    let session = await this.getCurrentSession();
     const playerId = session.playerId || uuid();
 
     let room = await this.rooms.getRoom(roomCode);
@@ -254,7 +255,7 @@ export default class Handler {
 
   private async leaveRoom(request: Request, {}: {}) {
     /// Default to an empty session
-    const session = await this.getSession();
+    const session = await this.getCurrentSession();
 
     /// If we're not in a room, there's nothing to do
     if (!session.roomCode) {

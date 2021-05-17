@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import { useRecoilState } from "recoil";
@@ -9,6 +9,8 @@ import { useCommand, useProcessCommandReponse } from "./command";
 import { loadPersistentSessionId, setPersistentSessionId } from "./persist";
 import { useSocket } from "./socket";
 
+const RETRY_DELAY = 2000;
+
 export const useSessionState = () => useRecoilValue(sessionStateAtom);
 
 export const useSessionLoadingState = () =>
@@ -16,6 +18,8 @@ export const useSessionLoadingState = () =>
 
 export const useSetupSession = () => {
   const socket = useSocket();
+
+  const [retryTimeout, setRetryTimeout] = useState<null | number>(null);
 
   const [loadingState, setLoadingState] = useRecoilState(
     sessionLoadingStateAtom
@@ -27,9 +31,31 @@ export const useSetupSession = () => {
 
   useEffect(() => {
     const openSession = async () => {
-      if (socket) {
-        console.log("Opening websocket");
-        await socket.open();
+      if (socket.ws && !socket.isOpen) {
+        console.log("Attempting to open websocket");
+
+        try {
+          /// Clear the retry timeout
+          if (retryTimeout) {
+            clearTimeout(retryTimeout);
+            setRetryTimeout(null);
+          }
+
+          /// Attempt to open the websocket
+          setLoadingState({ isOpen: false, isLoading: true });
+          await socket.ws.open();
+        } catch (e) {
+          console.warn("Error opening websocket session: " + e.message);
+
+          /// Schedule a reconnection
+          console.log(`Will retry connection in ${RETRY_DELAY}ms`);
+          setRetryTimeout(setTimeout(() => openSession(), RETRY_DELAY) as any);
+
+          /// Indicate retry as "loading"
+          setLoadingState({ isOpen: false, isLoading: true });
+
+          return;
+        }
 
         /// Check in local storage for an existing sessionId, and send it along
         let payload = {};

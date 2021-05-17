@@ -18,18 +18,21 @@ import {
 
 const WS_API_URL = "ws://localhost:8080/ws";
 
-export type Session = {
+export type Socket = {
+  ws: WebSocketAsPromised | null;
   isOpen: boolean;
-  isLoading: boolean;
-  sessionId: string | null;
 };
 
-const SocketContext = createContext<WebSocketAsPromised | null>(null);
+const SocketContext = createContext<Socket>({
+  ws: null,
+  isOpen: false,
+});
 
 export const useSocket = () => useContext(SocketContext);
 
-export const useSetupSocket = () => {
-  const [socketId, setSocketId] = useState(0);
+export const useSetupSocket = (): Socket => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const socket = useRef<WebSocketAsPromised | null>(null);
   const processCommandResponse = useProcessCommandReponse();
 
@@ -42,7 +45,7 @@ export const useSetupSocket = () => {
       extractRequestId: (data) => data && data.reqId,
     });
 
-    /// Listen for ad-hoc messaged
+    /// Listen for ad-hoc messages
     socket.current.onUnpackedMessage.addListener((msg: object) => {
       console.log(msg);
 
@@ -54,11 +57,21 @@ export const useSetupSocket = () => {
       }
     });
 
-    /// Increment the socketId counter to force a re-renders
-    setSocketId((id) => id + 1);
+    socket.current.onOpen.addListener(() => {
+      console.log("Socket connection opened");
+      setIsOpen(true);
+    });
+
+    socket.current.onClose.addListener(() => {
+      console.log("Socket connection closed");
+      setIsOpen(false);
+    });
   }, []);
 
-  return socket.current;
+  return {
+    ws: socket.current,
+    isOpen,
+  };
 };
 
 export const SocketBootstrapper = ({
