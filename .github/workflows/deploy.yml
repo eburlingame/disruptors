@@ -67,7 +67,6 @@ jobs:
   deploy:
     needs:
       - backend-build
-      - backend-test
       - frontend-build
 
     runs-on: ubuntu-latest
