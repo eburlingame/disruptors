@@ -2,7 +2,7 @@
 
 ## Basic Architecture
 
-- Python FastAPI server running a single websocket endpoint
+- Typescript/Express JS app which opens a websocket server
 - React client app which connects to said websocket
 
 ## Session and User Management
@@ -13,12 +13,8 @@ If the client reloads or reconnected, it will send a `reopenSession` command wit
 
 ### Commands
 
-- `openSession`: Create a new session
-- `reopenSession`: Re-open an existing session
-  - sessionToken
-- `createUser`: Create a new userId
-  - name
-- `closeSession`: Destroy the session and the associated user
+- See `backend/src/handler.ts` for the Websocket commands and their payloads.
+- Each command verb should have an associated handler function, and a `Joi` schema which validates the payload of the command
 
 ## Game State
 

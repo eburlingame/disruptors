@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ github.sha }}
-  CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ github.sha }}
+  BACKEND_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:sha-${{ github.sha }}
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:sha-${{ github.sha }}
 
-  LATEST_API_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:latest
-  LATEST_CLIENT_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:latest
+  LATEST_BACKEND_IMAGE: ghcr.io/${{ github.repository }}/disruptors-api:latest
+  LATEST_FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/disruptors-client:latest
 
 jobs:
   backend-build:
@@ -36,31 +36,8 @@ jobs:
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          tags: ${{ env.API_IMAGE }}
+          tags: ${{ env.BACKEND_IMAGE }}
           push: true
-
-  backend-test:
-    runs-on: ubuntu-latest
-    needs: [backend-build]
-    steps:
-      - name: Check Out Repo
-        uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to GitHub container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build test image
-        run: |
-          cd backend/
-          docker pull $API_IMAGE
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -84,7 +61,7 @@ jobs:
         with:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
-          tags: ${{ env.CLIENT_IMAGE }}
+          tags: ${{ env.FRONTEND_IMAGE }}
           push: true
 
   deploy:
@@ -109,14 +86,14 @@ jobs:
       - name: Push latest container images
         run: |
           echo "Push api container to latest tag"
-          docker pull $API_IMAGE
-          docker tag $API_IMAGE $LATEST_API_IMAGE
-          docker push $LATEST_API_IMAGE
+          docker pull $BACKEND_IMAGE
+          docker tag $BACKEND_IMAGE $LATEST_BACKEND_IMAGE
+          docker push $LATEST_BACKEND_IMAGE
 
           echo "Push client container to latest tag"
-          docker pull $CLIENT_IMAGE
-          docker tag $CLIENT_IMAGE $LATEST_CLIENT_IMAGE
-          docker push $LATEST_CLIENT_IMAGE
+          docker pull $FRONTEND_IMAGE
+          docker tag $FRONTEND_IMAGE $LATEST_FRONTEND_IMAGE
+          docker push $LATEST_FRONTEND_IMAGE
 
       - name: Trigger the deployment pipline
         run: |
