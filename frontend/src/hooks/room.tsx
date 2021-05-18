@@ -38,3 +38,35 @@ export const useLeaveRoom = () => {
 
   return { leaveRoom, leaving: loading, error };
 };
+
+export type GameConfig = {
+  cardDiscardLimit: number;
+};
+
+export const useConfigureGame = () => {
+  const processCommandResponse = useProcessCommandReponse();
+  const { sendCommand, loading, error } = useCommand();
+
+  const configureGame = async ({ cardDiscardLimit }: GameConfig) => {
+    const result = await sendCommand("game.configure", {
+      config: { cardDiscardLimit },
+    });
+
+    return processCommandResponse(result);
+  };
+
+  return { configureGame, configuring: loading, error };
+};
+
+export const useConfigurePlayer = () => {
+  const processCommandResponse = useProcessCommandReponse();
+  const { sendCommand, loading, error } = useCommand();
+
+  const configurePlayer = async (newName: string) => {
+    const result = await sendCommand("player.configure", { name: newName });
+
+    return processCommandResponse(result);
+  };
+
+  return { configurePlayer, configuring: loading, error };
+};

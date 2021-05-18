@@ -25,7 +25,7 @@ const Routes = () => {
   return (
     <Switch>
       <Route path="/join">
-        <div>Join a game</div>
+        <JoinGamePage />
       </Route>
 
       <Route path="/create">

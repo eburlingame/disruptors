@@ -12,6 +12,7 @@ import Games from "./games";
 
 import SessionPersistor, { PersistedSession } from "./persist/session";
 import RoomPersistor, { PersistedRoom, RoomPlayer } from "./persist/room";
+import games from "./games";
 
 export type SessionState = {
   sessionId: string;
@@ -19,6 +20,7 @@ export type SessionState = {
   room?: PersistedRoom;
   game?: {
     state: any;
+    config: any;
   };
 };
 
@@ -68,6 +70,18 @@ export default class Handler {
       "room.leave": {
         schema: Joi.object({}),
         handler: this.leaveRoom.bind(this),
+      },
+      "player.configure": {
+        schema: Joi.object({
+          name: Joi.string().required(),
+        }),
+        handler: this.configurePlayer.bind(this),
+      },
+      "game.configure": {
+        schema: Joi.object({
+          config: Joi.object().required(),
+        }),
+        handler: this.configureGame.bind(this),
       },
     };
   }
@@ -130,7 +144,7 @@ export default class Handler {
     throw new Error("Session has not been opened yet!");
   }
 
-  private async putSession(session: PersistedSession): Promise<void> {
+  private async putCurrentSession(session: PersistedSession): Promise<void> {
     await this.sessions.putSession(session);
     this.session = session;
   }
@@ -147,6 +161,14 @@ export default class Handler {
 
       if (room) {
         state.room = room;
+
+        if (this.session.playerId) {
+          const you = room.players.find(
+            ({ playerId }) => playerId === this.session?.playerId
+          );
+
+          state.you = you;
+        }
       }
     }
 
@@ -184,7 +206,7 @@ export default class Handler {
     }
 
     /// Persist the session
-    await this.putSession(session);
+    await this.putCurrentSession(session);
 
     /// Re-subscribe to room
     if (session.roomCode) {
@@ -222,7 +244,7 @@ export default class Handler {
 
     session.playerId = playerId;
     session.roomCode = roomCode;
-    await this.putSession(session);
+    await this.putCurrentSession(session);
 
     return sucessResponse(request, await this.commonState());
   }
@@ -246,9 +268,14 @@ export default class Handler {
       this.onRoomUpdates.bind(this)
     );
 
+    /// Update the game configuration
+    const game = new games.Catan();
+    room.gameConfig = game.updateGameConfig(room.players, room.gameConfig);
+
+    /// Update the current session
     session.playerId = playerId;
     session.roomCode = roomCode;
-    await this.putSession(session);
+    await this.putCurrentSession(session);
 
     return sucessResponse(request, await this.commonState());
   }
@@ -270,6 +297,10 @@ export default class Handler {
       (player) => player.playerId !== session.playerId
     );
 
+    /// Update the game configuration
+    const game = new games.Catan();
+    room.gameConfig = game.updateGameConfig(room.players, room.gameConfig);
+
     /// Put the room back and unsubscribe
     await this.rooms.putRoom(room);
     await this.rooms.unsubscribeFromRoom(room.roomCode, session.sessionId);
@@ -277,7 +308,67 @@ export default class Handler {
     /// Update the session and persist
     session.playerId = undefined;
     session.roomCode = undefined;
-    await this.putSession(session);
+    await this.putCurrentSession(session);
+
+    return sucessResponse(request, await this.commonState());
+  }
+
+  private async configurePlayer(request: Request, { name }: { name: string }) {
+    /// Default to an empty session
+    let session = await this.getCurrentSession();
+    const playerId = session.playerId || uuid();
+
+    if (!session.roomCode) {
+      throw new Error(`Not in a room`);
+    }
+
+    let room = await this.rooms.getRoom(session.roomCode);
+    if (!room) {
+      throw new Error(`Could not find room: ${session.roomCode}`);
+    }
+
+    /// Change the players name
+    room.players = room.players.map((player) => {
+      if (player.playerId === session.playerId) {
+        return { ...player, name };
+      }
+      return player;
+    });
+
+    /// Persist the room and the session
+    await this.rooms.putRoom(room);
+
+    return sucessResponse(request, await this.commonState());
+  }
+
+  private async configureGame(request: Request, { config }: { config: any }) {
+    /// Default to an empty session
+    let session = await this.getCurrentSession();
+
+    if (!session.roomCode) {
+      throw new Error(`Not in a room`);
+    }
+
+    let room = await this.rooms.getRoom(session.roomCode);
+    if (!room) {
+      throw new Error(`Could not find room: ${session.roomCode}`);
+    }
+
+    const player = room.players.find(
+      ({ playerId }) => playerId === session.playerId
+    );
+    if (!room) {
+      throw new Error(`Invalid player`);
+    }
+
+    /// Update the game configuration
+    const game = new Games.Catan();
+    const newConfig = game.updateGameConfig(room.players, config);
+
+    room.gameConfig = newConfig;
+
+    /// Persist the room and the session
+    await this.rooms.putRoom(room);
 
     return sucessResponse(request, await this.commonState());
   }
