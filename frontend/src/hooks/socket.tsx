@@ -16,7 +16,10 @@ import {
   useProcessCommandReponse,
 } from "./command";
 
-const WS_API_URL = "ws://localhost:8080/ws";
+const WS_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "wss://api.disruptors.ericburlingame.com"
+    : "ws://localhost:8080/ws";
 
 export type Socket = {
   ws: WebSocketAsPromised | null;

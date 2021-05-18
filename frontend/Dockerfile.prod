@@ -3,7 +3,7 @@ FROM node:current-alpine3.12 as build
 WORKDIR /usr/app
 
 ENV PATH /usr/app/node_modules/.bin:$PATH
-ENV NODE_ENV development
+ENV NODE_ENV production
 
 COPY package*.json ./
 RUN yarn install --frozen-lockfile --production=false
