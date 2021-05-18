@@ -9,6 +9,6 @@ RUN yarn global add typescript
 RUN tsc --build tsconfig.json
 
 ENV NODE_ENV production
-ENV API_PORT 3000
-EXPOSE 3000
+ENV API_PORT 8080
+EXPOSE 8080
 CMD ["node", "build/index.js"]
