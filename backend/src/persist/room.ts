@@ -7,11 +7,19 @@ export type RoomPlayer = {
   isHost: boolean;
 };
 
+export type PersistedGameState = {
+  state: any;
+  actions: any[];
+};
+
 export type PersistedRoom = {
   roomCode: string;
   players: RoomPlayer[];
+
   game: string;
   gameConfig: any;
+  gameReady: boolean;
+  gameState?: PersistedGameState;
 };
 
 const ROOM_PREFIX = "room|";

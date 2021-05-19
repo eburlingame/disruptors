@@ -70,3 +70,16 @@ export const useConfigurePlayer = () => {
 
   return { configurePlayer, configuring: loading, error };
 };
+
+export const useStartGame = () => {
+  const processCommandResponse = useProcessCommandReponse();
+  const { sendCommand, loading, error } = useCommand();
+
+  const startGame = async () => {
+    const result = await sendCommand("game.start", {});
+
+    return processCommandResponse(result);
+  };
+
+  return { startGame, starting: loading, error };
+};

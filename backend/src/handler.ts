@@ -83,6 +83,10 @@ export default class Handler {
         }),
         handler: this.configureGame.bind(this),
       },
+      "game.start": {
+        schema: Joi.object({}),
+        handler: this.startGame.bind(this),
+      },
     };
   }
 
@@ -147,6 +151,25 @@ export default class Handler {
   private async putCurrentSession(session: PersistedSession): Promise<void> {
     await this.sessions.putSession(session);
     this.session = session;
+  }
+
+  private async getCurrentRoom(): Promise<{
+    session: PersistedSession;
+    room: PersistedRoom;
+  }> {
+    /// Default to an empty session
+    const session = await this.getCurrentSession();
+
+    if (!session.roomCode) {
+      throw new Error(`Not in a room`);
+    }
+
+    const room = await this.rooms.getRoom(session.roomCode);
+    if (!room) {
+      throw new Error(`Could not find room: ${session.roomCode}`);
+    }
+
+    return { session, room };
   }
 
   private async commonState(): Promise<SessionState> {
@@ -228,11 +251,16 @@ export default class Handler {
     const roomCode = genRoomCode();
     const game = new Games.Catan();
 
+    const initialPlayers = [{ playerId, name: "", isHost: true }];
+    const intialConfig = game.newGameConfig();
+    const isGameReady = game.readyToStart(initialPlayers, intialConfig);
+
     const room: PersistedRoom = {
       roomCode: roomCode,
-      players: [{ playerId, name: "", isHost: true }],
+      players: initialPlayers,
       game: "Catan",
-      gameConfig: game.newGameConfig(),
+      gameConfig: intialConfig,
+      gameReady: isGameReady,
     };
 
     await this.rooms.putRoom(room);
@@ -271,6 +299,7 @@ export default class Handler {
     /// Update the game configuration
     const game = new games.Catan();
     room.gameConfig = game.updateGameConfig(room.players, room.gameConfig);
+    room.gameReady = game.readyToStart(room.players, room.gameConfig);
 
     /// Update the current session
     session.playerId = playerId;
@@ -300,6 +329,7 @@ export default class Handler {
     /// Update the game configuration
     const game = new games.Catan();
     room.gameConfig = game.updateGameConfig(room.players, room.gameConfig);
+    room.gameReady = game.readyToStart(room.players, room.gameConfig);
 
     /// Put the room back and unsubscribe
     await this.rooms.putRoom(room);
@@ -342,30 +372,53 @@ export default class Handler {
   }
 
   private async configureGame(request: Request, { config }: { config: any }) {
-    /// Default to an empty session
-    let session = await this.getCurrentSession();
-
-    if (!session.roomCode) {
-      throw new Error(`Not in a room`);
-    }
-
-    let room = await this.rooms.getRoom(session.roomCode);
-    if (!room) {
-      throw new Error(`Could not find room: ${session.roomCode}`);
-    }
+    let { session, room } = await this.getCurrentRoom();
 
     const player = room.players.find(
       ({ playerId }) => playerId === session.playerId
     );
-    if (!room) {
+    if (!player) {
       throw new Error(`Invalid player`);
     }
 
     /// Update the game configuration
     const game = new Games.Catan();
-    const newConfig = game.updateGameConfig(room.players, config);
+    room.gameConfig = game.updateGameConfig(room.players, config);
+    room.gameReady = game.readyToStart(room.players, room.gameConfig);
 
-    room.gameConfig = newConfig;
+    /// Persist the room and the session
+    await this.rooms.putRoom(room);
+
+    return sucessResponse(request, await this.commonState());
+  }
+
+  private async startGame(request: Request, {}: {}) {
+    let { session, room } = await this.getCurrentRoom();
+
+    const player = room.players.find(
+      ({ playerId }) => playerId === session.playerId
+    );
+
+    if (!player || !player.isHost) {
+      throw new Error("Only the host can start the game");
+    }
+
+    /// Update the game configuration
+    const game = new Games.Catan();
+
+    const isReadyToStart = game.readyToStart(room.players, room.gameConfig);
+
+    if (!isReadyToStart) {
+      throw new Error("Game isn't ready to start");
+    }
+
+    /// Start the initial game
+    const initialGameState = game.startGame(room.players, room.gameConfig);
+
+    room.gameState = {
+      state: initialGameState,
+      actions: [],
+    };
 
     /// Persist the room and the session
     await this.rooms.putRoom(room);

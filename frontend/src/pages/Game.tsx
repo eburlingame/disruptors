@@ -13,6 +13,7 @@ import {
   useConfigurePlayer,
   useJoinRoom,
   useLeaveRoom,
+  useStartGame,
 } from "../hooks/room";
 import { Input } from "@chakra-ui/input";
 import { Select } from "@chakra-ui/select";
@@ -66,12 +67,14 @@ const GamePage = ({}) => {
     const reuslt = await configureGame(newConfig);
   };
 
+  const { startGame, error: startError } = useStartGame();
+
   useEffect(() => {
     /// Open error modal if new error is encountered
-    if (joinError || configGameError || configPlayerError) {
+    if (joinError || configGameError || configPlayerError || startError) {
       errorModalDisclosure.onOpen();
     }
-  }, [joinError, configGameError, configPlayerError]);
+  }, [joinError, configGameError, configPlayerError, startError]);
 
   if (joining) {
     return <Layout title="">Joining the game room...</Layout>;
@@ -129,7 +132,15 @@ const GamePage = ({}) => {
             ))}
         </Box>
 
-        <Button onClick={onLeave}>Leave Game</Button>
+        {sessionState.you?.isHost && (
+          <Button onClick={() => startGame()} colorScheme="green">
+            Start Game
+          </Button>
+        )}
+
+        <Button onClick={onLeave} variant="outline" colorScheme="red" size="sm">
+          Leave Game
+        </Button>
       </VStack>
 
       <ErrorAlert
