@@ -11,17 +11,17 @@ import {
 import Games from "./games";
 
 import SessionPersistor, { PersistedSession } from "./persist/session";
-import RoomPersistor, { PersistedRoom, RoomPlayer } from "./persist/room";
+import RoomPersistor, {
+  PersistedRoom,
+  RoomPhase,
+  RoomPlayer,
+} from "./persist/room";
 import games from "./games";
 
 export type SessionState = {
   sessionId: string;
   you?: RoomPlayer;
   room?: PersistedRoom;
-  game?: {
-    state: any;
-    config: any;
-  };
 };
 
 export type HandlerFn = (
@@ -258,6 +258,7 @@ export default class Handler {
     const room: PersistedRoom = {
       roomCode: roomCode,
       players: initialPlayers,
+      phase: RoomPhase.OPENED,
       game: "Catan",
       gameConfig: intialConfig,
       gameReady: isGameReady,
@@ -419,6 +420,8 @@ export default class Handler {
       state: initialGameState,
       actions: [],
     };
+
+    room.phase = RoomPhase.PLAYING;
 
     /// Persist the room and the session
     await this.rooms.putRoom(room);

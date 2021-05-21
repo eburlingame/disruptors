@@ -12,9 +12,16 @@ export type PersistedGameState = {
   actions: any[];
 };
 
+export enum RoomPhase {
+  OPENED = 0,
+  PLAYING = 1,
+  GAME_COMPLETE = 2,
+}
+
 export type PersistedRoom = {
   roomCode: string;
   players: RoomPlayer[];
+  phase: RoomPhase;
 
   game: string;
   gameConfig: any;
