@@ -1,25 +1,9 @@
 import Game, { GamePlayer } from "../model";
-
-export enum GamePhase {
-  SETUP_ROUND_1 = "setup1",
-  SETUP_ROUND_2 = "setup2",
-  PLAYER = "playing",
-  ROBBER_ROLLER = "robber_rolled",
-}
-
-export type CatanAction = {};
-
-export type CatanConfig = {
-  cardDiscardLimit: number;
-};
+import { generateStaticBoard } from "./board";
+import { GamePhase, CatanAction, CatanConfig, CatanState } from "./types";
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
-};
-
-export type CatanState = {
-  config: CatanConfig;
-  phase: GamePhase;
 };
 
 export default class CatanGame
@@ -47,6 +31,7 @@ export default class CatanGame
     return {
       config: gameConfig,
       phase: GamePhase.SETUP_ROUND_1,
+      board: generateStaticBoard(),
     };
   }
 
