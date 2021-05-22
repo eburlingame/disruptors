@@ -114,7 +114,7 @@ export const generateStaticBoard = (): GameBoard => ({
     },
     // Inner ring
     {
-      location: { x: 0, y: -1, z: 1 },
+      location: { x: 0, y: 1, z: -1 },
       diceNumber: 6,
       tileType: TileType.BRICK,
       ports: [],
@@ -126,7 +126,7 @@ export const generateStaticBoard = (): GameBoard => ({
       ports: [],
     },
     {
-      location: { x: -1, y: -0, z: 1 },
+      location: { x: 0, y: 1, z: 1 },
       diceNumber: 3,
       tileType: TileType.ORE,
       ports: [],
