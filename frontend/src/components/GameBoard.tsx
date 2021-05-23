@@ -4,9 +4,22 @@ import { useGameViewState } from "./GameView";
 import hexagonImg from "../images/hexagon.svg";
 
 import styled from "styled-components";
-import { PortResource, TileType } from "../state/game_types";
+import {
+  GameTile,
+  PortResource,
+  TileCoordinate,
+  TileType,
+} from "../state/game_types";
 import { Button, ButtonGroup, IconButton } from "@chakra-ui/button";
-import { FaSearchMinus, FaSearchPlus } from "react-icons/fa";
+import { FaSearchMinus, FaSearchPlus, FaWarehouse } from "react-icons/fa";
+import { range } from "../utils";
+import {
+  EdgeDir,
+  hasTile,
+  locationToPosition,
+  tileAlongEdge,
+  VertexDir,
+} from "../boardUtils";
 
 const Container = styled.div`
   width: 100%;
@@ -27,8 +40,8 @@ const TILE_HEIGHT = 169;
 
 const BOARD_PADDING = 75;
 
-const CONTAINER_WIDTH = 5 * TILE_WIDTH;
-const CONTAINER_HEIGHT = 4 * TILE_HEIGHT;
+const CONTAINER_WIDTH = 5 * TILE_WIDTH + BOARD_PADDING;
+const CONTAINER_HEIGHT = 4 * TILE_HEIGHT + BOARD_PADDING;
 
 const ZoomControls = styled.div`
   position: absolute;
@@ -80,18 +93,65 @@ const Tile = styled.div<{ position: { x: number; y: number } }>`
   transform: translate(-50%, -50%);
 `;
 
-const locationToPosition = ({
-  x,
-  y,
-  z,
-}: {
-  x: number;
-  y: number;
-  z: number;
-}) => ({
-  x: x - y,
-  y: -z,
+const VertexesContainer = styled(Tile)`
+  z-index: 2;
+`;
+
+const indexToPosition = (index: number) => ({
+  x: (Math.cos((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_WIDTH) / 2.0,
+  y: (Math.sin((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_HEIGHT) / 2.0,
 });
+
+const VertexContainer = styled.div<{ index: number }>`
+  position: absolute;
+  z-index: 3;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(
+    calc(-50% + ${(props) => indexToPosition(props.index).x}px),
+    calc(-50% + ${(props) => indexToPosition(props.index).y}px)
+  );
+  text-align: center;
+  background-color: #222;
+  width: 25px;
+  height: 25px;
+`;
+
+/// Since multiple touch each vertex, decide which one should draw the vertex button/label
+const shouldDrawVertex = (
+  tiles: GameTile[],
+  position: TileCoordinate,
+  vertexIndex: number
+) => {
+  /// Always draw the top and bottom vertex
+  if (vertexIndex === VertexDir.N || vertexIndex === VertexDir.S) {
+    return true;
+  }
+
+  if (vertexIndex === VertexDir.NE) {
+    return !hasTile(tiles, tileAlongEdge(position, EdgeDir.NE));
+  }
+
+  if (vertexIndex === VertexDir.SE) {
+    return !hasTile(tiles, tileAlongEdge(position, EdgeDir.SE));
+  }
+
+  /// Let the squares to the left draw the left verticies, if they exist
+  if (vertexIndex === VertexDir.SW) {
+    return (
+      !hasTile(tiles, tileAlongEdge(position, EdgeDir.SW)) &&
+      !hasTile(tiles, tileAlongEdge(position, EdgeDir.W))
+    );
+  }
+
+  if (vertexIndex === VertexDir.NW) {
+    return (
+      !hasTile(tiles, tileAlongEdge(position, EdgeDir.W)) &&
+      !hasTile(tiles, tileAlongEdge(position, EdgeDir.NW))
+    );
+  }
+};
 
 const GameBoard = ({}) => {
   const { gameState } = useGameViewState();
@@ -99,8 +159,10 @@ const GameBoard = ({}) => {
 
   const [zoom, setZoom] = useState(0.75);
 
-  const zoomIn = () => setZoom((current) => current + 0.25);
-  const zoomOut = () => setZoom((current) => current - 0.25);
+  const zoomIn = () =>
+    setZoom((current) => (current < 2.75 ? current + 0.25 : current));
+  const zoomOut = () =>
+    setZoom((current) => (current > 0.25 ? current - 0.25 : current));
 
   return (
     <Container>
@@ -123,10 +185,24 @@ const GameBoard = ({}) => {
         <TileContainer zoom={zoom}>
           <TileOriginContainer zoom={zoom}>
             {tiles.map(({ diceNumber, tileType, location: { x, y, z } }) => (
-              <Tile position={locationToPosition({ x, y, z })}>
-                <DebugLabel>{`(${diceNumber} ${tileType}) ${x}, ${y}, ${z}`}</DebugLabel>
-                <TileImage src={hexagonImg} />
-              </Tile>
+              <>
+                <Tile position={locationToPosition({ x, y, z })}>
+                  <DebugLabel>{`(${diceNumber} ${tileType}) ${x}, ${y}, ${z}`}</DebugLabel>
+                  <TileImage src={hexagonImg} />
+                </Tile>
+
+                <VertexesContainer position={locationToPosition({ x, y, z })}>
+                  {range(6)
+                    .filter((index) =>
+                      shouldDrawVertex(tiles, { x, y, z }, index)
+                    )
+                    .map((index) => (
+                      <VertexContainer index={index}>
+                        <Box color="red.400">{index}</Box>
+                      </VertexContainer>
+                    ))}
+                </VertexesContainer>
+              </>
             ))}
           </TileOriginContainer>
         </TileContainer>

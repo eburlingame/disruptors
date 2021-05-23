@@ -151,7 +151,7 @@ const GameLayout = ({}) => {
                 shownOn: "xs",
                 content: ({}) => <div>Bank</div>,
               },
-              { name: "Actions", content: Actions },
+              { name: "Actions", content: Actions, shownOn: "xs" },
             ]}
           />
         </TabContainer>
