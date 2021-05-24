@@ -12,14 +12,14 @@ import {
 } from "../state/game_types";
 import { Button, ButtonGroup, IconButton } from "@chakra-ui/button";
 import { FaSearchMinus, FaSearchPlus, FaWarehouse } from "react-icons/fa";
-import { range } from "../utils";
+import { range } from "../utils/utils";
 import {
   EdgeDir,
   hasTile,
   locationToPosition,
   tileAlongEdge,
   VertexDir,
-} from "../boardUtils";
+} from "../utils/board_utils";
 
 const Container = styled.div`
   width: 100%;
@@ -38,7 +38,7 @@ const OverflowContainer = styled.div`
 const TILE_WIDTH = 146;
 const TILE_HEIGHT = 169;
 
-const BOARD_PADDING = 75;
+const BOARD_PADDING = 200;
 
 const CONTAINER_WIDTH = 5 * TILE_WIDTH + BOARD_PADDING;
 const CONTAINER_HEIGHT = 4 * TILE_HEIGHT + BOARD_PADDING;
@@ -52,6 +52,11 @@ const ZoomControls = styled.div`
 
 const TileContainer = styled.div<{ zoom: number }>`
   position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
+
+  background-color: #123;
   width: ${(props) => CONTAINER_WIDTH * props.zoom}px;
   height: ${(props) => CONTAINER_HEIGHT * props.zoom}px;
 `;
@@ -157,7 +162,7 @@ const GameBoard = ({}) => {
   const { gameState } = useGameViewState();
   const { tiles } = gameState.state.board;
 
-  const [zoom, setZoom] = useState(0.75);
+  const [zoom, setZoom] = useState(1.0);
 
   const zoomIn = () =>
     setZoom((current) => (current < 2.75 ? current + 0.25 : current));

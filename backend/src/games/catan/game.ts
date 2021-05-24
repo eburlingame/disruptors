@@ -32,6 +32,7 @@ export default class CatanGame
       config: gameConfig,
       phase: GamePhase.SETUP_ROUND_1,
       board: generateStaticBoard(),
+      players: players,
     };
   }
 

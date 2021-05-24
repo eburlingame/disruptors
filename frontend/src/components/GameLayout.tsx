@@ -5,7 +5,10 @@ import Layout from "./Layout";
 
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { responsiveVisibiity } from "../responsiveUtils";
-import GameBoard from "./GameBoard";
+
+import Bank from "./Bank";
+import Board from "./GameBoard";
+import Players from "./Players";
 
 const GameColumn = ({
   flex,
@@ -93,9 +96,6 @@ const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
 };
 
 const GameLayout = ({}) => {
-  const Bank = ({}) => <div>Bank</div>;
-  const Players = ({}) => <div>Players</div>;
-  const Board = ({}) => <GameBoard />;
   const Chat = ({}) => <div>Chat</div>;
   const Actions = ({}) => <div>Actions</div>;
   const Resources = ({}) => <div>Resources</div>;
@@ -149,7 +149,7 @@ const GameLayout = ({}) => {
               {
                 name: "Bank",
                 shownOn: "xs",
-                content: ({}) => <div>Bank</div>,
+                content: ({}) => <Bank />,
               },
               { name: "Actions", content: Actions, shownOn: "xs" },
             ]}
@@ -164,7 +164,7 @@ const GameLayout = ({}) => {
             tabs={[
               {
                 name: "Bank",
-                content: ({}) => <div>Bank</div>,
+                content: ({}) => <Bank />,
               },
             ]}
           />

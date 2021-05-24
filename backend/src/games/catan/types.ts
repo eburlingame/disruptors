@@ -1,3 +1,5 @@
+import { GamePlayer } from "../model";
+
 export enum GamePhase {
   SETUP_ROUND_1 = "setup1",
   SETUP_ROUND_2 = "setup2",
@@ -88,4 +90,5 @@ export type CatanState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
+  players: GamePlayer[];
 };

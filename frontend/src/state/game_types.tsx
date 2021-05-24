@@ -87,8 +87,13 @@ export type CatanConfig = {
   cardDiscardLimit: number;
 };
 
+export type GamePlayer = {
+  playerId: string;
+};
+
 export type CatanState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
+  players: GamePlayer[];
 };
