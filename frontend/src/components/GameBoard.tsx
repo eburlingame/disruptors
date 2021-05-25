@@ -4,14 +4,16 @@ import { useGameViewState } from "./GameView";
 import hexagonImg from "../images/hexagon.svg";
 
 import styled from "styled-components";
-import {
-  GameTile,
-  PortResource,
-  TileCoordinate,
-  TileType,
-} from "../state/game_types";
+import { GameTile, TileCoordinate, TileType } from "../state/game_types";
+import gameTheme from "../utils/game_theme";
 import { Button, ButtonGroup, IconButton } from "@chakra-ui/button";
-import { FaSearchMinus, FaSearchPlus, FaWarehouse } from "react-icons/fa";
+import {
+  FaHammer,
+  FaNetworkWired,
+  FaSearchMinus,
+  FaSearchPlus,
+  FaWarehouse,
+} from "react-icons/fa";
 import { range } from "../utils/utils";
 import {
   EdgeDir,
@@ -88,6 +90,16 @@ const DebugLabel = styled.div`
   text-align: center;
 `;
 
+const TileLabel = styled.div`
+  color: #000;
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  z-index: 2;
+  text-align: center;
+  transform: translate(0%, -50%);
+`;
+
 const Tile = styled.div<{ position: { x: number; y: number } }>`
   width: ${TILE_WIDTH}px;
   height: ${TILE_HEIGHT}px;
@@ -98,14 +110,80 @@ const Tile = styled.div<{ position: { x: number; y: number } }>`
   transform: translate(-50%, -50%);
 `;
 
-const VertexesContainer = styled(Tile)`
+const EdgesContainer = styled(Tile)`
   z-index: 2;
 `;
 
-const indexToPosition = (index: number) => ({
-  x: (Math.cos((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_WIDTH) / 2.0,
+const VertexesContainer = styled(Tile)`
+  z-index: 3;
+`;
+
+const ButtonsContainer = styled(Tile)`
+  z-index: 4;
+  width: 0px;
+  height: 0px;
+`;
+
+const vertexIndexToPosition = (index: number) => ({
+  x: (Math.cos((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_HEIGHT) / 2.0,
   y: (Math.sin((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_HEIGHT) / 2.0,
 });
+
+const edgeIndexToPosition = (index: number) => ({
+  x: (Math.cos((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_WIDTH) / 2.0,
+  y: (Math.sin((index / 6) * Math.PI * 2 - Math.PI / 2) * TILE_WIDTH) / 2.0,
+});
+
+const EdgeContainer = styled.div<{ index: number }>`
+  position: absolute;
+  z-index: 3;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(
+    calc(-50% + ${(props) => edgeIndexToPosition(props.index + 0.5).x}px),
+    calc(-50% + ${(props) => edgeIndexToPosition(props.index + 0.5).y}px)
+  );
+  text-align: center;
+  width: 25px;
+  height: 25px;
+`;
+
+const rad2deg = (radians: number) => (radians / Math.PI) * 180;
+const deg2rad = (degrees: number) => (degrees / 180) * Math.PI;
+
+const edgeLength = TILE_WIDTH * Math.sin(deg2rad(30));
+const EdgeLine = styled.div<{ index: number }>`
+  z-index: 2;
+
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  border-top: 4px solid #182;
+  width: ${edgeLength + 14}px;
+  transform: translate(-50%, -5px)
+    rotate(${(props) => props.index * 60 + 30}deg);
+
+  border-top: solid 4px #ddd;
+  transition: outline 0.6s linear;
+  border-radius: 5px;
+
+  // @keyframes shimmer {
+  //   0% {
+  //     border-top-style: dashed;
+  //   }
+  //   50% {
+  //     border-top-style: dotted;
+  //   }
+  //   100% {
+  //     border-top-style: dashed;
+  //   }
+  // }
+
+  // animation-name: shimmer;
+  // animation-duration: 0.5s;
+  // animation-iteration-count: infinite;
+`;
 
 const VertexContainer = styled.div<{ index: number }>`
   position: absolute;
@@ -114,11 +192,11 @@ const VertexContainer = styled.div<{ index: number }>`
   top: 50%;
   left: 50%;
   transform: translate(
-    calc(-50% + ${(props) => indexToPosition(props.index).x}px),
-    calc(-50% + ${(props) => indexToPosition(props.index).y}px)
+    calc(-50% + ${(props) => vertexIndexToPosition(props.index).x}px),
+    calc(-50% + ${(props) => vertexIndexToPosition(props.index).y}px)
   );
+
   text-align: center;
-  background-color: #222;
   width: 25px;
   height: 25px;
 `;
@@ -158,6 +236,24 @@ const shouldDrawVertex = (
   }
 };
 
+/// Since multiple touch each vertex, decide which one should draw the vertex button/label
+const shouldDrawEdge = (
+  tiles: GameTile[],
+  position: TileCoordinate,
+  edgeIndex: number
+) => {
+  /// Always draw the top and bottom vertex
+  if (
+    edgeIndex === EdgeDir.NE ||
+    edgeIndex === EdgeDir.E ||
+    edgeIndex == EdgeDir.SE
+  ) {
+    return true;
+  }
+
+  return !hasTile(tiles, tileAlongEdge(position, edgeIndex));
+};
+
 const GameBoard = ({}) => {
   const { gameState } = useGameViewState();
   const { tiles } = gameState.state.board;
@@ -169,6 +265,9 @@ const GameBoard = ({}) => {
   const zoomOut = () =>
     setZoom((current) => (current > 0.25 ? current - 0.25 : current));
 
+  const placingRoad = false;
+  const placingBuilding = false;
+
   return (
     <Container>
       <ZoomControls>
@@ -177,11 +276,13 @@ const GameBoard = ({}) => {
             aria-label="Zoom in"
             icon={<FaSearchPlus />}
             onClick={zoomIn}
+            colorScheme="blue"
           />
           <IconButton
             aria-label="Zoom out"
             icon={<FaSearchMinus />}
             onClick={zoomOut}
+            colorScheme="blue"
           />
         </ButtonGroup>
       </ZoomControls>
@@ -192,9 +293,29 @@ const GameBoard = ({}) => {
             {tiles.map(({ diceNumber, tileType, location: { x, y, z } }) => (
               <>
                 <Tile position={locationToPosition({ x, y, z })}>
-                  <DebugLabel>{`(${diceNumber} ${tileType}) ${x}, ${y}, ${z}`}</DebugLabel>
+                  {/* <DebugLabel>{`(${diceNumber} ${tileType}) ${x}, ${y}, ${z}`}</DebugLabel> */}
+                  <TileLabel>
+                    {tileType == TileType.DESERT
+                      ? ""
+                      : gameTheme.resources[tileType].label}
+                    <Box fontSize="xl" fontWeight="700">
+                      {diceNumber > 0 ? diceNumber : ""}
+                    </Box>
+                  </TileLabel>
                   <TileImage src={hexagonImg} />
                 </Tile>
+
+                <EdgesContainer position={locationToPosition({ x, y, z })}>
+                  {range(6)
+                    .filter((index) =>
+                      shouldDrawEdge(tiles, { x, y, z }, index)
+                    )
+                    .map((index) => (
+                      <EdgeContainer index={index}>
+                        <EdgeLine index={index} />
+                      </EdgeContainer>
+                    ))}
+                </EdgesContainer>
 
                 <VertexesContainer position={locationToPosition({ x, y, z })}>
                   {range(6)
@@ -202,11 +323,51 @@ const GameBoard = ({}) => {
                       shouldDrawVertex(tiles, { x, y, z }, index)
                     )
                     .map((index) => (
-                      <VertexContainer index={index}>
-                        <Box color="red.400">{index}</Box>
-                      </VertexContainer>
+                      <VertexContainer index={index}></VertexContainer>
                     ))}
                 </VertexesContainer>
+
+                <ButtonsContainer position={locationToPosition({ x, y, z })}>
+                  {placingRoad &&
+                    range(6)
+                      .filter((index) =>
+                        shouldDrawEdge(tiles, { x, y, z }, index)
+                      )
+                      .map((index) => (
+                        <EdgeContainer index={index}>
+                          <IconButton
+                            zIndex="4"
+                            position="absolute"
+                            transform="translate(-50%, 0%)"
+                            icon={<FaHammer />}
+                            aria-label=""
+                            variant="solid"
+                            size="xs"
+                            colorScheme="blue"
+                          />
+                        </EdgeContainer>
+                      ))}
+
+                  {placingBuilding &&
+                    range(6)
+                      .filter((index) =>
+                        shouldDrawVertex(tiles, { x, y, z }, index)
+                      )
+                      .map((index) => (
+                        <VertexContainer index={index}>
+                          <IconButton
+                            zIndex="4"
+                            position="absolute"
+                            transform="translate(-50%, 0%)"
+                            icon={<FaHammer />}
+                            aria-label=""
+                            variant="solid"
+                            size="xs"
+                            colorScheme="red"
+                          />
+                        </VertexContainer>
+                      ))}
+                </ButtonsContainer>
               </>
             ))}
           </TileOriginContainer>
