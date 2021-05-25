@@ -2,7 +2,7 @@ export type GamePlayer = {
   playerId: string;
 };
 
-export default interface Game<C, S, A> {
+export default interface Game<C, A, S, P> {
   /// Called when a game is created to get the default game configuration
   newGameConfig(): C;
 
@@ -15,6 +15,12 @@ export default interface Game<C, S, A> {
   /// Start the game with the given players and game config, returns an initial game state
   startGame(players: GamePlayer[], gameConfig: C): S;
 
+  /// Called before dispatching an action, which can validate/modify it before being applied
+  prepareAction(gameState: S, playerId: string, action: A): A;
+
   /// Called to dispatch an action into the game state, and returns a new state
-  applyAction(gameState: S, action: A): S;
+  applyAction(gameState: S, playerId: string, action: A): S;
+
+  /// Sanitize the game state for a given player (hide the card of other players, etc.)
+  sanitizeState(gameState: S, playerId: string): P;
 }

@@ -17,6 +17,7 @@ import RoomPersistor, {
   RoomPlayer,
 } from "./persist/room";
 import games from "./games";
+import { CatanAction, CatanState } from "./games/catan/types";
 
 export type SessionState = {
   sessionId: string;
@@ -86,6 +87,10 @@ export default class Handler {
       "game.start": {
         schema: Joi.object({}),
         handler: this.startGame.bind(this),
+      },
+      "game.action": {
+        schema: Joi.object({ action: Joi.object().required() }),
+        handler: this.gameAction.bind(this),
       },
     };
   }
@@ -191,6 +196,15 @@ export default class Handler {
           );
 
           state.you = you;
+        }
+
+        if (state.you && state.room.gameState) {
+          const game = new games.Catan();
+
+          state.room.gameState.state = game.sanitizeState(
+            state.room.gameState.state,
+            state.you.playerId
+          );
         }
       }
     }
@@ -424,6 +438,46 @@ export default class Handler {
     room.phase = RoomPhase.PLAYING;
 
     /// Persist the room and the session
+    await this.rooms.putRoom(room);
+
+    return sucessResponse(request, await this.commonState());
+  }
+
+  private async gameAction(request: Request, { action }: { action: object }) {
+    let { session, room } = await this.getCurrentRoom();
+
+    const player = room.players.find(
+      ({ playerId }) => playerId === session.playerId
+    );
+
+    if (!player) throw new Error("Invalid player");
+    if (!room.gameState) throw new Error("Invalid game state");
+
+    const game = new Games.Catan();
+
+    try {
+      /// Prepare/validate the action
+      const preparedAction = game.prepareAction(
+        room.gameState.state as CatanState,
+        player.playerId,
+        action as CatanAction
+      );
+
+      /// Dispatch the action and generate a new game state
+      const newState = game.applyAction(
+        room.gameState.state as CatanState,
+        player.playerId,
+        preparedAction
+      );
+
+      /// Update the room's state and action list
+      room.gameState.state = newState;
+      room.gameState.actions.push(preparedAction);
+    } catch (e) {
+      return errorResponse(request, e.message);
+    }
+
+    /// Persist the room
     await this.rooms.putRoom(room);
 
     return sucessResponse(request, await this.commonState());

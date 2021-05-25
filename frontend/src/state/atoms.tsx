@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { CatanAction, CatanState } from "./game_types";
+import { CatanAction, CatanPlayersState } from "./game_types";
 
 /// Theses should match the types from room.ts on the server
 export type RoomPlayer = {
@@ -9,7 +9,7 @@ export type RoomPlayer = {
 };
 
 export type GameState = {
-  state: CatanState;
+  state: CatanPlayersState;
   actions: CatanAction[];
 };
 

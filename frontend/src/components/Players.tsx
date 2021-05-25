@@ -17,38 +17,47 @@ const Players = ({}) => {
   const { players: roomPlayers } = room;
 
   /// Combine the room players with the game players
-  const players: RoomPlayer[] = gameState.state.players
-    .map(({ playerId }) =>
-      roomPlayers.find((roomPlayer) => playerId === roomPlayer.playerId)
-    )
-    .filter((player) => !!player)
-    .map((player) => player as RoomPlayer);
+  const players = gameState.state.players.map((gamePlayer) => ({
+    roomPlayer: roomPlayers.find(
+      (roomPlayer) => gamePlayer.playerId === roomPlayer.playerId
+    ),
+    gamePlayer: gamePlayer,
+  }));
 
   return (
     <VStack alignItems="stretch" overflowY="scroll">
-      {players.map(({ name }) => (
-        <HStack
-          borderWidth="0.5px"
-          borderStyle="solid"
-          rounded="md"
-          p="2"
-          justifyContent="space-between"
-        >
-          <HStack>
-            <FaUser />
-            <Box fontWeight="700">{name}</Box>
-          </HStack>
+      {players.map(
+        ({
+          roomPlayer,
+          gamePlayer: { totalResourceCards, totalDevelopmentCards },
+        }) => (
+          <HStack
+            borderWidth="0.5px"
+            borderStyle="solid"
+            rounded="md"
+            p="2"
+            justifyContent="space-between"
+          >
+            <HStack marginLeft="2">
+              <FaUser />
+              <Box fontWeight="700">{roomPlayer?.name}</Box>
+            </HStack>
 
-          <HStack>
-            <CardCount icon={<FaIdCard />} label="Resource cards" count={4} />
-            <CardCount
-              icon={<FaQuestionCircle />}
-              label="Development cards"
-              count={4}
-            />
+            <HStack>
+              <CardCount
+                icon={<FaIdCard />}
+                label="Resource cards"
+                count={totalResourceCards}
+              />
+              <CardCount
+                icon={<FaQuestionCircle />}
+                label="Development cards"
+                count={totalDevelopmentCards}
+              />
+            </HStack>
           </HStack>
-        </HStack>
-      ))}
+        )
+      )}
     </VStack>
   );
 };

@@ -99,7 +99,6 @@ export type Bank = {
 
 export type CatanPlayer = {
   playerId: string;
-
   resources: {
     brick: number;
     wood: number;
@@ -110,10 +109,19 @@ export type CatanPlayer = {
   developmentCards: DevelopmentCard[];
 };
 
-export type CatanState = {
+export type CatanOtherPlayer = {
+  playerId: string;
+  totalResourceCards: number;
+  totalDevelopmentCards: number;
+  points: number;
+};
+
+/// The state that is seen by any given player
+export type CatanPlayersState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
-  players: CatanPlayer[];
+  you: CatanPlayer;
+  players: CatanOtherPlayer[];
   bank: Bank;
 };

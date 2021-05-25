@@ -1,13 +1,21 @@
 import Game, { GamePlayer } from "../model";
 import { generateStaticBoard } from "./board";
-import { GamePhase, CatanAction, CatanConfig, CatanState } from "./types";
+import { sumResources } from "./util";
+import {
+  GamePhase,
+  CatanAction,
+  CatanConfig,
+  CatanState,
+  CatanPlayersState,
+} from "./types";
+import { shuffle } from "lodash";
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
 };
 
 export default class CatanGame
-  implements Game<CatanConfig, CatanState, CatanAction>
+  implements Game<CatanConfig, CatanAction, CatanState, CatanPlayersState>
 {
   constructor() {}
 
@@ -40,7 +48,7 @@ export default class CatanGame
         sheep: 19,
         developmentCards: [],
       },
-      players: players.map(({ playerId }) => ({
+      players: shuffle(players).map(({ playerId }) => ({
         playerId,
         resources: { brick: 0, wood: 0, ore: 0, wheat: 0, sheep: 0 },
         developmentCards: [],
@@ -48,7 +56,38 @@ export default class CatanGame
     };
   }
 
-  applyAction(gameState: CatanState, action: CatanAction): CatanState {
+  prepareAction(
+    gameState: CatanState,
+    playerId: string,
+    action: CatanAction
+  ): CatanAction {
+    return action;
+  }
+
+  applyAction(
+    gameState: CatanState,
+    playerId: string,
+    action: CatanAction
+  ): CatanState {
     return gameState;
+  }
+
+  sanitizeState(gameState: CatanState, playerId: string): CatanPlayersState {
+    const you = gameState.players.find(
+      (player) => player.playerId === playerId
+    );
+
+    if (!you) throw new Error("Invalid player");
+
+    return {
+      ...gameState,
+      you,
+      players: gameState.players.map((player) => ({
+        playerId,
+        totalResourceCards: sumResources(player),
+        totalDevelopmentCards: player.developmentCards.length,
+        points: 0,
+      })),
+    };
   }
 }

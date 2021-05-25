@@ -7,20 +7,15 @@ import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
 import { ResourceType } from "../state/game_types";
 
 const Players = ({}) => {
-  const { you } = useSessionState();
   const { gameState } = useGameViewState();
-
-  const player = gameState.state.players.find(
-    ({ playerId }) => playerId === you?.playerId
-  );
-  if (!player) return <Box>Invalid player</Box>;
+  const { you } = gameState.state;
 
   return (
     <HStack alignItems="stretch" overflowY="scroll">
       {resources
         .map((name: ResourceType) => ({
           resource: gameTheme.resources[name],
-          count: player.resources[name],
+          count: you.resources[name],
         }))
         .map(({ resource, count }) => {
           const IconComponent = resource.icon;
