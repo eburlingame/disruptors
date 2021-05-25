@@ -1,6 +1,3 @@
-/// This file should match backend/src/games/catan/types.ts
-/// (or ideally be in a shared library which we both consume)
-
 export enum GamePhase {
   SETUP_ROUND_1 = "setup1",
   SETUP_ROUND_2 = "setup2",
@@ -87,13 +84,36 @@ export type CatanConfig = {
   cardDiscardLimit: number;
 };
 
-export type GamePlayer = {
+export type DevelopmentCard = {
+  name: string;
+};
+
+export type Bank = {
+  brick: number;
+  wood: number;
+  ore: number;
+  wheat: number;
+  sheep: number;
+  developmentCards: DevelopmentCard[];
+};
+
+export type CatanPlayer = {
   playerId: string;
+
+  resources: {
+    brick: number;
+    wood: number;
+    ore: number;
+    wheat: number;
+    sheep: number;
+  };
+  developmentCards: DevelopmentCard[];
 };
 
 export type CatanState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
-  players: GamePlayer[];
+  players: CatanPlayer[];
+  bank: Bank;
 };

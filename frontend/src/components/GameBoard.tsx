@@ -31,7 +31,7 @@ const Container = styled.div`
 const OverflowContainer = styled.div`
   width: 100%;
   height: 100%;
-  overflow: scroll;
+  overflow: auto;
   position: relative;
 `;
 

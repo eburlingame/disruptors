@@ -1,22 +1,26 @@
 import React from "react";
-import { Box, HStack } from "@chakra-ui/layout";
-import Icon from "@chakra-ui/icon";
+import { Box, HStack, VStack } from "@chakra-ui/layout";
+import { useGameViewState } from "./GameView";
+import CardCount from "./CardCount";
+import { useSessionState } from "../hooks/session";
 import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
 import { ResourceType } from "../state/game_types";
-import { Tooltip } from "@chakra-ui/tooltip";
-import CardCount from "./CardCount";
-import { useGameViewState } from "./GameView";
 
-const Bank = ({}) => {
+const Players = ({}) => {
+  const { you } = useSessionState();
   const { gameState } = useGameViewState();
-  const { bank } = gameState.state;
+
+  const player = gameState.state.players.find(
+    ({ playerId }) => playerId === you?.playerId
+  );
+  if (!player) return <Box>Invalid player</Box>;
 
   return (
-    <HStack justifyContent="center">
+    <HStack alignItems="stretch" overflowY="scroll">
       {resources
         .map((name: ResourceType) => ({
           resource: gameTheme.resources[name],
-          count: bank[name],
+          count: player.resources[name],
         }))
         .map(({ resource, count }) => {
           const IconComponent = resource.icon;
@@ -25,7 +29,7 @@ const Bank = ({}) => {
             <CardCount
               icon={<IconComponent />}
               label={resource.label}
-              count={19}
+              count={count}
             />
           );
         })}
@@ -33,4 +37,4 @@ const Bank = ({}) => {
   );
 };
 
-export default Bank;
+export default Players;

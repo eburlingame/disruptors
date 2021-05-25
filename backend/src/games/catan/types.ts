@@ -86,9 +86,34 @@ export type CatanConfig = {
   cardDiscardLimit: number;
 };
 
+export type DevelopmentCard = {
+  name: string;
+};
+
+export type Bank = {
+  brick: number;
+  wood: number;
+  ore: number;
+  wheat: number;
+  sheep: number;
+  developmentCards: DevelopmentCard[];
+};
+
+export type CatanPlayer = GamePlayer & {
+  resources: {
+    brick: number;
+    wood: number;
+    ore: number;
+    wheat: number;
+    sheep: number;
+  };
+  developmentCards: DevelopmentCard[];
+};
+
 export type CatanState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
-  players: GamePlayer[];
+  players: CatanPlayer[];
+  bank: Bank;
 };

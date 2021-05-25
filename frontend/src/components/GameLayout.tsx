@@ -8,6 +8,7 @@ import { responsiveVisibiity } from "../responsiveUtils";
 
 import Bank from "./Bank";
 import Board from "./GameBoard";
+import Resources from "./Resources";
 import Players from "./Players";
 
 const GameColumn = ({
@@ -98,7 +99,6 @@ const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
 const GameLayout = ({}) => {
   const Chat = ({}) => <div>Chat</div>;
   const Actions = ({}) => <div>Actions</div>;
-  const Resources = ({}) => <div>Resources</div>;
 
   return (
     <Box flex="1" display="flex">

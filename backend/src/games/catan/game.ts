@@ -32,7 +32,19 @@ export default class CatanGame
       config: gameConfig,
       phase: GamePhase.SETUP_ROUND_1,
       board: generateStaticBoard(),
-      players: players,
+      bank: {
+        brick: 19,
+        wood: 19,
+        ore: 19,
+        wheat: 19,
+        sheep: 19,
+        developmentCards: [],
+      },
+      players: players.map(({ playerId }) => ({
+        playerId,
+        resources: { brick: 0, wood: 0, ore: 0, wheat: 0, sheep: 0 },
+        developmentCards: [],
+      })),
     };
   }
 
