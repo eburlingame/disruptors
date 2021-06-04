@@ -340,7 +340,7 @@ const GameBoard = ({}) => {
       const player = players.find(({ playerId }) => playerId === road.playerId);
 
       if (player) {
-        roadColor = player.color;
+        roadColor = gameTheme.playerColors[player.color].primary;
       }
     }
 
@@ -361,9 +361,11 @@ const GameBoard = ({}) => {
       );
 
       if (player) {
+        const color = gameTheme.playerColors[player.color].primary;
+
         if (building.type === BuildingType.Settlement) {
           return (
-            <Building playerColor={player.color}>
+            <Building playerColor={color}>
               <SettlementIcon />
             </Building>
           );
@@ -371,7 +373,7 @@ const GameBoard = ({}) => {
 
         if (building.type === BuildingType.City) {
           return (
-            <Building playerColor={player.color}>
+            <Building playerColor={color}>
               <CityIcon />
             </Building>
           );
@@ -447,11 +449,10 @@ const GameBoard = ({}) => {
                 <ButtonsContainer position={locationToPosition({ x, y, z })}>
                   {placingRoad &&
                     range(6)
-                      .filter(
-                        (index) =>
-                          shouldDrawEdge(tiles, { x, y, z }, index) &&
-                          !roadExists({ x, y, z }, index)
+                      .filter((index) =>
+                        shouldDrawEdge(tiles, { x, y, z }, index)
                       )
+                      .filter((index) => !roadExists({ x, y, z }, index))
                       .map((index) => (
                         <EdgeContainer index={index}>
                           <IconButton
@@ -473,11 +474,10 @@ const GameBoard = ({}) => {
 
                   {placingBuilding &&
                     range(6)
-                      .filter(
-                        (index) =>
-                          shouldDrawVertex(tiles, { x, y, z }, index) &&
-                          !buildingExists({ x, y, z }, index)
+                      .filter((index) =>
+                        shouldDrawVertex(tiles, { x, y, z }, index)
                       )
+                      .filter((index) => !buildingExists({ x, y, z }, index))
                       .map((index) => (
                         <VertexContainer index={index}>
                           <IconButton

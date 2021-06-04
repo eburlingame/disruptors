@@ -102,7 +102,7 @@ export default class CatanGame
       ...gameState,
       you,
       players: gameState.players.map((player) => ({
-        playerId,
+        playerId: player.playerId,
         color: player.color,
         totalResourceCards: sumResources(player),
         totalDevelopmentCards: player.developmentCards.length,
