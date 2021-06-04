@@ -4,7 +4,18 @@ import { useGameViewState } from "./GameView";
 import hexagonImg from "../images/hexagon.svg";
 
 import styled from "styled-components";
-import { GameTile, TileCoordinate, TileType } from "../state/game_types";
+import {
+  BuildCityAction,
+  BuildingType,
+  BuildRoadAction,
+  BuildSettlementAction,
+  EdgeCoordinate,
+  GameTile,
+  PlayerTurnState,
+  TileCoordinate,
+  TileType,
+  VertexCoordinate,
+} from "../state/game_types";
 import gameTheme from "../utils/game_theme";
 import { Button, ButtonGroup, IconButton } from "@chakra-ui/button";
 import {
@@ -17,11 +28,17 @@ import {
 import { range } from "../utils/utils";
 import {
   EdgeDir,
+  getCommonVertexCoordinate,
+  getCommonEdgeCoordinate,
   hasTile,
   locationToPosition,
   tileAlongEdge,
+  vertexCoordinateEqual,
   VertexDir,
+  edgeCoordinateEqual,
 } from "../utils/board_utils";
+import { useSessionState } from "../hooks/session";
+import { useGameAction } from "../hooks/game";
 
 const Container = styled.div`
   width: 100%;
@@ -153,18 +170,18 @@ const rad2deg = (radians: number) => (radians / Math.PI) * 180;
 const deg2rad = (degrees: number) => (degrees / 180) * Math.PI;
 
 const edgeLength = TILE_WIDTH * Math.sin(deg2rad(30));
-const EdgeLine = styled.div<{ index: number }>`
+const EdgeLine = styled.div<{ index: number; color: string }>`
   z-index: 2;
 
   top: 50%;
   left: 50%;
   position: absolute;
-  border-top: 4px solid #182;
+  border-top: 4px solid ${(props) => props.color};
   width: ${edgeLength + 14}px;
   transform: translate(-50%, -5px)
     rotate(${(props) => props.index * 60 + 30}deg);
 
-  border-top: solid 4px #ddd;
+  border-top: solid 4px ${(props) => props.color};
   transition: outline 0.6s linear;
   border-radius: 5px;
 
@@ -201,62 +218,60 @@ const VertexContainer = styled.div<{ index: number }>`
   height: 25px;
 `;
 
-/// Since multiple touch each vertex, decide which one should draw the vertex button/label
+const Building = styled.div<{ playerColor: string }>`
+  position: absolute;
+  left: 0px;
+  top: 0px;
+
+  width: 28px;
+  height: 28px;
+  border-radius: 0.25em;
+  background-color: ${(props) => props.playerColor};
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+/// Since tiles touch each vertex, only draw the "common" vertex
 const shouldDrawVertex = (
   tiles: GameTile[],
   position: TileCoordinate,
   vertexIndex: number
 ) => {
-  /// Always draw the top and bottom vertex
-  if (vertexIndex === VertexDir.N || vertexIndex === VertexDir.S) {
-    return true;
-  }
+  const vertexCoord: VertexCoordinate = {
+    tile: position,
+    vertexIndex,
+  };
 
-  if (vertexIndex === VertexDir.NE) {
-    return !hasTile(tiles, tileAlongEdge(position, EdgeDir.NE));
-  }
-
-  if (vertexIndex === VertexDir.SE) {
-    return !hasTile(tiles, tileAlongEdge(position, EdgeDir.SE));
-  }
-
-  /// Let the squares to the left draw the left verticies, if they exist
-  if (vertexIndex === VertexDir.SW) {
-    return (
-      !hasTile(tiles, tileAlongEdge(position, EdgeDir.SW)) &&
-      !hasTile(tiles, tileAlongEdge(position, EdgeDir.W))
-    );
-  }
-
-  if (vertexIndex === VertexDir.NW) {
-    return (
-      !hasTile(tiles, tileAlongEdge(position, EdgeDir.W)) &&
-      !hasTile(tiles, tileAlongEdge(position, EdgeDir.NW))
-    );
-  }
+  const commonVertex = getCommonVertexCoordinate(tiles, vertexCoord);
+  return vertexCoordinateEqual(commonVertex, vertexCoord);
 };
 
-/// Since multiple touch each vertex, decide which one should draw the vertex button/label
+/// Since multiple touch each vertex, only draw the "common" edge
 const shouldDrawEdge = (
   tiles: GameTile[],
   position: TileCoordinate,
   edgeIndex: number
 ) => {
-  /// Always draw the top and bottom vertex
-  if (
-    edgeIndex === EdgeDir.NE ||
-    edgeIndex === EdgeDir.E ||
-    edgeIndex == EdgeDir.SE
-  ) {
-    return true;
-  }
+  const edgeCoord: EdgeCoordinate = {
+    tile: position,
+    edgeIndex,
+  };
 
-  return !hasTile(tiles, tileAlongEdge(position, edgeIndex));
+  const commonEdge = getCommonEdgeCoordinate(tiles, edgeCoord);
+  return edgeCoordinateEqual(commonEdge, edgeCoord);
 };
 
 const GameBoard = ({}) => {
+  const { you } = useSessionState();
   const { gameState } = useGameViewState();
-  const { tiles } = gameState.state.board;
+  const {
+    players,
+    board: { tiles },
+    buildings,
+    roads,
+  } = gameState.state;
 
   const [zoom, setZoom] = useState(1.0);
 
@@ -265,8 +280,107 @@ const GameBoard = ({}) => {
   const zoomOut = () =>
     setZoom((current) => (current > 0.25 ? current - 0.25 : current));
 
-  const placingRoad = false;
-  const placingBuilding = false;
+  const { activePlayerId, activePlayerTurnState } = gameState.state;
+
+  const yourTurn = you && you.playerId === activePlayerId;
+
+  const placingRoad =
+    yourTurn && activePlayerTurnState === PlayerTurnState.PLACING_ROAD;
+
+  const placingBuilding =
+    yourTurn &&
+    (activePlayerTurnState === PlayerTurnState.PLACING_CITY ||
+      activePlayerTurnState === PlayerTurnState.PLACING_SETTLEMENT);
+
+  const { performAction } = useGameAction();
+
+  const onPlaceBuilding = (location: VertexCoordinate) => async () => {
+    if (placingBuilding) {
+      let action: BuildCityAction | BuildSettlementAction = {
+        name:
+          activePlayerTurnState === PlayerTurnState.PLACING_CITY
+            ? "buildCity"
+            : "buildSettlement",
+        location,
+      };
+
+      await performAction(action);
+    }
+  };
+
+  const onPlaceRoad = (location: EdgeCoordinate) => async () => {
+    if (placingRoad) {
+      let action: BuildRoadAction = {
+        name: "buildRoad",
+        location,
+      };
+
+      await performAction(action);
+    }
+  };
+
+  const roadExists = (tile: TileCoordinate, edgeIndex: number) =>
+    roads.find((road) =>
+      edgeCoordinateEqual({ tile, edgeIndex }, road.location)
+    ) != undefined;
+
+  const buildingExists = (tile: TileCoordinate, vertexIndex: number) =>
+    buildings.find((building) =>
+      vertexCoordinateEqual({ tile, vertexIndex }, building.location)
+    ) != undefined;
+
+  const renderRoad = (tile: TileCoordinate, edgeIndex: number) => {
+    let roadColor = "#ddd";
+
+    const road = roads.find((road) =>
+      edgeCoordinateEqual({ tile, edgeIndex }, road.location)
+    );
+
+    if (road) {
+      const player = players.find(({ playerId }) => playerId === road.playerId);
+
+      if (player) {
+        roadColor = player.color;
+      }
+    }
+
+    return <EdgeLine index={edgeIndex} color={roadColor} />;
+  };
+
+  const renderBuilding = (tile: TileCoordinate, vertexIndex: number) => {
+    const SettlementIcon = gameTheme.buildings.settlement.icon;
+    const CityIcon = gameTheme.buildings.city.icon;
+
+    const building = buildings.find((building) =>
+      vertexCoordinateEqual({ tile, vertexIndex }, building.location)
+    );
+
+    if (building) {
+      const player = players.find(
+        ({ playerId }) => playerId === building.playerId
+      );
+
+      if (player) {
+        if (building.type === BuildingType.Settlement) {
+          return (
+            <Building playerColor={player.color}>
+              <SettlementIcon />
+            </Building>
+          );
+        }
+
+        if (building.type === BuildingType.City) {
+          return (
+            <Building playerColor={player.color}>
+              <CityIcon />
+            </Building>
+          );
+        }
+      }
+    }
+
+    return <></>;
+  };
 
   return (
     <Container>
@@ -302,6 +416,7 @@ const GameBoard = ({}) => {
                       {diceNumber > 0 ? diceNumber : ""}
                     </Box>
                   </TileLabel>
+
                   <TileImage src={hexagonImg} />
                 </Tile>
 
@@ -312,7 +427,7 @@ const GameBoard = ({}) => {
                     )
                     .map((index) => (
                       <EdgeContainer index={index}>
-                        <EdgeLine index={index} />
+                        {renderRoad({ x, y, z }, index)}
                       </EdgeContainer>
                     ))}
                 </EdgesContainer>
@@ -323,15 +438,19 @@ const GameBoard = ({}) => {
                       shouldDrawVertex(tiles, { x, y, z }, index)
                     )
                     .map((index) => (
-                      <VertexContainer index={index}></VertexContainer>
+                      <VertexContainer index={index}>
+                        {renderBuilding({ x, y, z }, index)}
+                      </VertexContainer>
                     ))}
                 </VertexesContainer>
 
                 <ButtonsContainer position={locationToPosition({ x, y, z })}>
                   {placingRoad &&
                     range(6)
-                      .filter((index) =>
-                        shouldDrawEdge(tiles, { x, y, z }, index)
+                      .filter(
+                        (index) =>
+                          shouldDrawEdge(tiles, { x, y, z }, index) &&
+                          !roadExists({ x, y, z }, index)
                       )
                       .map((index) => (
                         <EdgeContainer index={index}>
@@ -344,14 +463,20 @@ const GameBoard = ({}) => {
                             variant="solid"
                             size="xs"
                             colorScheme="blue"
+                            onClick={onPlaceRoad({
+                              tile: { x, y, z },
+                              edgeIndex: index,
+                            })}
                           />
                         </EdgeContainer>
                       ))}
 
                   {placingBuilding &&
                     range(6)
-                      .filter((index) =>
-                        shouldDrawVertex(tiles, { x, y, z }, index)
+                      .filter(
+                        (index) =>
+                          shouldDrawVertex(tiles, { x, y, z }, index) &&
+                          !buildingExists({ x, y, z }, index)
                       )
                       .map((index) => (
                         <VertexContainer index={index}>
@@ -363,7 +488,11 @@ const GameBoard = ({}) => {
                             aria-label=""
                             variant="solid"
                             size="xs"
-                            colorScheme="red"
+                            colorScheme="green"
+                            onClick={onPlaceBuilding({
+                              tile: { x, y, z },
+                              vertexIndex: index,
+                            })}
                           />
                         </VertexContainer>
                       ))}

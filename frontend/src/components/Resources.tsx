@@ -17,6 +17,7 @@ const Players = ({}) => {
           resource: gameTheme.resources[name],
           count: you.resources[name],
         }))
+        .filter(({ count }) => count > 0)
         .map(({ resource, count }) => {
           const IconComponent = resource.icon;
 

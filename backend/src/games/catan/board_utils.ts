@@ -1,9 +1,9 @@
 import {
-  EdgeCoordinate,
   GameTile,
   TileCoordinate,
+  EdgeCoordinate,
   VertexCoordinate,
-} from "../state/game_types";
+} from "./types";
 
 export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
   x: x - y,

@@ -9,13 +9,17 @@ import {
   FaWarehouse,
 } from "react-icons/fa";
 
-import { ResourceType } from "../state/game_types";
+import { ResourceType, PlayerColor } from "../state/game_types";
 
 export type ThemeResource = {
   name: string;
   pluralName: string;
   label: string;
   icon: React.FC;
+};
+
+export type PlayerColorValue = {
+  primary: string;
 };
 
 export type GameTheme = {
@@ -30,6 +34,14 @@ export type GameTheme = {
     road: ThemeResource;
     settlement: ThemeResource;
     city: ThemeResource;
+  };
+  playerColors: {
+    [PlayerColor.Red]: PlayerColorValue;
+    [PlayerColor.Green]: PlayerColorValue;
+    [PlayerColor.Blue]: PlayerColorValue;
+    [PlayerColor.Teal]: PlayerColorValue;
+    [PlayerColor.Purple]: PlayerColorValue;
+    [PlayerColor.Orange]: PlayerColorValue;
   };
 };
 
@@ -77,7 +89,7 @@ const theme: GameTheme = {
   buildings: {
     road: {
       name: "fiber",
-      pluralName: "fiber cable",
+      pluralName: "fiber cables",
       label: "Fiber cable",
       icon: FaNetworkWired,
     },
@@ -92,6 +104,26 @@ const theme: GameTheme = {
       pluralName: "offices",
       label: "Office",
       icon: FaBuilding,
+    },
+  },
+  playerColors: {
+    [PlayerColor.Red]: {
+      primary: "#FF0000",
+    },
+    [PlayerColor.Green]: {
+      primary: "#00FF00",
+    },
+    [PlayerColor.Blue]: {
+      primary: "#0000FF",
+    },
+    [PlayerColor.Purple]: {
+      primary: "#FF00FF",
+    },
+    [PlayerColor.Teal]: {
+      primary: "#00FFFF",
+    },
+    [PlayerColor.Orange]: {
+      primary: "#FFFF00",
     },
   },
 };

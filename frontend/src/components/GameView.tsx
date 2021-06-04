@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { GameState } from "../state/atoms";
 import GameLayout from "./GameLayout";
 import Layout from "./Layout";
@@ -22,6 +22,10 @@ const GameView = ({ gameState }: { gameState: GameState }) => {
   const gameViewState: GameViewState = {
     gameState,
   };
+
+  // useEffect(() => {
+  //   console.log(gameState);
+  // }, [gameState]);
 
   return (
     <GameStateContext.Provider value={gameViewState}>

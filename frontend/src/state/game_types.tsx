@@ -1,7 +1,9 @@
+import { GamePlayer } from "./model";
+
 export enum GamePhase {
   SETUP_ROUND_1 = "setup1",
   SETUP_ROUND_2 = "setup2",
-  PLAYER = "playing",
+  PLAYING = "playing",
   ROBBER_ROLLER = "robber_rolled",
 }
 
@@ -78,7 +80,25 @@ export type GameBoard = {
   tiles: GameTile[];
 };
 
-export type CatanAction = {};
+export type BuildSettlementAction = {
+  name: "buildSettlement";
+  location: VertexCoordinate;
+};
+
+export type BuildCityAction = {
+  name: "buildCity";
+  location: VertexCoordinate;
+};
+
+export type BuildRoadAction = {
+  name: "buildRoad";
+  location: EdgeCoordinate;
+};
+
+export type CatanAction =
+  | BuildSettlementAction
+  | BuildSettlementAction
+  | BuildRoadAction;
 
 export type CatanConfig = {
   cardDiscardLimit: number;
@@ -97,8 +117,41 @@ export type Bank = {
   developmentCards: DevelopmentCard[];
 };
 
-export type CatanPlayer = {
-  playerId: string;
+export enum BuildingType {
+  Settlement = "settlement",
+  City = "city",
+}
+
+export enum PlayerTurnState {
+  IDLE = "idle",
+  MUST_ROLL = "mustRoll",
+  PLACING_SETTLEMENT = "placingSettlement",
+  PLACING_CITY = "placingCity",
+  PLACING_ROAD = "placingRoad",
+}
+
+export type Building = {
+  location: VertexCoordinate;
+  type: BuildingType;
+  playerId: string; // owner
+};
+
+export type Road = {
+  location: EdgeCoordinate;
+  playerId: string; // owner
+};
+
+export enum PlayerColor {
+  Red = "red",
+  Green = "green",
+  Blue = "blue",
+  Orange = "orange",
+  Purple = "purple",
+  Teal = "teal",
+}
+
+export type CatanPlayer = GamePlayer & {
+  color: PlayerColor;
   resources: {
     brick: number;
     wood: number;
@@ -109,11 +162,23 @@ export type CatanPlayer = {
   developmentCards: DevelopmentCard[];
 };
 
-export type CatanOtherPlayer = {
-  playerId: string;
+export type CatanOtherPlayer = GamePlayer & {
+  color: PlayerColor;
   totalResourceCards: number;
   totalDevelopmentCards: number;
   points: number;
+};
+
+export type CatanState = {
+  config: CatanConfig;
+  phase: GamePhase;
+  board: GameBoard;
+  buildings: Building[];
+  roads: Road[];
+  bank: Bank;
+  players: CatanPlayer[];
+  activePlayerId: string;
+  activePlayerTurnState: PlayerTurnState;
 };
 
 /// The state that is seen by any given player
@@ -121,7 +186,11 @@ export type CatanPlayersState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
+  buildings: Building[];
+  roads: Road[];
+  bank: Bank;
   you: CatanPlayer;
   players: CatanOtherPlayer[];
-  bank: Bank;
+  activePlayerId: string;
+  activePlayerTurnState: PlayerTurnState;
 };

@@ -50,8 +50,6 @@ export const useSetupSocket = (): Socket => {
 
     /// Listen for ad-hoc messages
     socket.current.onUnpackedMessage.addListener((msg: object) => {
-      console.log(msg);
-
       if (!("reqId" in msg) && "v" in msg) {
         const command: AdhocResponse = msg as any;
         const result: SendCommandResult = { sucess: true, data: command.d };

@@ -1,13 +1,19 @@
 import Game, { GamePlayer } from "../model";
 import { generateStaticBoard } from "./board";
 import { sumResources } from "./util";
+
 import {
   GamePhase,
   CatanAction,
   CatanConfig,
   CatanState,
   CatanPlayersState,
+  PlayerTurnState,
+  PlayerColor,
 } from "./types";
+
+import actions from "./actions";
+
 import { shuffle } from "lodash";
 
 export const defaultGameConfig: CatanConfig = {
@@ -36,10 +42,14 @@ export default class CatanGame
   }
 
   startGame(players: GamePlayer[], gameConfig: CatanConfig): CatanState {
+    const gamePlayers = shuffle(players);
+
     return {
       config: gameConfig,
       phase: GamePhase.SETUP_ROUND_1,
       board: generateStaticBoard(),
+      buildings: [],
+      roads: [],
       bank: {
         brick: 19,
         wood: 19,
@@ -48,11 +58,14 @@ export default class CatanGame
         sheep: 19,
         developmentCards: [],
       },
-      players: shuffle(players).map(({ playerId }) => ({
+      players: gamePlayers.map(({ playerId }, index) => ({
         playerId,
+        color: Object.values(PlayerColor)[index],
         resources: { brick: 0, wood: 0, ore: 0, wheat: 0, sheep: 0 },
         developmentCards: [],
       })),
+      activePlayerId: gamePlayers[0].playerId,
+      activePlayerTurnState: PlayerTurnState.PLACING_SETTLEMENT,
     };
   }
 
@@ -69,7 +82,13 @@ export default class CatanGame
     playerId: string,
     action: CatanAction
   ): CatanState {
-    return gameState;
+    const actionHandler = actions[action.name];
+
+    if (actionHandler) {
+      return actionHandler(gameState, playerId, action);
+    }
+
+    throw new Error(`Invalid action ${action.name}`);
   }
 
   sanitizeState(gameState: CatanState, playerId: string): CatanPlayersState {
@@ -84,6 +103,7 @@ export default class CatanGame
       you,
       players: gameState.players.map((player) => ({
         playerId,
+        color: player.color,
         totalResourceCards: sumResources(player),
         totalDevelopmentCards: player.developmentCards.length,
         points: 0,
