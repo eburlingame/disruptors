@@ -67,8 +67,14 @@ export const tileAlongEdge = (
   return addVectors(position, delta);
 };
 
+export const findTile = (
+  tiles: GameTile[],
+  position: TileCoordinate
+): GameTile | undefined =>
+  tiles.find(({ location }) => vectorsEqual(location, position));
+
 export const hasTile = (tiles: GameTile[], position: TileCoordinate): boolean =>
-  !!tiles.find(({ location }) => vectorsEqual(location, position));
+  !!findTile(tiles, position);
 
 export const hasTileAlongEdge = (
   tiles: GameTile[],
@@ -151,6 +157,15 @@ export const reciropcalEdges: { [index: number]: number } = {
   [EdgeDir.NW]: EdgeDir.SE,
 };
 
+export const vertexAdjacenies: { [index: number]: EdgeDir[] } = {
+  [VertexDir.N]: [EdgeDir.NW, EdgeDir.NE],
+  [VertexDir.NE]: [EdgeDir.NE, EdgeDir.E],
+  [VertexDir.SE]: [EdgeDir.E, EdgeDir.SE],
+  [VertexDir.S]: [EdgeDir.SE, EdgeDir.SW],
+  [VertexDir.SW]: [EdgeDir.SW, EdgeDir.W],
+  [VertexDir.NW]: [EdgeDir.W, EdgeDir.NW],
+};
+
 /// Since two tiles can touch each edge, decide which one should draw the vertex button/label
 export const getCommonEdgeCoordinate = (
   tiles: GameTile[],
@@ -175,4 +190,22 @@ export const getCommonEdgeCoordinate = (
   }
 
   return edgeCoord;
+};
+
+export const tilesTouchingVertex = (
+  tiles: GameTile[],
+  vertexCoord: VertexCoordinate
+): GameTile[] => {
+  const common = getCommonVertexCoordinate(tiles, vertexCoord);
+  const commonTile = findTile(tiles, common.tile);
+
+  if (!commonTile) throw new Error("Invalid tile?");
+
+  const edges = vertexAdjacenies[common.vertexIndex];
+
+  const otherTiles: any[] = edges
+    .map((edgeIndex) => findTile(tiles, tileAlongEdge(common.tile, edgeIndex)))
+    .filter((t) => t !== undefined);
+
+  return [commonTile, ...otherTiles];
 };

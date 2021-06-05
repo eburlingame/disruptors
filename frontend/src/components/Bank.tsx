@@ -25,7 +25,7 @@ const Bank = ({}) => {
             <CardCount
               icon={<IconComponent />}
               label={resource.label}
-              count={19}
+              count={count}
             />
           );
         })}
