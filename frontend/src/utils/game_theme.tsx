@@ -100,7 +100,7 @@ const theme: GameTheme = {
       icon: FaWarehouse,
     },
     city: {
-      name: "offices",
+      name: "office",
       pluralName: "offices",
       label: "Office",
       icon: FaBuilding,

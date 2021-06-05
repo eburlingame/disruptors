@@ -95,10 +95,29 @@ export type BuildRoadAction = {
   location: EdgeCoordinate;
 };
 
+export type RollDiceAction = {
+  name: "rollDice";
+  values: [number, number];
+};
+
+export type TurnAction = "buildSettlement" | "buildCity" | "buildRoad" | "idle";
+
+export type ChangeTurnAction = {
+  name: "changeTurnAction";
+  turnAction: TurnAction;
+};
+
+export type EndTurnAction = {
+  name: "endTurn";
+};
+
 export type CatanAction =
   | BuildSettlementAction
   | BuildSettlementAction
-  | BuildRoadAction;
+  | BuildRoadAction
+  | RollDiceAction
+  | ChangeTurnAction
+  | EndTurnAction;
 
 export type CatanConfig = {
   cardDiscardLimit: number;

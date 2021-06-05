@@ -10,6 +10,9 @@ import Bank from "./Bank";
 import Board from "./GameBoard";
 import Resources from "./Resources";
 import Players from "./Players";
+import Actions from "./Actions";
+import { useGameViewState } from "./GameView";
+import { GamePhase } from "../state/game_types";
 
 const GameColumn = ({
   flex,
@@ -62,19 +65,27 @@ type TabDefn = {
   content: React.FC<any>;
   shownOn?: string;
   hiddenOn?: string;
+  shownIf?: boolean;
 };
 
 const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
   return (
     <Tabs variant="enclosed" flex="1" display="flex" flexDir="column">
       <TabList>
-        {tabs.map(({ name, hiddenOn, shownOn }) => (
-          <Tab
-            display={responsiveVisibiity(hiddenOn, shownOn, "inherit", "none")}
-          >
-            {name}
-          </Tab>
-        ))}
+        {tabs
+          .filter(({ shownIf }) => (shownIf != undefined ? shownIf : true))
+          .map(({ name, hiddenOn, shownOn }) => (
+            <Tab
+              display={responsiveVisibiity(
+                hiddenOn,
+                shownOn,
+                "inherit",
+                "none"
+              )}
+            >
+              {name}
+            </Tab>
+          ))}
       </TabList>
 
       <TabPanels
@@ -96,9 +107,16 @@ const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
   );
 };
 
-const GameLayout = ({}) => {
-  const Chat = ({}) => <div>Chat</div>;
-  const Actions = ({}) => <div>Actions</div>;
+const GameLayout = () => {
+  const {
+    gameState: { state },
+  } = useGameViewState();
+
+  const yourTurn =
+    state.activePlayerId === state.you.playerId &&
+    state.phase === GamePhase.PLAYING;
+
+  const Chat = () => <div>Chat</div>;
 
   return (
     <Box flex="1" display="flex">
@@ -130,8 +148,13 @@ const GameLayout = ({}) => {
               {
                 name: "Game Board",
                 shownOn: "xs",
-                content: ({}) => (
-                  <Box bgColor="blue.800" flex="1" alignSelf="stretch">
+                content: () => (
+                  <Box
+                    bgColor="blue.800"
+                    flex="1"
+                    alignSelf="stretch"
+                    minHeight="400px"
+                  >
                     <Board />
                   </Box>
                 ),
@@ -149,9 +172,14 @@ const GameLayout = ({}) => {
               {
                 name: "Bank",
                 shownOn: "xs",
-                content: ({}) => <Bank />,
+                content: () => <Bank />,
               },
-              { name: "Actions", content: Actions, shownOn: "xs" },
+              {
+                name: "Actions",
+                content: Actions,
+                shownOn: "xs",
+                shownIf: yourTurn,
+              },
             ]}
           />
         </TabContainer>
@@ -164,7 +192,7 @@ const GameLayout = ({}) => {
             tabs={[
               {
                 name: "Bank",
-                content: ({}) => <Bank />,
+                content: () => <Bank />,
               },
             ]}
           />
@@ -183,9 +211,11 @@ const GameLayout = ({}) => {
           />
         </TabContainer>
 
-        <TabContainer flex="1">
-          <TabSet tabs={[{ name: "Actions", content: Actions }]} />
-        </TabContainer>
+        {yourTurn && (
+          <TabContainer flex="1">
+            <TabSet tabs={[{ name: "Actions", content: Actions }]} />
+          </TabContainer>
+        )}
       </GameColumn>
     </Box>
   );

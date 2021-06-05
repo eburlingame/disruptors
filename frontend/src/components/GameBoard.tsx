@@ -1,5 +1,6 @@
 import { Box } from "@chakra-ui/layout";
 import React, { useState } from "react";
+import { last } from "lodash";
 import { useGameViewState } from "./GameView";
 import hexagonImg from "../images/hexagon.svg";
 
@@ -12,6 +13,7 @@ import {
   EdgeCoordinate,
   GameTile,
   PlayerTurnState,
+  RollDiceAction,
   TileCoordinate,
   TileType,
   VertexCoordinate,
@@ -43,8 +45,10 @@ import { useGameAction } from "../hooks/game";
 const Container = styled.div`
   width: 100%;
   height: 100%;
+  min-height: 400px;
   overflow: hidden;
   position: relative;
+  background-color: #111;
 `;
 
 const OverflowContainer = styled.div`
@@ -69,13 +73,31 @@ const ZoomControls = styled.div`
   z-index: 4;
 `;
 
+const DiceValueContainer = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 4;
+  background-color: #121212;
+  border-radius: 0.5em;
+  font-size: 20pt;
+  padding: 0.5em;
+  font-weight: 700;
+`;
+
+const DiceValueContainerTitle = styled.div`
+  font-size: 12pt;
+  color: #d8d8d8;
+  font-weight: 400;
+`;
+
 const TileContainer = styled.div<{ zoom: number }>`
   position: absolute;
   // top: 50%;
   // left: 50%;
   // transform: translate(-50%, -50%);
 
-  background-color: #123;
+  background-color: #111;
   width: ${(props) => CONTAINER_WIDTH * props.zoom}px;
   height: ${(props) => CONTAINER_HEIGHT * props.zoom}px;
 `;
@@ -282,15 +304,21 @@ const GameBoard = ({}) => {
 
   const { activePlayerId, activePlayerTurnState } = gameState.state;
 
+  const lastDiceRoll: RollDiceAction | undefined = last(
+    gameState.actions
+      .filter(({ name }) => name === "rollDice")
+      .map((a) => a as RollDiceAction)
+  );
+
   const yourTurn = you && you.playerId === activePlayerId;
 
   const placingRoad =
     yourTurn && activePlayerTurnState === PlayerTurnState.PLACING_ROAD;
 
-  const placingBuilding =
-    yourTurn &&
-    (activePlayerTurnState === PlayerTurnState.PLACING_CITY ||
-      activePlayerTurnState === PlayerTurnState.PLACING_SETTLEMENT);
+  const placingCity = activePlayerTurnState === PlayerTurnState.PLACING_CITY;
+  const placingSettlement =
+    activePlayerTurnState === PlayerTurnState.PLACING_SETTLEMENT;
+  const placingBuilding = yourTurn && (placingCity || placingSettlement);
 
   const { performAction } = useGameAction();
 
@@ -328,6 +356,21 @@ const GameBoard = ({}) => {
     buildings.find((building) =>
       vertexCoordinateEqual({ tile, vertexIndex }, building.location)
     ) != undefined;
+
+  const settlementExists = (
+    playerId: string,
+    tile: TileCoordinate,
+    vertexIndex: number
+  ) =>
+    buildings
+      .filter(
+        (building) =>
+          building.type === BuildingType.Settlement &&
+          building.playerId === playerId
+      )
+      .find((building) =>
+        vertexCoordinateEqual({ tile, vertexIndex }, building.location)
+      ) != undefined;
 
   const renderRoad = (tile: TileCoordinate, edgeIndex: number) => {
     let roadColor = "#ddd";
@@ -403,6 +446,14 @@ const GameBoard = ({}) => {
         </ButtonGroup>
       </ZoomControls>
 
+      {lastDiceRoll && (
+        <DiceValueContainer>
+          <DiceValueContainerTitle>Last roll:</DiceValueContainerTitle>
+          {lastDiceRoll.values[0]} + {lastDiceRoll.values[1]} ={" "}
+          {lastDiceRoll.values[0] + lastDiceRoll.values[1]}
+        </DiceValueContainer>
+      )}
+
       <OverflowContainer>
         <TileContainer zoom={zoom}>
           <TileOriginContainer zoom={zoom}>
@@ -477,7 +528,11 @@ const GameBoard = ({}) => {
                       .filter((index) =>
                         shouldDrawVertex(tiles, { x, y, z }, index)
                       )
-                      .filter((index) => !buildingExists({ x, y, z }, index))
+                      .filter((index) =>
+                        placingCity
+                          ? settlementExists(you?.playerId, { x, y, z }, index)
+                          : !buildingExists({ x, y, z }, index)
+                      )
                       .map((index) => (
                         <VertexContainer index={index}>
                           <IconButton
