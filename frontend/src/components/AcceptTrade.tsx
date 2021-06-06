@@ -71,22 +71,23 @@ const AcceptTrade = ({}) => {
     <VStack alignItems="stretch">
       <Box>
         <Box fontSize="lg" fontWeight="bold">
-          {requestingPlayer?.name} is seeking:
+          {requestingPlayer?.name} is offering:
         </Box>
 
-        {seeking.map(({ count, name, pluralName, icon: Icon }) => (
+        {giving.map(({ count, name, pluralName, icon: Icon }) => (
           <HStack>
             <Icon />
             <Box>{`${count} ${count === 1 ? name : pluralName}`}</Box>
           </HStack>
         ))}
+        {giving.length === 0 && <Box>Nothing</Box>}
       </Box>
       <Box>
         <Box fontSize="lg" fontWeight="bold">
           In exchange for:
         </Box>
 
-        {giving.map(({ count, name, pluralName, icon: Icon }) => (
+        {seeking.map(({ count, name, pluralName, icon: Icon }) => (
           <HStack>
             <Icon />
             <Box>{`${count} ${count === 1 ? name : pluralName}`}</Box>

@@ -69,8 +69,8 @@ const theme: GameTheme = {
     },
     [ResourceType.ORE]: {
       name: "shuttle bus",
-      pluralName: "shuttle busses",
-      label: "Shuttle busses",
+      pluralName: "shuttle buses",
+      label: "Shuttle buses",
       icon: FaBus,
     },
     [ResourceType.BRICK]: {

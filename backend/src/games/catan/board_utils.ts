@@ -3,6 +3,9 @@ import {
   TileCoordinate,
   EdgeCoordinate,
   VertexCoordinate,
+  ExchangeRate,
+  PortResource,
+  CatanState,
 } from "./types";
 
 export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
@@ -54,10 +57,30 @@ export const vertexCoordinateEqual = (
   b: VertexCoordinate
 ): boolean => vectorsEqual(a.tile, b.tile) && a.vertexIndex === b.vertexIndex;
 
+export const vertexCoordinateEquivalent = (
+  tiles: GameTile[],
+  a: VertexCoordinate,
+  b: VertexCoordinate
+) =>
+  vertexCoordinateEqual(
+    getCommonVertexCoordinate(tiles, a),
+    getCommonVertexCoordinate(tiles, b)
+  );
+
 export const edgeCoordinateEqual = (
   a: EdgeCoordinate,
   b: EdgeCoordinate
 ): boolean => vectorsEqual(a.tile, b.tile) && a.edgeIndex === b.edgeIndex;
+
+export const edgeCoordinateEquivalent = (
+  tiles: GameTile[],
+  a: EdgeCoordinate,
+  b: EdgeCoordinate
+) =>
+  edgeCoordinateEqual(
+    getCommonEdgeCoordinate(tiles, a),
+    getCommonEdgeCoordinate(tiles, b)
+  );
 
 export const tileAlongEdge = (
   position: TileCoordinate,
@@ -208,4 +231,35 @@ export const tilesTouchingVertex = (
     .filter((t) => t !== undefined);
 
   return [commonTile, ...otherTiles];
+};
+
+export const getAvailableExchanges = (
+  state: CatanState,
+  playerId: string
+): ExchangeRate[] => {
+  const { tiles } = state.board;
+
+  const buildings = state.buildings.filter(
+    (building) => building.playerId === playerId
+  );
+
+  const allPorts = state.board.tiles.flatMap(({ ports, location }) =>
+    ports.map((port) => ({
+      port,
+      location: { tile: location, vertexIndex: port.vertexIndex },
+    }))
+  );
+
+  const usablePorts = allPorts
+    .filter(({ location }) =>
+      buildings.some((building) =>
+        vertexCoordinateEquivalent(tiles, building.location, location)
+      )
+    )
+    .map(({ port: { resource, ratio } }) => ({ resource, ratio }));
+
+  return [
+    { resource: PortResource.ANY, ratio: 4 }, /// default maritime trade
+    ...usablePorts,
+  ];
 };

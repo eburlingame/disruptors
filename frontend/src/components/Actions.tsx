@@ -22,9 +22,10 @@ import {
   FaUniversity,
 } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
-import CreateTradeRequest from "./CreateTradeRequest";
+import CreateTradeRequest from "./CreatePlayerTradeRequest";
 import CompleteTrade from "./CompleteTrade";
 import AcceptTrade from "./AcceptTrade";
+import CreateBankTradeRequest from "./CreateBankTradeRequest";
 
 const canBuildRoad = (state: CatanPlayersState): boolean =>
   state.you.resources.brick >= 1 && state.you.resources.wood >= 1;
@@ -95,10 +96,18 @@ const Actions = ({}) => {
   };
 
   if (
+    yourTurn &&
     state.activePlayerTurnState ===
-    PlayerTurnState.CREATING_PLAYER_TRADE_REQUEST
+      PlayerTurnState.CREATING_PLAYER_TRADE_REQUEST
   ) {
     return <CreateTradeRequest />;
+  }
+
+  if (
+    yourTurn &&
+    state.activePlayerTurnState === PlayerTurnState.CREATING_BANK_TRADE_REQUEST
+  ) {
+    return <CreateBankTradeRequest />;
   }
 
   if (

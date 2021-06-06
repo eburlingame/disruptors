@@ -180,7 +180,6 @@ const GameLayout = () => {
                 name: "Actions",
                 content: Actions,
                 shownOn: "xs",
-                shownIf: actionsAvailable,
               },
             ]}
           />
@@ -213,11 +212,9 @@ const GameLayout = () => {
           />
         </TabContainer>
 
-        {actionsAvailable && (
-          <TabContainer flex="1">
-            <TabSet tabs={[{ name: "Actions", content: Actions }]} />
-          </TabContainer>
-        )}
+        <TabContainer flex="1">
+          <TabSet tabs={[{ name: "Actions", content: Actions }]} />
+        </TabContainer>
       </GameColumn>
     </Box>
   );

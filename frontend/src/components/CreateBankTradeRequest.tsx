@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
-import { CgCloseO } from "react-icons/cg";
 import gameTheme, { resources } from "../utils/game_theme";
 import {
-  RequestTradeAction,
+  BankTradeAction,
   ChangeTurnAction,
   ResourceType,
+  ExchangeRate,
+  PortResource,
 } from "../state/game_types";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { useGameViewState } from "./GameView";
@@ -13,6 +14,7 @@ import { Button, IconButton } from "@chakra-ui/button";
 import { FaExchangeAlt, FaWindowClose } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
 import { Tag } from "@chakra-ui/tag";
+import { sum } from "lodash";
 
 type ResourceCount = {
   resource: ResourceType;
@@ -20,14 +22,38 @@ type ResourceCount = {
   maxCount: number;
 };
 
+const lowestRatioFor = (
+  exchangeRates: ExchangeRate[] | undefined,
+  resource: string
+) => {
+  if (!exchangeRates) {
+    return undefined;
+  }
+
+  let lowestRatio = 4;
+
+  exchangeRates.forEach((rate) => {
+    if (
+      rate.ratio < lowestRatio &&
+      (rate.resource === PortResource.ANY || rate.resource === resource)
+    ) {
+      lowestRatio = rate.ratio;
+    }
+  });
+
+  return lowestRatio;
+};
+
 const ResourcePicker = ({
   label,
   counts,
+  exchangeRates,
   addCount,
   clearCount,
 }: {
   label: string;
   counts: ResourceCount[];
+  exchangeRates?: ExchangeRate[];
   addCount: (resource: ResourceType) => void;
   clearCount: () => void;
 }) => {
@@ -77,6 +103,11 @@ const ResourcePicker = ({
                   onClick={onAdd(resource)}
                   disabled={maxCount != -1 && count >= maxCount}
                 />
+                <Center fontWeight="bold">
+                  {lowestRatioFor(exchangeRates, resource) &&
+                    `${lowestRatioFor(exchangeRates, resource)} : 1`}
+                </Center>
+
                 {count > 0 && (
                   <Tag
                     position="absolute"
@@ -99,7 +130,7 @@ const ResourcePicker = ({
   );
 };
 
-const CreateTradeRequest = ({}) => {
+const CreateBankTradeRequest = ({}) => {
   const {
     gameState: { state },
   } = useGameViewState();
@@ -120,21 +151,8 @@ const CreateTradeRequest = ({}) => {
       maxCount: state.you.resources[resource],
     }));
 
-  const [seekingCounts, setSeekingCounts] = useState(emptySeekingCounts());
   const [givingCounts, setGivingCounts] = useState(emptyGivingCounts());
-
-  const addSeekingCount = (resourceType: ResourceType) =>
-    setSeekingCounts((counts) =>
-      counts.map((count) => {
-        if (count.resource === resourceType) {
-          return { ...count, count: count.count + 1 };
-        }
-
-        return count;
-      })
-    );
-
-  const clearSeekingCount = () => setSeekingCounts(emptySeekingCounts());
+  const [seekingCounts, setSeekingCounts] = useState(emptySeekingCounts());
 
   const addGivingCount = (resourceType: ResourceType) =>
     setGivingCounts((counts) =>
@@ -151,6 +169,19 @@ const CreateTradeRequest = ({}) => {
     );
 
   const clearGivingCount = () => setGivingCounts(emptyGivingCounts());
+
+  const addSeekingCount = (resourceType: ResourceType) =>
+    setSeekingCounts((counts) =>
+      counts.map((count) => {
+        if (count.resource === resourceType) {
+          return { ...count, count: count.count + 1 };
+        }
+
+        return count;
+      })
+    );
+
+  const clearSeekingCount = () => setSeekingCounts(emptySeekingCounts());
 
   const onCancel = async () => {
     const action: ChangeTurnAction = {
@@ -176,8 +207,8 @@ const CreateTradeRequest = ({}) => {
       }))
       .filter(({ count }) => count > 0);
 
-    const action: RequestTradeAction = {
-      name: "requestTrade",
+    const action: BankTradeAction = {
+      name: "bankTrade",
       seeking,
       giving,
     };
@@ -185,13 +216,31 @@ const CreateTradeRequest = ({}) => {
     await performAction(action);
   };
 
+  const currentGivingCount = sum(givingCounts.map(({ count }) => count));
+  const currentSeekingCount = sum(seekingCounts.map(({ count }) => count));
+
+  const maxSeekingCount = sum(
+    seekingCounts.map((count) => {
+      const ratio =
+        lowestRatioFor(state.availableExchanges, count.resource) || 4;
+
+      const currentGiving =
+        givingCounts.find(
+          (givingCount) => givingCount.resource === count.resource
+        )?.count || 0;
+
+      return Math.floor(currentGiving / ratio);
+    })
+  );
+
   return (
     <VStack alignItems="stretch">
       <ResourcePicker
-        label="I am seeking:"
-        counts={seekingCounts}
-        addCount={addSeekingCount}
-        clearCount={clearSeekingCount}
+        label="I am offering:"
+        counts={givingCounts}
+        addCount={addGivingCount}
+        clearCount={clearGivingCount}
+        exchangeRates={state.availableExchanges}
       />
 
       <Center>
@@ -202,9 +251,12 @@ const CreateTradeRequest = ({}) => {
 
       <ResourcePicker
         label="In exchange for:"
-        counts={givingCounts}
-        addCount={addGivingCount}
-        clearCount={clearGivingCount}
+        counts={seekingCounts.map((count) => ({
+          ...count,
+          maxCount: maxSeekingCount - currentSeekingCount,
+        }))}
+        addCount={addSeekingCount}
+        clearCount={clearSeekingCount}
       />
 
       <Box marginTop="2" />
@@ -214,7 +266,12 @@ const CreateTradeRequest = ({}) => {
           Cancel
         </Button>
 
-        <Button colorScheme="green" flex="1" onClick={onSubmit}>
+        <Button
+          colorScheme="green"
+          flex="1"
+          onClick={onSubmit}
+          disabled={currentGivingCount === 0 || currentSeekingCount === 0}
+        >
           Submit
         </Button>
       </HStack>
@@ -222,4 +279,4 @@ const CreateTradeRequest = ({}) => {
   );
 };
 
-export default CreateTradeRequest;
+export default CreateBankTradeRequest;

@@ -222,6 +222,25 @@ const performPlayerTrade = (
   return state;
 };
 
+const performBankTrade = (
+  state: CatanState,
+  playerId: string,
+  seeking: ResourceCount[],
+  giving: ResourceCount[]
+): CatanState => {
+  /// Move the "seeking" cards from the seeker to the giver
+  seeking.forEach(({ resource, count }) => {
+    state = resourceFromBankToPlayer(state, playerId, resource, count);
+  });
+
+  /// Move the "giving" cards from the giver to the seeker
+  giving.forEach(({ resource, count }) => {
+    state = resourceFromBankToPlayer(state, playerId, resource, -count);
+  });
+
+  return state;
+};
+
 const collectResourceFromTile = (
   state: CatanState,
   playerId: string,
@@ -591,6 +610,31 @@ const completeTrade = (
   return state;
 };
 
+const bankTrade = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "bankTrade") {
+    throw Error("Invalid action");
+  }
+
+  if (
+    state.activePlayerTurnState !== PlayerTurnState.CREATING_BANK_TRADE_REQUEST
+  ) {
+    throw Error("No trade in progress");
+  }
+
+  state = performBankTrade(state, playerId, action.seeking, action.giving);
+  state.activePlayerTurnState = PlayerTurnState.IDLE;
+
+  return state;
+};
+
 const endTurn = (
   state: CatanState,
   playerId: string,
@@ -609,6 +653,7 @@ const endTurn = (
 
   return state;
 };
+
 const actionMap: { [name: string]: ActionHandler } = {
   buildSettlement,
   buildCity,
@@ -618,6 +663,7 @@ const actionMap: { [name: string]: ActionHandler } = {
   requestTrade,
   acceptTrade,
   completeTrade,
+  bankTrade,
   endTurn,
 };
 

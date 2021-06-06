@@ -16,6 +16,7 @@ import actions from "./actions";
 
 import { random, shuffle } from "lodash";
 import { randomInt } from "src/util";
+import { getAvailableExchanges } from "./board_utils";
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
@@ -78,7 +79,7 @@ export default class CatanGame
     if (action.name === "rollDice") {
       return {
         ...action,
-        values: [randomInt(6), randomInt(6)],
+        values: [randomInt(6) + 1, randomInt(6) + 1],
       };
     }
 
@@ -109,6 +110,7 @@ export default class CatanGame
     return {
       ...gameState,
       you,
+      availableExchanges: getAvailableExchanges(gameState, playerId),
       players: gameState.players.map((player) => ({
         playerId: player.playerId,
         color: player.color,

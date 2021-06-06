@@ -54,8 +54,11 @@ export enum PortResource {
   ANY = "any",
 }
 
-export type Port = {
+export type Port = ExchangeRate & {
   vertexIndex: number;
+};
+
+export type ExchangeRate = {
   resource: PortResource;
   ratio: number;
 };
@@ -139,6 +142,12 @@ export type EndTurnAction = {
   name: "endTurn";
 };
 
+export type BankTradeAction = {
+  name: "bankTrade";
+  seeking: ResourceCount[];
+  giving: ResourceCount[];
+};
+
 export type CatanAction =
   | BuildSettlementAction
   | BuildCityAction
@@ -148,6 +157,7 @@ export type CatanAction =
   | RequestTradeAction
   | AcceptTradeAction
   | CompleteTradeAction
+  | BankTradeAction
   | EndTurnAction;
 
 export type CatanConfig = {
@@ -266,4 +276,5 @@ export type CatanPlayersState = {
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
   activeTradeRequest?: TradeRequest;
+  availableExchanges: ExchangeRate[];
 };

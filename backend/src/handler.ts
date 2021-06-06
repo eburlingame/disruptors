@@ -474,6 +474,7 @@ export default class Handler {
       room.gameState.state = newState;
       room.gameState.actions.push(preparedAction);
     } catch (e) {
+      console.warn(e);
       return errorResponse(request, e.message);
     }
 
