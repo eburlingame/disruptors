@@ -80,6 +80,11 @@ export type GameBoard = {
   tiles: GameTile[];
 };
 
+export type ResourceCount = {
+  resource: ResourceType;
+  count: number;
+};
+
 export type BuildSettlementAction = {
   name: "buildSettlement";
   location: VertexCoordinate;
@@ -100,11 +105,34 @@ export type RollDiceAction = {
   values: [number, number];
 };
 
-export type TurnAction = "buildSettlement" | "buildCity" | "buildRoad" | "idle";
+export type RequestTradeAction = {
+  name: "requestTrade";
+  seeking: ResourceCount[];
+  giving: ResourceCount[];
+};
+
+export type TurnAction =
+  | "buildSettlement"
+  | "buildCity"
+  | "buildRoad"
+  | "startPlayerTradeRequest"
+  | "startBankTradeRequest"
+  | "idle";
 
 export type ChangeTurnAction = {
   name: "changeTurnAction";
   turnAction: TurnAction;
+};
+
+export type AcceptTradeAction = {
+  name: "acceptTrade";
+  acceptance: TradeAcceptance;
+};
+
+export type CompleteTradeAction = {
+  name: "completeTrade";
+  completeTrade: boolean;
+  acceptedTradeFrom: string;
 };
 
 export type EndTurnAction = {
@@ -117,6 +145,9 @@ export type CatanAction =
   | BuildRoadAction
   | RollDiceAction
   | ChangeTurnAction
+  | RequestTradeAction
+  | AcceptTradeAction
+  | CompleteTradeAction
   | EndTurnAction;
 
 export type CatanConfig = {
@@ -147,6 +178,9 @@ export enum PlayerTurnState {
   PLACING_SETTLEMENT = "placingSettlement",
   PLACING_CITY = "placingCity",
   PLACING_ROAD = "placingRoad",
+  CREATING_BANK_TRADE_REQUEST = "creatingBankTrade",
+  CREATING_PLAYER_TRADE_REQUEST = "creatingPlayerTradeRequest",
+  SUBMITTED_PLAYER_TRADE_REQUEST = "submittedPlayerTradeRequest",
 }
 
 export type Building = {
@@ -158,6 +192,24 @@ export type Building = {
 export type Road = {
   location: EdgeCoordinate;
   playerId: string; // owner
+};
+
+export enum TradeAcceptance {
+  UNDECIDED = "undecided",
+  REJECTED = "rejected",
+  ACCEPTED = "accepted",
+}
+
+export type PlayerTradeAcceptance = {
+  playerId: string;
+  acceptance: TradeAcceptance;
+};
+
+export type TradeRequest = {
+  playerId: string;
+  seeking: ResourceCount[];
+  giving: ResourceCount[];
+  acceptance: PlayerTradeAcceptance[];
 };
 
 export enum PlayerColor {
@@ -198,6 +250,7 @@ export type CatanState = {
   players: CatanPlayer[];
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
+  activeTradeRequest?: TradeRequest;
 };
 
 /// The state that is seen by any given player
@@ -212,4 +265,5 @@ export type CatanPlayersState = {
   players: CatanOtherPlayer[];
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
+  activeTradeRequest?: TradeRequest;
 };

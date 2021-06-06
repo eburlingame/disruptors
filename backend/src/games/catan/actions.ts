@@ -18,8 +18,11 @@ import {
   GamePhase,
   GameTile,
   PlayerTurnState,
+  ResourceCount,
   ResourceType,
   TileCoordinate,
+  TradeAcceptance,
+  TradeRequest,
   VertexCoordinate,
 } from "./types";
 
@@ -142,6 +145,81 @@ const resourceFromBankToPlayer = (
   }
 
   throw new Error("Not enough resources");
+};
+
+const tradePlayerResource = (
+  state: CatanState,
+  seekerPlayerId: string,
+  giverPlayerId: string,
+  resourceType: ResourceType,
+  quantity: number
+): CatanState => {
+  const giverIndex = state.players.findIndex(
+    ({ playerId }) => playerId === giverPlayerId
+  );
+
+  if (state.players[giverIndex].resources[resourceType] < quantity) {
+    throw new Error("Not enough resources to be given");
+  }
+
+  return {
+    ...state,
+    players: state.players.map((player) => {
+      if (giverPlayerId === player.playerId) {
+        return {
+          ...player,
+          resources: {
+            ...player.resources,
+            [resourceType]: player.resources[resourceType] - quantity,
+          },
+        };
+      }
+
+      if (seekerPlayerId === player.playerId) {
+        return {
+          ...player,
+          resources: {
+            ...player.resources,
+            [resourceType]: player.resources[resourceType] + quantity,
+          },
+        };
+      }
+
+      return player;
+    }),
+  };
+};
+
+const performPlayerTrade = (
+  state: CatanState,
+  seekerPlayerId: string,
+  giverPlayerId: string,
+  seeking: ResourceCount[],
+  giving: ResourceCount[]
+): CatanState => {
+  /// Move the "seeking" cards from the seeker to the giver
+  seeking.forEach(({ resource, count }) => {
+    state = tradePlayerResource(
+      state,
+      seekerPlayerId,
+      giverPlayerId,
+      resource,
+      count
+    );
+  });
+
+  /// Move the "giving" cards from the giver to the seeker
+  giving.forEach(({ resource, count }) => {
+    state = tradePlayerResource(
+      state,
+      giverPlayerId,
+      seekerPlayerId,
+      resource,
+      count
+    );
+  });
+
+  return state;
 };
 
 const collectResourceFromTile = (
@@ -393,11 +471,122 @@ const changeTurnAction = (
     state.activePlayerTurnState = PlayerTurnState.PLACING_SETTLEMENT;
   } else if (action.turnAction === "buildRoad") {
     state.activePlayerTurnState = PlayerTurnState.PLACING_ROAD;
+  } else if (action.turnAction === "startBankTradeRequest") {
+    state.activePlayerTurnState = PlayerTurnState.CREATING_BANK_TRADE_REQUEST;
+  } else if (action.turnAction === "startPlayerTradeRequest") {
+    state.activePlayerTurnState = PlayerTurnState.CREATING_PLAYER_TRADE_REQUEST;
   } else if (action.turnAction === "idle") {
     state.activePlayerTurnState = PlayerTurnState.IDLE;
   } else {
     throw Error("Invalid turn action");
   }
+
+  return state;
+};
+
+const requestTrade = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "requestTrade") {
+    throw Error("Invalid action");
+  }
+
+  state.activeTradeRequest = {
+    playerId,
+    seeking: action.seeking,
+    giving: action.giving,
+    acceptance: state.players.map((player) => ({
+      playerId: player.playerId,
+      acceptance: TradeAcceptance.UNDECIDED,
+    })),
+  };
+
+  state.activePlayerTurnState = PlayerTurnState.SUBMITTED_PLAYER_TRADE_REQUEST;
+
+  return state;
+};
+
+const acceptTrade = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (action.name !== "acceptTrade") {
+    throw Error("Invalid action");
+  }
+
+  if (
+    !state.activeTradeRequest ||
+    state.activePlayerTurnState !==
+      PlayerTurnState.SUBMITTED_PLAYER_TRADE_REQUEST
+  ) {
+    throw Error("No trade in progress");
+  }
+
+  state.activeTradeRequest.acceptance = state.activeTradeRequest.acceptance.map(
+    (acceptance) => {
+      if (acceptance.playerId === playerId) {
+        return {
+          ...acceptance,
+          acceptance: action.acceptance,
+        };
+      }
+
+      return acceptance;
+    }
+  );
+
+  return state;
+};
+
+const completeTrade = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "completeTrade") {
+    throw Error("Invalid action");
+  }
+
+  if (
+    !state.activeTradeRequest ||
+    state.activePlayerTurnState !==
+      PlayerTurnState.SUBMITTED_PLAYER_TRADE_REQUEST
+  ) {
+    throw Error("No trade in progress");
+  }
+
+  if (action.completeTrade) {
+    const { acceptedTradeFrom } = action;
+
+    if (
+      state.players.find(({ playerId }) => playerId === acceptedTradeFrom) ===
+      undefined
+    ) {
+      throw Error("Invalid player");
+    }
+
+    state = performPlayerTrade(
+      state,
+      playerId,
+      acceptedTradeFrom,
+      state.activeTradeRequest.seeking,
+      state.activeTradeRequest.giving
+    );
+  }
+
+  state.activeTradeRequest = undefined;
+  state.activePlayerTurnState = PlayerTurnState.IDLE;
 
   return state;
 };
@@ -420,13 +609,15 @@ const endTurn = (
 
   return state;
 };
-
 const actionMap: { [name: string]: ActionHandler } = {
   buildSettlement,
   buildCity,
   buildRoad,
   rollDice,
   changeTurnAction,
+  requestTrade,
+  acceptTrade,
+  completeTrade,
   endTurn,
 };
 

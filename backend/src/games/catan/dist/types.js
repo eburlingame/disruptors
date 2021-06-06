@@ -46,6 +46,9 @@ var PlayerTurnState;
     PlayerTurnState["PLACING_SETTLEMENT"] = "placingSettlement";
     PlayerTurnState["PLACING_CITY"] = "placingCity";
     PlayerTurnState["PLACING_ROAD"] = "placingRoad";
+    PlayerTurnState["CREATING_BANK_TRADE_REQUEST"] = "creatingBankTrade";
+    PlayerTurnState["CREATING_PLAYER_TRADE_REQUEST"] = "creatingPlayerTradeRequest";
+    PlayerTurnState["SUBMITTED_PLAYER_TRADE_REQUEST"] = "submittedPlayerTradeRequest";
 })(PlayerTurnState = exports.PlayerTurnState || (exports.PlayerTurnState = {}));
 var PlayerColor;
 (function (PlayerColor) {

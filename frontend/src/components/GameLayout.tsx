@@ -10,7 +10,7 @@ import Bank from "./Bank";
 import Board from "./GameBoard";
 import Resources from "./Resources";
 import Players from "./Players";
-import Actions from "./Actions";
+import Actions, { areActionsAvailable } from "./Actions";
 import { useGameViewState } from "./GameView";
 import { GamePhase } from "../state/game_types";
 
@@ -116,6 +116,8 @@ const GameLayout = () => {
     state.activePlayerId === state.you.playerId &&
     state.phase === GamePhase.PLAYING;
 
+  const actionsAvailable = areActionsAvailable(state);
+
   const Chat = () => <div>Chat</div>;
 
   return (
@@ -178,7 +180,7 @@ const GameLayout = () => {
                 name: "Actions",
                 content: Actions,
                 shownOn: "xs",
-                shownIf: yourTurn,
+                shownIf: actionsAvailable,
               },
             ]}
           />
@@ -211,7 +213,7 @@ const GameLayout = () => {
           />
         </TabContainer>
 
-        {yourTurn && (
+        {actionsAvailable && (
           <TabContainer flex="1">
             <TabSet tabs={[{ name: "Actions", content: Actions }]} />
           </TabContainer>

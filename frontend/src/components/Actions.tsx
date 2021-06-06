@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, HStack, VStack } from "@chakra-ui/layout";
-import Icon from "@chakra-ui/icon";
-import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
+import gameTheme from "../utils/game_theme";
 import {
   CatanPlayersState,
   PlayerTurnState,
@@ -9,6 +8,7 @@ import {
   EndTurnAction,
   ChangeTurnAction,
   TurnAction,
+  GamePhase,
 } from "../state/game_types";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { useGameViewState } from "./GameView";
@@ -22,6 +22,9 @@ import {
   FaUniversity,
 } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
+import CreateTradeRequest from "./CreateTradeRequest";
+import CompleteTrade from "./CompleteTrade";
+import AcceptTrade from "./AcceptTrade";
 
 const canBuildRoad = (state: CatanPlayersState): boolean =>
   state.you.resources.brick >= 1 && state.you.resources.wood >= 1;
@@ -39,6 +42,21 @@ const canBuyDevelopmentCard = (state: CatanPlayersState): boolean =>
   state.you.resources.ore >= 1 &&
   state.you.resources.sheep >= 1 &&
   state.you.resources.wheat >= 1;
+
+export const areActionsAvailable = (state: CatanPlayersState) => {
+  if (
+    state.activePlayerTurnState ===
+    PlayerTurnState.SUBMITTED_PLAYER_TRADE_REQUEST
+  ) {
+    return true;
+  }
+
+  const yourTurn =
+    state.activePlayerId === state.you.playerId &&
+    state.phase === GamePhase.PLAYING;
+
+  return yourTurn;
+};
 
 const Actions = ({}) => {
   const {
@@ -76,8 +94,22 @@ const Actions = ({}) => {
     }
   };
 
-  if (!yourTurn) {
-    return <></>;
+  if (
+    state.activePlayerTurnState ===
+    PlayerTurnState.CREATING_PLAYER_TRADE_REQUEST
+  ) {
+    return <CreateTradeRequest />;
+  }
+
+  if (
+    state.activePlayerTurnState ===
+    PlayerTurnState.SUBMITTED_PLAYER_TRADE_REQUEST
+  ) {
+    if (yourTurn) {
+      return <CompleteTrade />;
+    } else {
+      return <AcceptTrade />;
+    }
   }
 
   return (
@@ -97,6 +129,7 @@ const Actions = ({}) => {
         justifyContent="left"
         colorScheme="yellow"
         disabled={!isIdle}
+        onClick={onChangeTurnAction("startPlayerTradeRequest")}
       >
         Trade with others
       </Button>
@@ -106,6 +139,7 @@ const Actions = ({}) => {
         justifyContent="left"
         colorScheme="yellow"
         disabled={!isIdle}
+        onClick={onChangeTurnAction("startBankTradeRequest")}
       >
         Trade with the bank
       </Button>

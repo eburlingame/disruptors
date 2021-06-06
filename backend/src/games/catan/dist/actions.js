@@ -281,6 +281,12 @@ var changeTurnAction = function (state, playerId, action) {
     else if (action.turnAction === "buildRoad") {
         state.activePlayerTurnState = types_1.PlayerTurnState.PLACING_ROAD;
     }
+    else if (action.turnAction === "startBankTradeRequest") {
+        state.activePlayerTurnState = types_1.PlayerTurnState.CREATING_BANK_TRADE_REQUEST;
+    }
+    else if (action.turnAction === "startPlayerTradeRequest") {
+        state.activePlayerTurnState = types_1.PlayerTurnState.CREATING_PLAYER_TRADE_REQUEST;
+    }
     else if (action.turnAction === "idle") {
         state.activePlayerTurnState = types_1.PlayerTurnState.IDLE;
     }
