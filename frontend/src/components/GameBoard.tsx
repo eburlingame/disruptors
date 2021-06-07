@@ -2,8 +2,10 @@ import { Box } from "@chakra-ui/layout";
 import React, { useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
-import hexagonImg from "../images/hexagon.svg";
+
 import backerImg from "../images/board_backing.svg";
+import tileDarkImg from "../images/tile_dark.svg";
+import tileLightImg from "../images/tile_light.svg";
 
 import styled from "styled-components";
 import {
@@ -48,13 +50,13 @@ import { FormLabel } from "@chakra-ui/form-control";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { useTheme } from "@chakra-ui/system";
 
-const Container = styled.div`
+const Container = styled.div<{ backgroundColor: string }>`
   width: 100%;
   height: 100%;
   min-height: 400px;
   overflow: hidden;
   position: relative;
-  background-color: #fff;
+  background-color: ${(props) => props.backgroundColor};
 `;
 
 const OverflowContainer = styled.div`
@@ -291,6 +293,7 @@ const TileIcon = ({
   tileType: TileType;
 }) => {
   const resource = tileType as unknown as ResourceType;
+  const textColor = useColorModeValue("gray.800", "gray.100");
 
   if (Object.values(ResourceType).includes(resource)) {
     const { label, icon: Icon } = gameTheme.resources[resource];
@@ -301,7 +304,7 @@ const TileIcon = ({
           <Icon />
         </Tooltip>
 
-        <Box fontSize="24px" fontWeight="bold" >
+        <Box fontSize="24px" fontWeight="bold" color={textColor}>
           {diceNumber}
         </Box>
       </TileIconContainer>
@@ -485,8 +488,11 @@ const GameBoard = ({}) => {
     return <></>;
   };
 
+  const tileBackgroundImage = useColorModeValue(tileLightImg, tileDarkImg);
+  const boardBackgroundColor = useColorModeValue("#fefefe", "#121212");
+
   return (
-    <Container>
+    <Container backgroundColor={boardBackgroundColor}>
       <ZoomControls>
         <ButtonGroup isAttached variant="solid">
           <IconButton
@@ -527,7 +533,7 @@ const GameBoard = ({}) => {
                     tileType={tileType}
                   />
 
-                  <TileImage src={hexagonImg} />
+                  <TileImage src={tileBackgroundImage} />
                 </Tile>
 
                 <EdgesContainer position={locationToPosition({ x, y, z })}>
