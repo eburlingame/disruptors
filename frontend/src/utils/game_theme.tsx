@@ -1,3 +1,5 @@
+import React from "react";
+
 import {
   FaBuilding,
   FaBus,
@@ -8,6 +10,18 @@ import {
   FaServer,
   FaWarehouse,
 } from "react-icons/fa";
+
+import devLargeImg from "../images/icons_dev_l.svg";
+import internLargeImg from "../images/icons_intern_l.svg";
+import serverLargeImg from "../images/icons_server_l.svg";
+import shuttleLargeImg from "../images/icons_shuttle_l.svg";
+import snacksLargeImg from "../images/icons_snacks_l.svg";
+
+import devSmallmg from "../images/icons_dev_s.svg";
+import internSmallmg from "../images/icons_intern_s.svg";
+import serverSmallmg from "../images/icons_server_s.svg";
+import shuttleSmallmg from "../images/icons_shuttle_s.svg";
+import snacksSmallmg from "../images/icons_snacks_s.svg";
 
 import { ResourceType, PlayerColor } from "../state/game_types";
 
@@ -45,6 +59,10 @@ export type GameTheme = {
   };
 };
 
+export const resourceIcon = (src: string) => () => {
+  return <img src={src} />;
+};
+
 export const resources = [
   ResourceType.WHEAT,
   ResourceType.WOOD,
@@ -59,31 +77,31 @@ const theme: GameTheme = {
       name: "dev",
       pluralName: "devs",
       label: "Developers",
-      icon: FaIdBadge,
+      icon: resourceIcon(devLargeImg),
     },
     [ResourceType.WOOD]: {
       name: "intern",
       pluralName: "interns",
       label: "Interns",
-      icon: FaGraduationCap,
+      icon: resourceIcon(internLargeImg),
     },
     [ResourceType.ORE]: {
       name: "shuttle bus",
       pluralName: "shuttle buses",
       label: "Shuttle buses",
-      icon: FaBus,
+      icon: resourceIcon(shuttleLargeImg),
     },
     [ResourceType.BRICK]: {
       name: "server",
       pluralName: "servers",
       label: "Servers",
-      icon: FaServer,
+      icon: resourceIcon(serverLargeImg),
     },
     [ResourceType.SHEEP]: {
       name: "snack",
       pluralName: "snacks",
       label: "Snacks",
-      icon: FaCoffee,
+      icon: resourceIcon(snacksLargeImg),
     },
   },
   buildings: {
