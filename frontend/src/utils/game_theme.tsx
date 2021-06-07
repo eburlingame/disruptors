@@ -17,11 +17,11 @@ import serverLargeImg from "../images/icons_server_l.svg";
 import shuttleLargeImg from "../images/icons_shuttle_l.svg";
 import snacksLargeImg from "../images/icons_snacks_l.svg";
 
-import devSmallmg from "../images/icons_dev_s.svg";
-import internSmallmg from "../images/icons_intern_s.svg";
-import serverSmallmg from "../images/icons_server_s.svg";
-import shuttleSmallmg from "../images/icons_shuttle_s.svg";
-import snacksSmallmg from "../images/icons_snacks_s.svg";
+import devSmallImg from "../images/icons_dev_s.svg";
+import internSmallImg from "../images/icons_intern_s.svg";
+import serverSmallImg from "../images/icons_server_s.svg";
+import shuttleSmallImg from "../images/icons_shuttle_s.svg";
+import snacksSmallImg from "../images/icons_snacks_s.svg";
 
 import { ResourceType, PlayerColor } from "../state/game_types";
 
@@ -60,7 +60,7 @@ export type GameTheme = {
 };
 
 export const resourceIcon = (src: string) => () => {
-  return <img src={src} />;
+  return <img src={src} style={{ height: "2em" }} />;
 };
 
 export const resources = [

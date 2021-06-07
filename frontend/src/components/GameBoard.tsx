@@ -154,17 +154,17 @@ const TileIconContainer = styled.div`
   z-index: 2;
   position: absolute;
   left: 50%;
-  top: 53%;
+  top: 50%;
   text-align: center;
   width: 100px;
-  height: 100px;
+  height: 150px;
   transform: translate(-50%, -50%);
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 2em;
+  font-size: 2.5em;
 `;
 
 const Tile = styled.div<{ position: { x: number; y: number } }>`
@@ -301,7 +301,7 @@ const TileIcon = ({
           <Icon />
         </Tooltip>
 
-        <Box fontWeight="bold" marginTop="2">
+        <Box fontSize="24px" fontWeight="bold" >
           {diceNumber}
         </Box>
       </TileIconContainer>
