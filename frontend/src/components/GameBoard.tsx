@@ -45,6 +45,8 @@ import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { FormLabel } from "@chakra-ui/form-control";
+import { useColorModeValue } from "@chakra-ui/color-mode";
+import { useTheme } from "@chakra-ui/system";
 
 const Container = styled.div`
   width: 100%;
@@ -77,12 +79,12 @@ const ZoomControls = styled.div`
   z-index: 4;
 `;
 
-const DiceValueContainer = styled.div`
+const DiceValueContainer = styled.div<{ backgroundColor: string }>`
   position: absolute;
   bottom: 10px;
   right: 10px;
   z-index: 4;
-  background-color: #121212;
+  background: ${(props) => props.backgroundColor};
   border-radius: 0.5em;
   font-size: 20pt;
   padding: 0.5em;
@@ -91,7 +93,7 @@ const DiceValueContainer = styled.div`
 
 const DiceValueContainerTitle = styled.div`
   font-size: 12pt;
-  color: #d8d8d8;
+  color: #777;
   font-weight: 400;
 `;
 
@@ -349,6 +351,8 @@ const GameBoard = ({}) => {
     roads,
   } = gameState.state;
 
+  const rollBacker = useColorModeValue("#aaa", "#121212");
+
   const [zoom, setZoom] = useState(1.0);
 
   const zoomIn = () =>
@@ -501,7 +505,7 @@ const GameBoard = ({}) => {
       </ZoomControls>
 
       {lastDiceRoll && (
-        <DiceValueContainer>
+        <DiceValueContainer backgroundColor={rollBacker}>
           <DiceValueContainerTitle>Last roll:</DiceValueContainerTitle>
           {lastDiceRoll.values[0]} + {lastDiceRoll.values[1]} ={" "}
           {lastDiceRoll.values[0] + lastDiceRoll.values[1]}

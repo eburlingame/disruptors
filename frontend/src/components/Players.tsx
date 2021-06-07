@@ -7,12 +7,13 @@ import { FaIdCard, FaQuestionCircle, FaSimCard, FaUser } from "react-icons/fa";
 import { Tooltip } from "@chakra-ui/tooltip";
 import CardCount from "./CardCount";
 import { useColorModeValue } from "@chakra-ui/color-mode";
+import gameTheme from "../utils/game_theme";
 
 const Players = ({}) => {
   const { room } = useSessionState();
   const { gameState } = useGameViewState();
 
-  const activeColor = useColorModeValue("blue.400", "blue.800");
+  const activeColor = useColorModeValue("blue.400", "blue.600");
 
   if (!room) {
     return <Box>Invalid players</Box>;
@@ -32,7 +33,12 @@ const Players = ({}) => {
       {players.map(
         ({
           roomPlayer,
-          gamePlayer: { playerId, totalResourceCards, totalDevelopmentCards },
+          gamePlayer: {
+            color,
+            playerId,
+            totalResourceCards,
+            totalDevelopmentCards,
+          },
         }) => (
           <HStack
             borderStyle="solid"
@@ -49,7 +55,7 @@ const Players = ({}) => {
             }
           >
             <HStack marginLeft="2">
-              <FaUser />
+              <FaUser color={gameTheme.playerColors[color].primary} />
               <Box fontWeight="700">{roomPlayer?.name}</Box>
             </HStack>
 
