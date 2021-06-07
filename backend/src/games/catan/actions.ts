@@ -1,5 +1,6 @@
 import { sum } from "lodash";
 import {
+  computeLongestRoad,
   edgeCoordinateEqual,
   findTile,
   getCommonEdgeCoordinate,
@@ -388,8 +389,12 @@ const buildRoad = (
     throw Error("Invalid action");
   }
 
-  const location = getCommonEdgeCoordinate(state.board.tiles, action.location);
   const player = getPlayer(state, playerId);
+  const playerIndex = state.players.findIndex(
+    (player) => player.playerId === playerId
+  );
+
+  const location = getCommonEdgeCoordinate(state.board.tiles, action.location);
 
   if (state.phase === GamePhase.PLAYING) {
     if (!canBuildRoad(player)) {
@@ -434,6 +439,13 @@ const buildRoad = (
       state.activePlayerId = previousPlayer(state);
     }
   }
+
+  console.log(
+    "computeLongestRoad(state, playerId)",
+    computeLongestRoad(state, playerId)
+  );
+  
+  state.players[playerIndex].longestRoad = computeLongestRoad(state, playerId);
 
   return state;
 };

@@ -65,6 +65,9 @@ export default class CatanGame
         color: Object.values(PlayerColor)[index],
         resources: { brick: 0, wood: 0, ore: 0, wheat: 0, sheep: 0 },
         developmentCards: [],
+        points: 0,
+        longestRoad: 1,
+        robberDeployCount: 0,
       })),
       activePlayerId: gamePlayers[0].playerId,
       activePlayerTurnState: PlayerTurnState.PLACING_SETTLEMENT,
@@ -117,6 +120,8 @@ export default class CatanGame
         totalResourceCards: sumResources(player),
         totalDevelopmentCards: player.developmentCards.length,
         points: 0,
+        longestRoad: player.longestRoad,
+        robberDeployCount: player.robberDeployCount,
       })),
     };
   }

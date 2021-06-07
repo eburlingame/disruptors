@@ -241,6 +241,9 @@ export type CatanPlayer = GamePlayer & {
     sheep: number;
   };
   developmentCards: DevelopmentCard[];
+  points: number;
+  robberDeployCount: number;
+  longestRoad: number;
 };
 
 export type CatanOtherPlayer = GamePlayer & {
@@ -248,6 +251,8 @@ export type CatanOtherPlayer = GamePlayer & {
   totalResourceCards: number;
   totalDevelopmentCards: number;
   points: number;
+  robberDeployCount: number;
+  longestRoad: number;
 };
 
 export type CatanState = {
@@ -268,9 +273,9 @@ export type CatanPlayersState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
+  bank: Bank;
   buildings: Building[];
   roads: Road[];
-  bank: Bank;
   you: CatanPlayer;
   players: CatanOtherPlayer[];
   activePlayerId: string;

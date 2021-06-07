@@ -189,6 +189,15 @@ export const vertexAdjacenies: { [index: number]: EdgeDir[] } = {
   [VertexDir.NW]: [EdgeDir.W, EdgeDir.NW],
 };
 
+export const edgeVerticies: { [index: number]: VertexDir[] } = {
+  [EdgeDir.NE]: [VertexDir.N, VertexDir.NE],
+  [EdgeDir.E]: [VertexDir.NE, VertexDir.SE],
+  [EdgeDir.SE]: [VertexDir.SE, VertexDir.S],
+  [EdgeDir.SW]: [VertexDir.S, VertexDir.SW],
+  [EdgeDir.W]: [VertexDir.SW, VertexDir.NW],
+  [EdgeDir.NW]: [VertexDir.NW, VertexDir.N],
+};
+
 /// Since two tiles can touch each edge, decide which one should draw the vertex button/label
 export const getCommonEdgeCoordinate = (
   tiles: GameTile[],
@@ -231,6 +240,98 @@ export const tilesTouchingVertex = (
     .filter((t) => t !== undefined);
 
   return [commonTile, ...otherTiles];
+};
+
+export const edgeToVertices = (tiles: GameTile[], edge: EdgeCoordinate) => {
+  const edges = edgeVerticies[edge.edgeIndex];
+
+  return [
+    getCommonVertexCoordinate(tiles, {
+      tile: edge.tile,
+      vertexIndex: edges[0],
+    }),
+    getCommonVertexCoordinate(tiles, {
+      tile: edge.tile,
+      vertexIndex: edges[1],
+    }),
+  ];
+};
+
+type RoadGraph = { [key: string]: Set<string> };
+
+const vertexKey = ({ tile: { x, y, z }, vertexIndex: v }: VertexCoordinate) =>
+  `${x}|${y}|${z}/${v}`;
+
+const roadsToGraph = (state: CatanState, playerId: string): RoadGraph => {
+  const { tiles } = state.board;
+  const roads = state.roads.filter((road) => road.playerId === playerId);
+
+  let graph: RoadGraph = {};
+
+  const addVertexToGraph = (fromKey: string, toKey: string) => {
+    if (fromKey in graph) {
+      graph[fromKey].add(toKey);
+    } else {
+      graph[fromKey] = new Set([toKey]);
+    }
+  };
+
+  roads.forEach(({ location }) => {
+    const [vertexA, vertexB] = edgeToVertices(tiles, location);
+
+    const keyA = vertexKey(vertexA);
+    const keyB = vertexKey(vertexB);
+
+    addVertexToGraph(keyA, keyB);
+    addVertexToGraph(keyB, keyA);
+  });
+
+  return graph;
+};
+
+const longestPathFrom = (graph: RoadGraph, start: string) => {
+  let stack: { node: string; depth: number }[] = [];
+  let seen = new Set<string>();
+  let maxDepth = 0;
+
+  /// Perform a DFS starting from the given start node
+  stack.push({ node: start, depth: 0 });
+
+  while (stack.length > 0) {
+    const edge = stack.pop();
+    if (!edge) continue;
+
+    /// Keep track of which nodes we've been to
+    seen.add(edge.node);
+
+    /// Keep track of the longest branch
+    if (edge.depth > maxDepth) {
+      maxDepth = edge.depth;
+    }
+
+    const neighbors = graph[edge.node];
+    neighbors.forEach((neighbor) => {
+      if (!seen.has(neighbor)) {
+        stack.push({ node: neighbor, depth: edge.depth + 1 });
+      }
+    });
+  }
+
+  return maxDepth;
+};
+
+export const computeLongestRoad = (
+  state: CatanState,
+  playerId: string
+): number => {
+  const graph = roadsToGraph(state, playerId);
+  const startNodes = Object.keys(graph);
+
+  const longestRoad = Math.max(
+    ...startNodes.map((start) => longestPathFrom(graph, start))
+  );
+
+  return longestRoad;
 };
 
 export const getAvailableExchanges = (
