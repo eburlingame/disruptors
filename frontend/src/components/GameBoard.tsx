@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
 import hexagonImg from "../images/hexagon.svg";
+import backerImg from "../images/board_backing.svg";
 
 import styled from "styled-components";
 import {
@@ -13,6 +14,7 @@ import {
   EdgeCoordinate,
   GameTile,
   PlayerTurnState,
+  ResourceType,
   RollDiceAction,
   TileCoordinate,
   TileType,
@@ -41,6 +43,8 @@ import {
 } from "../utils/board_utils";
 import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
+import { Tooltip } from "@chakra-ui/tooltip";
+import { FormLabel } from "@chakra-ui/form-control";
 
 const Container = styled.div`
   width: 100%;
@@ -48,7 +52,7 @@ const Container = styled.div`
   min-height: 400px;
   overflow: hidden;
   position: relative;
-  background-color: #111;
+  background-color: #fff;
 `;
 
 const OverflowContainer = styled.div`
@@ -61,7 +65,7 @@ const OverflowContainer = styled.div`
 const TILE_WIDTH = 146;
 const TILE_HEIGHT = 169;
 
-const BOARD_PADDING = 200;
+const BOARD_PADDING = 230;
 
 const CONTAINER_WIDTH = 5 * TILE_WIDTH + BOARD_PADDING;
 const CONTAINER_HEIGHT = 4 * TILE_HEIGHT + BOARD_PADDING;
@@ -93,13 +97,17 @@ const DiceValueContainerTitle = styled.div`
 
 const TileContainer = styled.div<{ zoom: number }>`
   position: absolute;
-  // top: 50%;
-  // left: 50%;
-  // transform: translate(-50%, -50%);
 
-  background-color: #111;
   width: ${(props) => CONTAINER_WIDTH * props.zoom}px;
   height: ${(props) => CONTAINER_HEIGHT * props.zoom}px;
+`;
+
+const BackgroundImage = styled.img`
+  position: absolute;
+  left: -500px;
+  top: -500px;
+  min-width: 1000px;
+  min-height: 1000px;
 `;
 
 const TileOriginContainer = styled.div<{ zoom: number }>`
@@ -137,6 +145,24 @@ const TileLabel = styled.div`
   z-index: 2;
   text-align: center;
   transform: translate(0%, -50%);
+`;
+
+const TileIconContainer = styled.div`
+  color: #000;
+  z-index: 2;
+  position: absolute;
+  left: 50%;
+  top: 53%;
+  text-align: center;
+  width: 100px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 2em;
 `;
 
 const Tile = styled.div<{ position: { x: number; y: number } }>`
@@ -254,6 +280,34 @@ const Building = styled.div<{ playerColor: string }>`
   justify-content: center;
   align-items: center;
 `;
+
+const TileIcon = ({
+  diceNumber,
+  tileType,
+}: {
+  diceNumber: string;
+  tileType: TileType;
+}) => {
+  const resource = tileType as unknown as ResourceType;
+
+  if (Object.values(ResourceType).includes(resource)) {
+    const { label, icon: Icon } = gameTheme.resources[resource];
+
+    return (
+      <TileIconContainer>
+        <Tooltip label={label}>
+          <Icon />
+        </Tooltip>
+
+        <Box fontWeight="bold" marginTop="2">
+          {diceNumber}
+        </Box>
+      </TileIconContainer>
+    );
+  }
+
+  return <TileIconContainer></TileIconContainer>;
+};
 
 /// Since tiles touch each vertex, only draw the "common" vertex
 const shouldDrawVertex = (
@@ -457,18 +511,17 @@ const GameBoard = ({}) => {
       <OverflowContainer>
         <TileContainer zoom={zoom}>
           <TileOriginContainer zoom={zoom}>
+            <BackgroundImage src={backerImg} />
+
             {tiles.map(({ diceNumber, tileType, location: { x, y, z } }) => (
               <>
                 <Tile position={locationToPosition({ x, y, z })}>
                   {/* <DebugLabel>{`(${diceNumber} ${tileType}) ${x}, ${y}, ${z}`}</DebugLabel> */}
-                  <TileLabel>
-                    {tileType == TileType.DESERT
-                      ? ""
-                      : gameTheme.resources[tileType].label}
-                    <Box fontSize="xl" fontWeight="700">
-                      {diceNumber > 0 ? diceNumber : ""}
-                    </Box>
-                  </TileLabel>
+
+                  <TileIcon
+                    diceNumber={diceNumber > 0 ? diceNumber.toString() : ""}
+                    tileType={tileType}
+                  />
 
                   <TileImage src={hexagonImg} />
                 </Tile>
