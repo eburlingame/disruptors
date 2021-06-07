@@ -1,6 +1,6 @@
 import Game, { GamePlayer } from "../model";
 import { generateStaticBoard } from "./board";
-import { sumResources } from "./util";
+import { sumResources } from "./utils";
 
 import {
   GamePhase,
@@ -15,7 +15,7 @@ import {
 import actions from "./actions";
 
 import { random, shuffle } from "lodash";
-import { randomInt } from "src/util";
+import { randomInt } from "../../util";
 import { getAvailableExchanges } from "./board_utils";
 
 export const defaultGameConfig: CatanConfig = {
