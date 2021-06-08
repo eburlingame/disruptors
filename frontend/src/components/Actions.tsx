@@ -15,11 +15,13 @@ import { Tooltip } from "@chakra-ui/tooltip";
 import { useGameViewState } from "./GameView";
 import { Button } from "@chakra-ui/button";
 import {
+  FaArrowRight,
   FaDice,
   FaDollarSign,
   FaExchangeAlt,
   FaMagic,
   FaStopCircle,
+  FaTimes,
   FaUniversity,
 } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
@@ -90,7 +92,7 @@ const Actions = ({}) => {
   };
 
   const onChangeTurnAction = (turnAction: TurnAction) => async () => {
-    if (isIdle) {
+    if (isIdle || turnAction === "idle") {
       const action: ChangeTurnAction = { name: "changeTurnAction", turnAction };
       await performAction(action);
     }
@@ -217,15 +219,29 @@ const Actions = ({}) => {
         </Button>
       </HStack>
 
-      <Button
-        leftIcon={<FaStopCircle />}
-        justifyContent="left"
-        colorScheme="red"
-        disabled={!isIdle || mustRoll}
-        onClick={onEndTurn}
-      >
-        End turn
-      </Button>
+      {isIdle && (
+        <Button
+          leftIcon={<FaArrowRight />}
+          justifyContent="left"
+          colorScheme="red"
+          disabled={!isIdle || mustRoll}
+          onClick={onEndTurn}
+        >
+          End turn
+        </Button>
+      )}
+
+      {!isIdle && (
+        <Button
+          leftIcon={<FaTimes />}
+          justifyContent="left"
+          colorScheme="pink"
+          disabled={isIdle}
+          onClick={onChangeTurnAction("idle")}
+        >
+          Cancel
+        </Button>
+      )}
     </VStack>
   );
 };
