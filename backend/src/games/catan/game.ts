@@ -77,7 +77,9 @@ export default class CatanGame
         },
         longestRoad: 1,
         robberDeployCount: 0,
+        mustDiscard: 0,
       })),
+      robber: null,
       activePlayerId: gamePlayers[0].playerId,
       activePlayerTurnState: PlayerTurnState.PLACING_SETTLEMENT,
     };

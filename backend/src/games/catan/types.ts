@@ -260,6 +260,7 @@ export type CatanPlayer = GamePlayer & {
   };
   robberDeployCount: number;
   longestRoad: number;
+  mustDiscard: number;
 };
 
 export type CatanOtherPlayer = GamePlayer & {
@@ -279,6 +280,7 @@ export type CatanState = {
   roads: Road[];
   bank: Bank;
   players: CatanPlayer[];
+  robber: TileCoordinate | null;
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
   activeTradeRequest?: TradeRequest;

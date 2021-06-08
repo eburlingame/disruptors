@@ -27,6 +27,7 @@ import {
   TradeRequest,
   VertexCoordinate,
 } from "./types";
+import { sumResources } from "./utils";
 
 export type ActionHandler = (
   state: CatanState,
@@ -60,6 +61,14 @@ const getPlayer = (state: CatanState, playerId: string) => {
   }
 
   throw new Error("Unable to find player with playerId " + playerId);
+};
+
+const getPlayerIndex = (state: CatanState, playerId: string) => {
+  const playerIndex = state.players.findIndex(
+    (player) => player.playerId === playerId
+  );
+
+  return playerIndex;
 };
 
 const previousPlayer = (state: CatanState) => {
@@ -444,9 +453,7 @@ const buildRoad = (
   }
 
   const player = getPlayer(state, playerId);
-  const playerIndex = state.players.findIndex(
-    (player) => player.playerId === playerId
-  );
+  const playerIndex = getPlayerIndex(state, playerId);
 
   const location = getCommonEdgeCoordinate(state.board.tiles, action.location);
 
@@ -517,19 +524,39 @@ const rollDice = (
   const { tiles } = state.board;
   const diceTotal = sum(action.values);
 
-  state.buildings.map(({ type, location, playerId: tilesPlayerId }) => {
-    tilesTouchingVertex(tiles, location)
-      .filter(({ diceNumber }) => diceNumber === diceTotal)
-      .forEach((gameTile) => {
-        if (type === BuildingType.Settlement) {
-          state = collectResourceFromTile(state, tilesPlayerId, gameTile, 1);
-        } else if (type === BuildingType.City) {
-          state = collectResourceFromTile(state, tilesPlayerId, gameTile, 2);
-        }
-      });
-  });
+  /// Robber rolled
+  if (diceTotal === 7) {
+    state.phase = GamePhase.ROBBER_ROLLER;
 
-  state.activePlayerTurnState = PlayerTurnState.IDLE;
+    state.players = state.players.map((player) => {
+      const resourceCount = sumResources(player);
+
+      if (resourceCount > state.config.cardDiscardLimit) {
+        return {
+          ...player,
+          mustDiscard: Math.floor(resourceCount / 2.0),
+        };
+      }
+
+      return player;
+    });
+  }
+  /// Otherwise, distribute resources normally
+  else {
+    state.buildings.map(({ type, location, playerId: tilesPlayerId }) => {
+      tilesTouchingVertex(tiles, location)
+        .filter(({ diceNumber }) => diceNumber === diceTotal)
+        .forEach((gameTile) => {
+          if (type === BuildingType.Settlement) {
+            state = collectResourceFromTile(state, tilesPlayerId, gameTile, 1);
+          } else if (type === BuildingType.City) {
+            state = collectResourceFromTile(state, tilesPlayerId, gameTile, 2);
+          }
+        });
+    });
+
+    state.activePlayerTurnState = PlayerTurnState.IDLE;
+  }
 
   return state;
 };
@@ -609,9 +636,7 @@ const buyDevCard = (
   }
 
   const player = getPlayer(state, playerId);
-  const playerIndex = state.players.findIndex(
-    (player) => player.playerId === playerId
-  );
+  const playerIndex = getPlayerIndex(state, playerId);
 
   if (!canBuyDevelopmentCard(player)) {
     throw new Error("Not enough resources to buy development card");

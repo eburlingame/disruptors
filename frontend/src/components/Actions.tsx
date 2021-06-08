@@ -72,10 +72,14 @@ const Actions = ({}) => {
   const yourTurn = state.activePlayerId === state.you.playerId;
 
   const mustRoll =
-    yourTurn && state.activePlayerTurnState === PlayerTurnState.MUST_ROLL;
+    yourTurn &&
+    state.activePlayerTurnState === PlayerTurnState.MUST_ROLL &&
+    state.phase === GamePhase.PLAYING;
 
   const isIdle =
     yourTurn && state.activePlayerTurnState === PlayerTurnState.IDLE;
+
+  const mandatoryAction = state.you.mustDiscard > 0;
 
   const onDiceRoll = async () => {
     if (mustRoll) {
@@ -236,7 +240,7 @@ const Actions = ({}) => {
           leftIcon={<FaTimes />}
           justifyContent="left"
           colorScheme="pink"
-          disabled={isIdle}
+          disabled={isIdle || mandatoryAction}
           onClick={onChangeTurnAction("idle")}
         >
           Cancel
