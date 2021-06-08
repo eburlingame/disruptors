@@ -1,15 +1,19 @@
 import React from "react";
 
 import {
+  FaBitcoin,
   FaBuilding,
   FaBus,
   FaCoffee,
+  FaCreditCard,
   FaGraduationCap,
   FaIdBadge,
   FaNetworkWired,
   FaServer,
   FaWarehouse,
 } from "react-icons/fa";
+import { RiVirusFill } from "react-icons/ri";
+import { GrResources } from "react-icons/gr";
 
 import devLargeImg from "../images/icons_dev_l.svg";
 import internLargeImg from "../images/icons_intern_l.svg";
@@ -57,6 +61,10 @@ export type GameTheme = {
     [PlayerColor.Purple]: PlayerColorValue;
     [PlayerColor.Orange]: PlayerColorValue;
   };
+  robber: ThemeResource;
+  developmentCards: ThemeResource;
+  resourceCards: ThemeResource;
+  victoryPoints: ThemeResource;
 };
 
 export const resourceIcon = (src: string) => () => {
@@ -143,6 +151,30 @@ const theme: GameTheme = {
     [PlayerColor.Orange]: {
       primary: "#FFFF00",
     },
+  },
+  robber: {
+    name: "malware",
+    pluralName: "malwares",
+    label: "Malare",
+    icon: RiVirusFill,
+  },
+  victoryPoints: {
+    name: "bitcoin",
+    pluralName: "bitcoins",
+    label: "Bitcoin",
+    icon: FaBitcoin,
+  },
+  resourceCards: {
+    name: "resource card",
+    pluralName: "resource cards",
+    label: "Resource cards",
+    icon: GrResources,
+  },
+  developmentCards: {
+    name: "development card",
+    pluralName: "development cards",
+    label: "Development cards",
+    icon: FaCreditCard,
   },
 };
 

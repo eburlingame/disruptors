@@ -164,8 +164,13 @@ export type CatanConfig = {
   cardDiscardLimit: number;
 };
 
+export enum DevelopmentCardType {
+  KNIGHT = "knight",
+  PLUS_ONE_VP = "plusOneVP",
+}
+
 export type DevelopmentCard = {
-  name: string;
+  type: DevelopmentCardType;
 };
 
 export type Bank = {
@@ -241,12 +246,20 @@ export type CatanPlayer = GamePlayer & {
     sheep: number;
   };
   developmentCards: DevelopmentCard[];
+  points: {
+    public: number; /// includes cities, settlements, longest road, largest army
+    private: number; /// includes development cards victory poitns
+  };
+  robberDeployCount: number;
+  longestRoad: number;
 };
 
 export type CatanOtherPlayer = GamePlayer & {
   color: PlayerColor;
   totalResourceCards: number;
   totalDevelopmentCards: number;
+  robberDeployCount: number;
+  longestRoad: number;
   points: number;
 };
 
@@ -268,9 +281,9 @@ export type CatanPlayersState = {
   config: CatanConfig;
   phase: GamePhase;
   board: GameBoard;
+  bank: Bank;
   buildings: Building[];
   roads: Road[];
-  bank: Bank;
   you: CatanPlayer;
   players: CatanOtherPlayer[];
   activePlayerId: string;

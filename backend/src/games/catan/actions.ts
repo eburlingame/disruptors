@@ -15,6 +15,7 @@ import {
   CatanAction,
   CatanPlayer,
   CatanState,
+  DevelopmentCardType,
   EdgeCoordinate,
   GamePhase,
   GameTile,
@@ -258,6 +259,60 @@ const collectResourceFromTile = (
   return state;
 };
 
+const playersVictoryPoints = (state: CatanState, playerId: string) => {
+  const player = getPlayer(state, playerId);
+
+  const longestRoad = Math.max(
+    ...state.players.map(({ longestRoad }) => longestRoad)
+  );
+
+  const longestRoadPoints =
+    player.longestRoad === longestRoad && longestRoad >= 5 ? 2 : 0;
+
+  const mostRobberDeploys = Math.max(
+    ...state.players.map(({ robberDeployCount }) => robberDeployCount)
+  );
+
+  const largestArmyPoints =
+    player.robberDeployCount === mostRobberDeploys && mostRobberDeploys >= 3
+      ? 2
+      : 0;
+
+  const cityCount = state.buildings.filter(
+    (building) =>
+      building.type === BuildingType.City && building.playerId === playerId
+  ).length;
+
+  const settlementCount = state.buildings.filter(
+    (building) =>
+      building.type === BuildingType.Settlement &&
+      building.playerId === playerId
+  ).length;
+
+  console.log(cityCount, settlementCount, longestRoadPoints, largestArmyPoints);
+  const publicPoints =
+    2 * cityCount + settlementCount + longestRoadPoints + largestArmyPoints;
+
+  const privatePoints = player.developmentCards.filter(
+    (card) => card.type === DevelopmentCardType.PLUS_ONE_VP
+  ).length;
+
+  return {
+    public: publicPoints,
+    private: privatePoints,
+  };
+};
+
+const computeVictoryPoints = (state: CatanState): CatanState => {
+  return {
+    ...state,
+    players: state.players.map((player) => ({
+      ...player,
+      points: playersVictoryPoints(state, player.playerId),
+    })),
+  };
+};
+
 const buildSettlement = (
   state: CatanState,
   playerId: string,
@@ -373,6 +428,8 @@ const buildCity = (
 
   state.activePlayerTurnState = PlayerTurnState.IDLE;
 
+  state = computeVictoryPoints(state);
+
   return state;
 };
 
@@ -440,12 +497,9 @@ const buildRoad = (
     }
   }
 
-  console.log(
-    "computeLongestRoad(state, playerId)",
-    computeLongestRoad(state, playerId)
-  );
-  
   state.players[playerIndex].longestRoad = computeLongestRoad(state, playerId);
+
+  state = computeVictoryPoints(state);
 
   return state;
 };
