@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
 import { useGameViewState } from "./GameView";
 import { useSessionState } from "../hooks/session";
-import { FaUser } from "react-icons/fa";
+import { FaCreditCard, FaUser } from "react-icons/fa";
 import { Tooltip } from "@chakra-ui/tooltip";
 import CardCount from "./CardCount";
 import { useColorModeValue } from "@chakra-ui/color-mode";
@@ -37,6 +37,8 @@ const Players = ({}) => {
             playerId,
             totalResourceCards,
             totalDevelopmentCards,
+            longestRoad,
+            robberDeployCount,
             points,
           },
         }) => (
@@ -55,16 +57,14 @@ const Players = ({}) => {
             }
           >
             <HStack marginLeft="2">
-              <Tooltip label={"Bitcoin"}>
-                <VStack>
-                  <Box fontSize="xl">
-                    <FaUser color={gameTheme.playerColors[color].primary} />
-                  </Box>
-                  <Box fontWeight="900" fontSize="xl" marginTop="2">
-                    {roomPlayer?.name}
-                  </Box>
-                </VStack>
-              </Tooltip>
+              <VStack>
+                <Box fontSize="xl">
+                  <FaUser color={gameTheme.playerColors[color].primary} />
+                </Box>
+                <Box fontWeight="900" fontSize="xl" marginTop="2">
+                  {roomPlayer?.name}
+                </Box>
+              </VStack>
             </HStack>
 
             <HStack>
@@ -74,13 +74,18 @@ const Players = ({}) => {
                 count={points}
               />
               <CardCount
+                icon={<gameTheme.buildings.road.icon />}
+                label={gameTheme.buildings.road.label}
+                count={longestRoad}
+              />
+              <CardCount
                 icon={<gameTheme.resourceCards.icon />}
                 label={gameTheme.resourceCards.label}
                 count={totalResourceCards}
               />
               <CardCount
-                icon={<gameTheme.developmentCards.icon />}
-                label={gameTheme.developmentCards.label}
+                icon={<FaCreditCard />}
+                label={"Development cards"}
                 count={totalDevelopmentCards}
               />
             </HStack>

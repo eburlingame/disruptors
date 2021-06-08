@@ -2,6 +2,7 @@ import React from "react";
 
 import {
   FaBitcoin,
+  FaBroom,
   FaBuilding,
   FaBus,
   FaCoffee,
@@ -9,6 +10,7 @@ import {
   FaGraduationCap,
   FaIdBadge,
   FaNetworkWired,
+  FaPlusSquare,
   FaServer,
   FaWarehouse,
 } from "react-icons/fa";
@@ -27,7 +29,11 @@ import serverSmallImg from "../images/icons_server_s.svg";
 import shuttleSmallImg from "../images/icons_shuttle_s.svg";
 import snacksSmallImg from "../images/icons_snacks_s.svg";
 
-import { ResourceType, PlayerColor } from "../state/game_types";
+import {
+  ResourceType,
+  PlayerColor,
+  DevelopmentCardType,
+} from "../state/game_types";
 
 export type ThemeResource = {
   name: string;
@@ -62,7 +68,10 @@ export type GameTheme = {
     [PlayerColor.Orange]: PlayerColorValue;
   };
   robber: ThemeResource;
-  developmentCards: ThemeResource;
+  developmentCards: {
+    [DevelopmentCardType.KNIGHT]: ThemeResource;
+    [DevelopmentCardType.VICTORY_POINT]: ThemeResource;
+  };
   resourceCards: ThemeResource;
   victoryPoints: ThemeResource;
 };
@@ -171,10 +180,18 @@ const theme: GameTheme = {
     icon: GrResources,
   },
   developmentCards: {
-    name: "development card",
-    pluralName: "development cards",
-    label: "Development cards",
-    icon: FaCreditCard,
+    [DevelopmentCardType.KNIGHT]: {
+      name: "antivirus",
+      pluralName: "antiviruses",
+      label: "Antivirus",
+      icon: FaBroom,
+    },
+    [DevelopmentCardType.VICTORY_POINT]: {
+      name: "free Bitcoin",
+      pluralName: "free Bitcoins",
+      label: "Free Bitcoin",
+      icon: FaBitcoin,
+    },
   },
 };
 

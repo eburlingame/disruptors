@@ -14,7 +14,7 @@ import {
 
 import actions from "./actions";
 
-import { random, shuffle } from "lodash";
+import { random, shuffle, sum } from "lodash";
 import { randomInt } from "../../util";
 import { getAvailableExchanges } from "./board_utils";
 
@@ -58,13 +58,19 @@ export default class CatanGame
         ore: 19,
         wheat: 19,
         sheep: 19,
-        developmentCards: [],
+        developmentCards: {
+          knight: 14,
+          victoryPoint: 5,
+        },
       },
       players: gamePlayers.map(({ playerId }, index) => ({
         playerId,
         color: Object.values(PlayerColor)[index],
         resources: { brick: 0, wood: 0, ore: 0, wheat: 0, sheep: 0 },
-        developmentCards: [],
+        developmentCards: {
+          knight: 0,
+          victoryPoint: 0,
+        },
         points: {
           public: 0,
           private: 0,
@@ -121,7 +127,7 @@ export default class CatanGame
         playerId: player.playerId,
         color: player.color,
         totalResourceCards: sumResources(player),
-        totalDevelopmentCards: player.developmentCards.length,
+        totalDevelopmentCards: sum(Object.values(player.developmentCards)),
         points: player.points.public,
         longestRoad: player.longestRoad,
         robberDeployCount: player.robberDeployCount,

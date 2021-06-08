@@ -118,6 +118,7 @@ export type TurnAction =
   | "buildSettlement"
   | "buildCity"
   | "buildRoad"
+  | "playDevCard"
   | "startPlayerTradeRequest"
   | "startBankTradeRequest"
   | "idle";
@@ -148,6 +149,10 @@ export type BankTradeAction = {
   giving: ResourceCount[];
 };
 
+export type BuyDevCardAction = {
+  name: "buyDevCard";
+};
+
 export type CatanAction =
   | BuildSettlementAction
   | BuildCityAction
@@ -158,7 +163,8 @@ export type CatanAction =
   | AcceptTradeAction
   | CompleteTradeAction
   | BankTradeAction
-  | EndTurnAction;
+  | EndTurnAction
+  | BuyDevCardAction;
 
 export type CatanConfig = {
   cardDiscardLimit: number;
@@ -166,11 +172,12 @@ export type CatanConfig = {
 
 export enum DevelopmentCardType {
   KNIGHT = "knight",
-  PLUS_ONE_VP = "plusOneVP",
+  VICTORY_POINT = "victoryPoint",
 }
 
-export type DevelopmentCard = {
-  type: DevelopmentCardType;
+export type DevelopmentCards = {
+  [DevelopmentCardType.KNIGHT]: number;
+  [DevelopmentCardType.VICTORY_POINT]: number;
 };
 
 export type Bank = {
@@ -179,7 +186,7 @@ export type Bank = {
   ore: number;
   wheat: number;
   sheep: number;
-  developmentCards: DevelopmentCard[];
+  developmentCards: DevelopmentCards;
 };
 
 export enum BuildingType {
@@ -193,6 +200,7 @@ export enum PlayerTurnState {
   PLACING_SETTLEMENT = "placingSettlement",
   PLACING_CITY = "placingCity",
   PLACING_ROAD = "placingRoad",
+  PLAYING_DEV_CARD = "playingDevCard",
   CREATING_BANK_TRADE_REQUEST = "creatingBankTrade",
   CREATING_PLAYER_TRADE_REQUEST = "creatingPlayerTradeRequest",
   SUBMITTED_PLAYER_TRADE_REQUEST = "submittedPlayerTradeRequest",
@@ -245,7 +253,7 @@ export type CatanPlayer = GamePlayer & {
     wheat: number;
     sheep: number;
   };
-  developmentCards: DevelopmentCard[];
+  developmentCards: DevelopmentCards;
   points: {
     public: number; /// includes cities, settlements, longest road, largest army
     private: number; /// includes development cards victory poitns

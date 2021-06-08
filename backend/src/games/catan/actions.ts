@@ -1,4 +1,4 @@
-import { sum } from "lodash";
+import { range, shuffle, sum } from "lodash";
 import {
   computeLongestRoad,
   edgeCoordinateEqual,
@@ -289,13 +289,10 @@ const playersVictoryPoints = (state: CatanState, playerId: string) => {
       building.playerId === playerId
   ).length;
 
-  console.log(cityCount, settlementCount, longestRoadPoints, largestArmyPoints);
   const publicPoints =
     2 * cityCount + settlementCount + longestRoadPoints + largestArmyPoints;
 
-  const privatePoints = player.developmentCards.filter(
-    (card) => card.type === DevelopmentCardType.PLUS_ONE_VP
-  ).length;
+  const privatePoints = player.developmentCards.victoryPoint;
 
   return {
     public: publicPoints,
@@ -556,6 +553,8 @@ const changeTurnAction = (
     state.activePlayerTurnState = PlayerTurnState.PLACING_SETTLEMENT;
   } else if (action.turnAction === "buildRoad") {
     state.activePlayerTurnState = PlayerTurnState.PLACING_ROAD;
+  } else if (action.turnAction === "playDevCard") {
+    state.activePlayerTurnState = PlayerTurnState.PLAYING_DEV_CARD;
   } else if (action.turnAction === "startBankTradeRequest") {
     state.activePlayerTurnState = PlayerTurnState.CREATING_BANK_TRADE_REQUEST;
   } else if (action.turnAction === "startPlayerTradeRequest") {
@@ -565,6 +564,68 @@ const changeTurnAction = (
   } else {
     throw Error("Invalid turn action");
   }
+
+  return state;
+};
+
+const drawDevelopmentCard = (state: CatanState) => {
+  const { knight, victoryPoint } = state.bank.developmentCards;
+
+  let bankCards = shuffle([
+    ...range(knight).map(() => DevelopmentCardType.KNIGHT),
+    ...range(victoryPoint).map(() => DevelopmentCardType.VICTORY_POINT),
+  ]);
+
+  const drawnCard = bankCards.pop();
+
+  if (!drawnCard) throw new Error("No cards left!");
+
+  state.bank.developmentCards = {
+    knight: bankCards.filter((card) => card === DevelopmentCardType.KNIGHT)
+      .length,
+
+    victoryPoint: bankCards.filter(
+      (card) => card === DevelopmentCardType.VICTORY_POINT
+    ).length,
+  };
+
+  return {
+    drawnCard,
+    state,
+  };
+};
+
+const buyDevCard = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "buyDevCard") {
+    throw Error("Invalid action");
+  }
+
+  const player = getPlayer(state, playerId);
+  const playerIndex = state.players.findIndex(
+    (player) => player.playerId === playerId
+  );
+
+  if (!canBuyDevelopmentCard(player)) {
+    throw new Error("Not enough resources to buy development card");
+  }
+
+  /// Pay for the development card
+  state = resourceFromBankToPlayer(state, playerId, ResourceType.ORE, -1);
+  state = resourceFromBankToPlayer(state, playerId, ResourceType.WHEAT, -1);
+  state = resourceFromBankToPlayer(state, playerId, ResourceType.SHEEP, -1);
+
+  const { drawnCard, state: newState } = drawDevelopmentCard(state);
+  state = newState;
+
+  state.players[playerIndex].developmentCards[drawnCard] += 1;
 
   return state;
 };
@@ -726,6 +787,7 @@ const actionMap: { [name: string]: ActionHandler } = {
   buildRoad,
   rollDice,
   changeTurnAction,
+  buyDevCard,
   requestTrade,
   acceptTrade,
   completeTrade,

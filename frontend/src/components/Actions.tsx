@@ -9,6 +9,7 @@ import {
   ChangeTurnAction,
   TurnAction,
   GamePhase,
+  BuyDevCardAction,
 } from "../state/game_types";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { useGameViewState } from "./GameView";
@@ -95,6 +96,13 @@ const Actions = ({}) => {
     }
   };
 
+  const onBuyDevCard = async () => {
+    if (isIdle && canBuyDevelopmentCard(state)) {
+      const action: BuyDevCardAction = { name: "buyDevCard" };
+      await performAction(action);
+    }
+  };
+
   if (
     yourTurn &&
     state.activePlayerTurnState ===
@@ -159,7 +167,8 @@ const Actions = ({}) => {
           justifyContent="left"
           flex="1"
           colorScheme="orange"
-          disabled={!isIdle || !(state.you.developmentCards.length > 0)}
+          disabled={!isIdle || !(state.you.developmentCards.knight > 0)}
+          onClick={onChangeTurnAction("playDevCard")}
         >
           Play dev card
         </Button>
@@ -169,6 +178,7 @@ const Actions = ({}) => {
           flex="1"
           colorScheme="orange"
           disabled={!isIdle || !canBuyDevelopmentCard(state)}
+          onClick={onBuyDevCard}
         >
           Buy dev card
         </Button>
