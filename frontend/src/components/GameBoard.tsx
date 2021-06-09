@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/layout";
+import { Box, Center } from "@chakra-ui/layout";
 import React, { useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
@@ -15,6 +15,7 @@ import {
   BuildSettlementAction,
   EdgeCoordinate,
   GameTile,
+  PlaceRobberAction,
   PlayerTurnState,
   ResourceType,
   RollDiceAction,
@@ -25,23 +26,19 @@ import {
 import gameTheme from "../utils/game_theme";
 import { Button, ButtonGroup, IconButton } from "@chakra-ui/button";
 import {
+  FaArrowCircleDown,
   FaHammer,
-  FaNetworkWired,
   FaSearchMinus,
   FaSearchPlus,
-  FaWarehouse,
 } from "react-icons/fa";
 import { range } from "../utils/utils";
 import {
-  EdgeDir,
   getCommonVertexCoordinate,
   getCommonEdgeCoordinate,
-  hasTile,
   locationToPosition,
-  tileAlongEdge,
   vertexCoordinateEqual,
-  VertexDir,
   edgeCoordinateEqual,
+  vectorsEqual,
 } from "../utils/board_utils";
 import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
@@ -285,12 +282,20 @@ const Building = styled.div<{ playerColor: string }>`
   align-items: center;
 `;
 
+const PlaceRobberButtonContainer = styled.div`
+  transform: translate(-50%, -50%);
+  width: 100px;
+  text-align: center;
+`;
+
 const TileIcon = ({
   diceNumber,
   tileType,
+  hasRobber,
 }: {
   diceNumber: string;
   tileType: TileType;
+  hasRobber: boolean;
 }) => {
   const resource = tileType as unknown as ResourceType;
   const textColor = useColorModeValue("gray.800", "gray.100");
@@ -301,10 +306,17 @@ const TileIcon = ({
     return (
       <TileIconContainer>
         <Tooltip label={label}>
-          <Icon />
+          <Box opacity={hasRobber ? 0.3 : 1.0}>
+            <Icon />
+          </Box>
         </Tooltip>
 
-        <Box fontSize="24px" fontWeight="bold" color={textColor}>
+        <Box
+          fontSize="24px"
+          fontWeight="bold"
+          color={hasRobber ? "red" : textColor}
+          opacity={hasRobber ? 0.3 : 1.0}
+        >
           {diceNumber}
         </Box>
       </TileIconContainer>
@@ -352,6 +364,7 @@ const GameBoard = ({}) => {
     board: { tiles },
     buildings,
     roads,
+    robber,
   } = gameState.state;
 
   const rollBacker = useColorModeValue("#aaa", "#121212");
@@ -381,6 +394,9 @@ const GameBoard = ({}) => {
     activePlayerTurnState === PlayerTurnState.PLACING_SETTLEMENT;
   const placingBuilding = yourTurn && (placingCity || placingSettlement);
 
+  const placingRobber =
+    yourTurn && activePlayerTurnState === PlayerTurnState.MUST_PLACE_ROBBER;
+
   const { performAction } = useGameAction();
 
   const onPlaceBuilding = (location: VertexCoordinate) => async () => {
@@ -401,6 +417,17 @@ const GameBoard = ({}) => {
     if (placingRoad) {
       let action: BuildRoadAction = {
         name: "buildRoad",
+        location,
+      };
+
+      await performAction(action);
+    }
+  };
+
+  const onPlaceRobber = (location: TileCoordinate) => async () => {
+    if (placingRobber) {
+      let action: PlaceRobberAction = {
+        name: "placeRobber",
         location,
       };
 
@@ -531,6 +558,7 @@ const GameBoard = ({}) => {
                   <TileIcon
                     diceNumber={diceNumber > 0 ? diceNumber.toString() : ""}
                     tileType={tileType}
+                    hasRobber={vectorsEqual(robber, { x, y, z })}
                   />
 
                   <TileImage src={tileBackgroundImage} />
@@ -614,6 +642,18 @@ const GameBoard = ({}) => {
                           />
                         </VertexContainer>
                       ))}
+
+                  {placingRobber && (
+                    <PlaceRobberButtonContainer>
+                      <IconButton
+                        variant="solid"
+                        colorScheme="purple"
+                        icon={<FaArrowCircleDown />}
+                        aria-label="Place robber"
+                        onClick={onPlaceRobber({ x, y, z })}
+                      />
+                    </PlaceRobberButtonContainer>
+                  )}
                 </ButtonsContainer>
               </>
             ))}

@@ -79,7 +79,11 @@ const Actions = ({}) => {
   const isIdle =
     yourTurn && state.activePlayerTurnState === PlayerTurnState.IDLE;
 
-  const mandatoryAction = state.you.mustDiscard > 0;
+  const mandatoryAction =
+    state.you.mustDiscard > 0 ||
+    state.phase === GamePhase.ROBBER_ROLLER ||
+    state.activePlayerTurnState === PlayerTurnState.MUST_PLACE_ROBBER ||
+    state.activePlayerTurnState === PlayerTurnState.MUST_ROLL;
 
   const onDiceRoll = async () => {
     if (mustRoll) {

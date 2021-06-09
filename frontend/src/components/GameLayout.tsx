@@ -1,7 +1,5 @@
 import { Box } from "@chakra-ui/layout";
 import React, { ReactNode } from "react";
-import { GameState } from "../state/atoms";
-import Layout from "./Layout";
 
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { responsiveVisibiity } from "../responsiveUtils";

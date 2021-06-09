@@ -153,6 +153,16 @@ export type BuyDevCardAction = {
   name: "buyDevCard";
 };
 
+export type DiscardCardsAction = {
+  name: "discardCards";
+  discarding: ResourceCount[];
+};
+
+export type PlaceRobberAction = {
+  name: "placeRobber";
+  location: TileCoordinate;
+};
+
 export type CatanAction =
   | BuildSettlementAction
   | BuildCityAction
@@ -163,6 +173,8 @@ export type CatanAction =
   | AcceptTradeAction
   | CompleteTradeAction
   | BankTradeAction
+  | DiscardCardsAction
+  | PlaceRobberAction
   | EndTurnAction
   | BuyDevCardAction;
 
@@ -197,6 +209,7 @@ export enum BuildingType {
 export enum PlayerTurnState {
   IDLE = "idle",
   MUST_ROLL = "mustRoll",
+  MUST_PLACE_ROBBER = "mustPlaceRobber",
   PLACING_SETTLEMENT = "placingSettlement",
   PLACING_CITY = "placingCity",
   PLACING_ROAD = "placingRoad",
@@ -296,6 +309,7 @@ export type CatanPlayersState = {
   roads: Road[];
   you: CatanPlayer;
   players: CatanOtherPlayer[];
+  robber: TileCoordinate | null;
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
   activeTradeRequest?: TradeRequest;

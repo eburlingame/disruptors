@@ -9,19 +9,23 @@ import {
   GamePhase,
   PlayerTurnState,
   ResourceType,
+  DiscardCardsAction,
 } from "../state/game_types";
 import { Button } from "@chakra-ui/button";
 import { sum } from "lodash";
+import { useGameAction } from "../hooks/game";
 
 const emptyDiscardCounts = () =>
   Object.values(ResourceType).map((resource) => ({
     resource,
-    discardCount: 0,
+    count: 0,
   }));
 
 const DiscardPicker = ({}) => {
   const { gameState } = useGameViewState();
   const { you } = gameState.state;
+
+  const { performAction } = useGameAction();
 
   const mustDiscard =
     gameState.state.phase === GamePhase.ROBBER_ROLLER && you.mustDiscard > 0;
@@ -37,11 +41,11 @@ const DiscardPicker = ({}) => {
       selected.map((count) => {
         if (
           count.resource === resource &&
-          you.resources[count.resource] > count.discardCount
+          you.resources[count.resource] > count.count
         ) {
           return {
             ...count,
-            discardCount: count.discardCount + 1,
+            count: count.count + 1,
           };
         }
 
@@ -50,27 +54,39 @@ const DiscardPicker = ({}) => {
     );
 
   const leftToPick =
-    you.mustDiscard - sum(selectedForDiscard.map((d) => d.discardCount));
+    you.mustDiscard - sum(selectedForDiscard.map((d) => d.count));
 
   const resourceSelectedCount = (resource: ResourceType) =>
-    selectedForDiscard.find((count) => count.resource === resource)
-      ?.discardCount || 0;
+    selectedForDiscard.find((count) => count.resource === resource)?.count || 0;
+
+  const onSubmitDiscard = async () => {
+    if (leftToPick === 0) {
+      const action: DiscardCardsAction = {
+        name: "discardCards",
+        discarding: selectedForDiscard,
+      };
+
+      await performAction(action);
+    }
+  };
 
   return (
     <Box>
-      {mustDiscard && (
-        <HStack fontWeight="bold" marginBottom="4">
-          <Box color="red.400">{`You must discard ${you.mustDiscard} cards.`}</Box>
-          {leftToPick > 0 && (
-            <Box color="red.400">{`Select ${leftToPick} cards:`}</Box>
-          )}
+      <HStack fontWeight="bold" marginBottom="4">
+        <Box color="red.400">{`You must discard ${you.mustDiscard} cards.`}</Box>
+        {leftToPick > 0 && (
+          <Box color="red.400">{`Select ${leftToPick} cards:`}</Box>
+        )}
 
-          <Button onClick={reset}>Reset</Button>
-          <Button disabled={leftToPick > 0} colorScheme="green">
-            Done
-          </Button>
-        </HStack>
-      )}
+        <Button onClick={reset}>Reset</Button>
+        <Button
+          disabled={leftToPick > 0}
+          colorScheme="green"
+          onClick={onSubmitDiscard}
+        >
+          Done
+        </Button>
+      </HStack>
 
       <HStack justifyContent="space-between">
         <HStack alignItems="stretch" overflowY="scroll">

@@ -540,6 +540,11 @@ const rollDice = (
 
       return player;
     });
+
+    if (state.players.every(({ mustDiscard }) => mustDiscard === 0)) {
+      state.phase = GamePhase.PLAYING;
+      state.activePlayerTurnState = PlayerTurnState.MUST_PLACE_ROBBER;
+    }
   }
   /// Otherwise, distribute resources normally
   else {
@@ -651,6 +656,95 @@ const buyDevCard = (
   state = newState;
 
   state.players[playerIndex].developmentCards[drawnCard] += 1;
+
+  return state;
+};
+
+const playDevCard = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  // if (state.activePlayerId !== playerId) {
+  //   throw new Error("Not your turn");
+  // }
+
+  // if (action.name !== "buyDevCard") {
+  //   throw Error("Invalid action");
+  // }
+
+  // const player = getPlayer(state, playerId);
+  // const playerIndex = getPlayerIndex(state, playerId);
+
+  // if (!canBuyDevelopmentCard(player)) {
+  //   throw new Error("Not enough resources to buy development card");
+  // }
+
+  // /// Pay for the development card
+  // state = resourceFromBankToPlayer(state, playerId, ResourceType.ORE, -1);
+  // state = resourceFromBankToPlayer(state, playerId, ResourceType.WHEAT, -1);
+  // state = resourceFromBankToPlayer(state, playerId, ResourceType.SHEEP, -1);
+
+  // const { drawnCard, state: newState } = drawDevelopmentCard(state);
+  // state = newState;
+
+  // state.players[playerIndex].developmentCards[drawnCard] += 1;
+
+  return state;
+};
+
+const discardCards = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "discardCards") {
+    throw Error("Invalid action");
+  }
+
+  if (state.phase !== GamePhase.ROBBER_ROLLER) {
+    throw new Error("No need to discard");
+  }
+
+  const playerIndex = getPlayerIndex(state, playerId);
+
+  /// Discard the given resource
+  action.discarding.forEach(({ resource, count }) => {
+    state = resourceFromBankToPlayer(state, playerId, resource, -count);
+    state.players[playerIndex].mustDiscard -= count;
+  });
+
+  if (state.players.every(({ mustDiscard }) => mustDiscard === 0)) {
+    state.phase = GamePhase.PLAYING;
+    state.activePlayerTurnState = PlayerTurnState.MUST_PLACE_ROBBER;
+  }
+
+  return state;
+};
+
+const placeRobber = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "placeRobber") {
+    throw Error("Invalid action");
+  }
+
+  if (state.activePlayerTurnState !== PlayerTurnState.MUST_PLACE_ROBBER) {
+    throw new Error("No need to place robber");
+  }
+
+  state.robber = action.location;
+  state.activePlayerTurnState = PlayerTurnState.IDLE;
 
   return state;
 };
@@ -817,6 +911,8 @@ const actionMap: { [name: string]: ActionHandler } = {
   acceptTrade,
   completeTrade,
   bankTrade,
+  discardCards,
+  placeRobber,
   endTurn,
 };
 
