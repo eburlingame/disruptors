@@ -29,6 +29,7 @@ import CreateTradeRequest from "./CreatePlayerTradeRequest";
 import CompleteTrade from "./CompleteTrade";
 import AcceptTrade from "./AcceptTrade";
 import CreateBankTradeRequest from "./CreateBankTradeRequest";
+import StealCard from "./StealCard";
 
 const canBuildRoad = (state: CatanPlayersState): boolean =>
   state.you.resources.brick >= 1 && state.you.resources.wood >= 1;
@@ -83,6 +84,7 @@ const Actions = ({}) => {
     state.you.mustDiscard > 0 ||
     state.phase === GamePhase.ROBBER_ROLLER ||
     state.activePlayerTurnState === PlayerTurnState.MUST_PLACE_ROBBER ||
+    state.activePlayerTurnState === PlayerTurnState.MUST_STEAL_CARD ||
     state.activePlayerTurnState === PlayerTurnState.MUST_ROLL;
 
   const onDiceRoll = async () => {
@@ -112,6 +114,13 @@ const Actions = ({}) => {
       await performAction(action);
     }
   };
+
+  if (
+    yourTurn &&
+    state.activePlayerTurnState === PlayerTurnState.MUST_STEAL_CARD
+  ) {
+    return <StealCard />;
+  }
 
   if (
     yourTurn &&

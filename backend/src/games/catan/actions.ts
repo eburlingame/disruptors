@@ -1,4 +1,4 @@
-import { range, shuffle, sum } from "lodash";
+import { first, range, shuffle, sum } from "lodash";
 import {
   computeLongestRoad,
   edgeCoordinateEqual,
@@ -317,6 +317,21 @@ const computeVictoryPoints = (state: CatanState): CatanState => {
       points: playersVictoryPoints(state, player.playerId),
     })),
   };
+};
+
+const pickRandomResource = (
+  state: CatanState,
+  playerId: string
+): ResourceType | undefined => {
+  const player = getPlayer(state, playerId);
+
+  const resourceCards = shuffle(
+    Object.entries(player.resources).flatMap(([resource, count]) =>
+      range(count).map(() => resource as ResourceType)
+    )
+  );
+
+  return first(resourceCards);
 };
 
 const buildSettlement = (
@@ -744,6 +759,44 @@ const placeRobber = (
   }
 
   state.robber = action.location;
+  state.activePlayerTurnState = PlayerTurnState.MUST_STEAL_CARD;
+
+  return state;
+};
+
+const stealCard = (
+  state: CatanState,
+  playerId: string,
+  action: CatanAction
+): CatanState => {
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
+
+  if (action.name !== "stealCard") {
+    throw Error("Invalid action");
+  }
+
+  if (state.activePlayerTurnState !== PlayerTurnState.MUST_STEAL_CARD) {
+    throw new Error("No need to steal a card");
+  }
+
+  if (
+    !state.players
+      .filter((player) => player.playerId !== playerId)
+      .some((player) => player.playerId === action.stealFrom)
+  ) {
+    throw new Error("Invalid player to steal from");
+  }
+
+  const resourceToSteal = pickRandomResource(state, action.stealFrom);
+
+  if (resourceToSteal) {
+    tradePlayerResource(state, playerId, action.stealFrom, resourceToSteal, 1);
+  } else {
+    console.warn("Player has no cards to steal");
+  }
+
   state.activePlayerTurnState = PlayerTurnState.IDLE;
 
   return state;
@@ -913,6 +966,7 @@ const actionMap: { [name: string]: ActionHandler } = {
   bankTrade,
   discardCards,
   placeRobber,
+  stealCard,
   endTurn,
 };
 

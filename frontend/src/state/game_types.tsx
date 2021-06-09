@@ -163,6 +163,11 @@ export type PlaceRobberAction = {
   location: TileCoordinate;
 };
 
+export type StealCardAction = {
+  name: "stealCard";
+  stealFrom: string;
+};
+
 export type CatanAction =
   | BuildSettlementAction
   | BuildCityAction
@@ -175,6 +180,7 @@ export type CatanAction =
   | BankTradeAction
   | DiscardCardsAction
   | PlaceRobberAction
+  | StealCardAction
   | EndTurnAction
   | BuyDevCardAction;
 
@@ -210,10 +216,13 @@ export enum PlayerTurnState {
   IDLE = "idle",
   MUST_ROLL = "mustRoll",
   MUST_PLACE_ROBBER = "mustPlaceRobber",
+  MUST_STEAL_CARD = "mustStealCard",
+
   PLACING_SETTLEMENT = "placingSettlement",
   PLACING_CITY = "placingCity",
   PLACING_ROAD = "placingRoad",
   PLAYING_DEV_CARD = "playingDevCard",
+
   CREATING_BANK_TRADE_REQUEST = "creatingBankTrade",
   CREATING_PLAYER_TRADE_REQUEST = "creatingPlayerTradeRequest",
   SUBMITTED_PLAYER_TRADE_REQUEST = "submittedPlayerTradeRequest",

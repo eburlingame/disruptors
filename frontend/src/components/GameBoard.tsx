@@ -24,7 +24,7 @@ import {
   VertexCoordinate,
 } from "../state/game_types";
 import gameTheme from "../utils/game_theme";
-import { Button, ButtonGroup, IconButton } from "@chakra-ui/button";
+import { ButtonGroup, IconButton } from "@chakra-ui/button";
 import {
   FaArrowCircleDown,
   FaHammer,
