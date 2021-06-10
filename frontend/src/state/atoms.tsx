@@ -8,9 +8,16 @@ export type RoomPlayer = {
   isHost: boolean;
 };
 
+export type GameActionRecord = {
+  id: string; /// unique action id
+  at: number; /// date
+  who: string; /// playerId
+  action: CatanAction;
+};
+
 export type GameState = {
   state: CatanPlayersState;
-  actions: CatanAction[];
+  actions: GameActionRecord[];
 };
 
 export enum RoomPhase {

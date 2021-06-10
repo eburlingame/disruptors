@@ -384,6 +384,7 @@ const GameBoard = ({}) => {
 
   const lastDiceRoll: RollDiceAction | undefined = last(
     gameState.actions
+      .map(({ action }) => action)
       .filter(({ name }) => name === "rollDice")
       .map((a) => a as RollDiceAction)
   );

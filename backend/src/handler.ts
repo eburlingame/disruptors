@@ -472,7 +472,12 @@ export default class Handler {
 
       /// Update the room's state and action list
       room.gameState.state = newState;
-      room.gameState.actions.push(preparedAction);
+      room.gameState.actions.push({
+        id: uuid(),
+        at: new Date().getTime(),
+        who: player.playerId,
+        action: preparedAction,
+      });
     } catch (e) {
       console.warn(e);
       return errorResponse(request, e.message);

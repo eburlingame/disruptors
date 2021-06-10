@@ -1,17 +1,21 @@
-import {
-  Building,
-  CatanPlayersState,
-  CatanState,
-  EdgeCoordinate,
-  ExchangeRate,
-  GameBoard,
-  GameTile,
-  PortResource,
-  Road,
-  TileCoordinate,
-  VertexCoordinate,
-} from "../state/game_types";
 import { range } from "./utils";
+
+import {
+  GameTile,
+  TileCoordinate,
+  EdgeCoordinate,
+  VertexCoordinate,
+  ExchangeRate,
+  PortResource,
+  CatanState,
+  GameBoard,
+  Road,
+  Building,
+  ResourceType,
+  TileType,
+  BuildingType,
+  CatanPlayer,
+} from "../state/game_types";
 
 export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
   x: x - y,
@@ -458,4 +462,69 @@ export const playerHasBuildingNextToRobber = (
   }
 
   return false;
+};
+
+export type ResourceDistribution = {
+  [playerId: string]: {
+    [ResourceType.BRICK]: number;
+    [ResourceType.ORE]: number;
+    [ResourceType.WHEAT]: number;
+    [ResourceType.SHEEP]: number;
+    [ResourceType.WOOD]: number;
+  };
+};
+
+export const tileTypeToResourceType = (
+  tileType: TileType
+): ResourceType | undefined => {
+  if (Object.values(ResourceType).includes(tileType as any)) {
+    return tileType as unknown as ResourceType;
+  }
+
+  return undefined;
+};
+
+export const distributeResources = (
+  tiles: GameTile[],
+  robber: TileCoordinate | null,
+  players: CatanPlayer[],
+  buildings: Building[],
+  diceTotal: number
+): ResourceDistribution => {
+  if (diceTotal === 7) return {};
+
+  const distribution: ResourceDistribution = players.reduce(
+    (obj, player) => ({
+      ...obj,
+      [player.playerId]: {
+        [ResourceType.BRICK]: 0,
+        [ResourceType.ORE]: 0,
+        [ResourceType.WHEAT]: 0,
+        [ResourceType.SHEEP]: 0,
+        [ResourceType.WOOD]: 0,
+      },
+    }),
+    {}
+  );
+
+  buildings.forEach(({ type, location, playerId: tilesPlayerId }) => {
+    tilesTouchingVertex(tiles, location)
+      .filter(({ diceNumber }) => diceNumber === diceTotal)
+      .filter(({ location }) =>
+        robber ? !vectorsEqual(location, robber) : true
+      )
+      .forEach((gameTile) => {
+        const resourceType = tileTypeToResourceType(gameTile.tileType);
+
+        if (resourceType) {
+          if (type === BuildingType.Settlement) {
+            distribution[tilesPlayerId][resourceType] += 1;
+          } else if (type === BuildingType.City) {
+            distribution[tilesPlayerId][resourceType] += 2;
+          }
+        }
+      });
+  });
+
+  return distribution;
 };

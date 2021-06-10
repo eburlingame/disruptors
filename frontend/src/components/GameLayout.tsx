@@ -11,6 +11,7 @@ import Players from "./Players";
 import Actions, { areActionsAvailable } from "./Actions";
 import { useGameViewState } from "./GameView";
 import { GamePhase } from "../state/game_types";
+import Log from "./Log";
 
 const GameColumn = ({
   flex,
@@ -106,18 +107,6 @@ const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
 };
 
 const GameLayout = () => {
-  const {
-    gameState: { state },
-  } = useGameViewState();
-
-  const yourTurn =
-    state.activePlayerId === state.you.playerId &&
-    state.phase === GamePhase.PLAYING;
-
-  const actionsAvailable = areActionsAvailable(state);
-
-  const Chat = () => <div>Chat</div>;
-
   return (
     <Box flex="1" display="flex">
       {/* Left columns */}
@@ -160,7 +149,7 @@ const GameLayout = () => {
                 ),
               },
               { name: "Players", content: Players },
-              { name: "Chat", content: Chat },
+              { name: "Log", content: Log },
             ]}
           />
         </TabContainer>
@@ -200,7 +189,7 @@ const GameLayout = () => {
         <TabContainer flex="2">
           <TabSet
             tabs={[
-              { name: "Chat", content: Chat },
+              { name: "Log", content: Log },
               {
                 name: "Players",
                 shownOn: "md",

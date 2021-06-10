@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
-import { CgCloseO } from "react-icons/cg";
-import gameTheme, { resources } from "../utils/game_theme";
+import gameTheme from "../utils/game_theme";
 import {
   RequestTradeAction,
   ChangeTurnAction,

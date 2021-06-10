@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, VStack } from "@chakra-ui/layout";
+import { HStack, VStack } from "@chakra-ui/layout";
 import gameTheme from "../utils/game_theme";
 import {
   CatanPlayersState,
@@ -20,7 +20,6 @@ import {
   FaDollarSign,
   FaExchangeAlt,
   FaMagic,
-  FaStopCircle,
   FaTimes,
   FaUniversity,
 } from "react-icons/fa";

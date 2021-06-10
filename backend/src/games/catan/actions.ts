@@ -1,12 +1,14 @@
 import { first, range, shuffle, sum } from "lodash";
 import {
   computeLongestRoad,
+  distributeResources,
   edgeCoordinateEqual,
   findTile,
   getCommonEdgeCoordinate,
   getCommonVertexCoordinate,
   playerHasBuildingNextToRobber,
   tilesTouchingVertex,
+  tileTypeToResourceType,
   vectorsEqual,
   vertexCoordinateEqual,
 } from "./board_utils";
@@ -24,6 +26,7 @@ import {
   ResourceCount,
   ResourceType,
   TileCoordinate,
+  TileType,
   TradeAcceptance,
   TradeRequest,
   VertexCoordinate,
@@ -261,8 +264,8 @@ const collectResourceFromTile = (
 ): CatanState => {
   const { tileType } = gameTile;
 
-  if (Object.values(ResourceType).includes(tileType as any)) {
-    const resourceType = tileType as unknown as ResourceType;
+  const resourceType = tileTypeToResourceType(tileType);
+  if (resourceType) {
     return resourceFromBankToPlayer(state, playerId, resourceType, quantity);
   }
 
@@ -537,7 +540,6 @@ const rollDice = (
     throw Error("Invalid action");
   }
 
-  const { tiles } = state.board;
   const diceTotal = sum(action.values);
 
   /// Robber rolled
@@ -564,16 +566,23 @@ const rollDice = (
   }
   /// Otherwise, distribute resources normally
   else {
-    state.buildings.map(({ type, location, playerId: tilesPlayerId }) => {
-      tilesTouchingVertex(tiles, location)
-        .filter(({ diceNumber }) => diceNumber === diceTotal)
-        .forEach((gameTile) => {
-          if (type === BuildingType.Settlement) {
-            state = collectResourceFromTile(state, tilesPlayerId, gameTile, 1);
-          } else if (type === BuildingType.City) {
-            state = collectResourceFromTile(state, tilesPlayerId, gameTile, 2);
-          }
-        });
+    const disribution = distributeResources(
+      state.board.tiles,
+      state.robber,
+      state.players,
+      state.buildings,
+      diceTotal
+    );
+
+    Object.entries(disribution).forEach(([playerId, got]) => {
+      Object.entries(got).forEach(([resource, count]) => {
+        state = resourceFromBankToPlayer(
+          state,
+          playerId,
+          resource as ResourceType,
+          count
+        );
+      });
     });
 
     state.activePlayerTurnState = PlayerTurnState.IDLE;

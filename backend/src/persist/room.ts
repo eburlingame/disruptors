@@ -7,9 +7,16 @@ export type RoomPlayer = {
   isHost: boolean;
 };
 
+export type GameActionRecord = {
+  id: string;
+  at: number; // date
+  who: string; /// playerId
+  action: any;
+};
+
 export type PersistedGameState = {
   state: any;
-  actions: any[];
+  actions: GameActionRecord[];
 };
 
 export enum RoomPhase {
