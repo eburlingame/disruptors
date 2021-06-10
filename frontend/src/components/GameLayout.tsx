@@ -69,7 +69,7 @@ type TabDefn = {
 
 const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
   return (
-    <Tabs variant="enclosed">
+    <Tabs variant="enclosed" display="flex" flexDirection="column" flex="1">
       <TabList>
         {tabs
           .filter(({ shownIf }) => (shownIf != undefined ? shownIf : true))
@@ -93,11 +93,13 @@ const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
         borderTop="none"
         flex="1"
         roundedBottom="md"
+        display="flex"
+        flexDirection="column"
       >
         {tabs.map(({ hiddenOn, shownOn, content: ContentComponent }) => (
           <TabPanel
             display={responsiveVisibiity(hiddenOn, shownOn, "flex", "none")}
-            height="100%"
+            flex="1"
             flexDirection="column"
           >
             <ContentComponent />
@@ -126,9 +128,11 @@ const GameLayout = () => {
       <GameColumn flex="2">
         <Box
           bgColor="blue.800"
-          flex="1"
           alignSelf="stretch"
           display={responsiveVisibiity("xs", "none", "inherit", "none")}
+          flex="1 1 auto"
+          height="0px"
+          overflowY="hidden"
         >
           <Board />
         </Box>
@@ -182,7 +186,7 @@ const GameLayout = () => {
             tabs={[
               {
                 name: "Bank",
-                content: () => <Bank />,
+                content: Bank,
               },
             ]}
           />
@@ -201,7 +205,7 @@ const GameLayout = () => {
           />
         </TabContainer>
 
-        <TabContainer flex="1">
+        <TabContainer>
           <TabSet tabs={[{ name: "Actions", content: Actions }]} />
         </TabContainer>
       </GameColumn>

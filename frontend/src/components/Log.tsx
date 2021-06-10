@@ -160,17 +160,15 @@ const Log = ({}) => {
   }, [actions.length]);
 
   return (
-    <Box overflowY="scroll" flex="1" maxH="500px" ref={ref}>
-      <Box>
-        {actions.map(({ id, at, who, action }) => (
-          <ActionRow
-            key={id}
-            player={playerMap[who]}
-            action={action}
-            players={playerMap}
-          />
-        ))}
-      </Box>
+    <Box flex="1 1 auto" height="0px" overflowY="scroll" ref={ref}>
+      {actions.map(({ id, at, who, action }) => (
+        <ActionRow
+          key={id}
+          player={playerMap[who]}
+          action={action}
+          players={playerMap}
+        />
+      ))}
     </Box>
   );
 };

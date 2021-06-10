@@ -49,10 +49,17 @@ import { FormLabel } from "@chakra-ui/form-control";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { useTheme } from "@chakra-ui/system";
 
+const TILE_WIDTH = 146;
+const TILE_HEIGHT = 169;
+
+const BOARD_PADDING = 230;
+
+const CONTAINER_WIDTH = 5 * TILE_WIDTH + BOARD_PADDING;
+const CONTAINER_HEIGHT = 4 * TILE_HEIGHT + BOARD_PADDING;
+
 const Container = styled.div<{ backgroundColor: string }>`
   width: 100%;
   height: 100%;
-  min-height: 400px;
   overflow: hidden;
   position: relative;
   background-color: ${(props) => props.backgroundColor};
@@ -61,17 +68,9 @@ const Container = styled.div<{ backgroundColor: string }>`
 const OverflowContainer = styled.div`
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden; // scroll
   position: relative;
 `;
-
-const TILE_WIDTH = 146;
-const TILE_HEIGHT = 169;
-
-const BOARD_PADDING = 230;
-
-const CONTAINER_WIDTH = 5 * TILE_WIDTH + BOARD_PADDING;
-const CONTAINER_HEIGHT = 4 * TILE_HEIGHT + BOARD_PADDING;
 
 const ZoomControls = styled.div`
   position: absolute;
@@ -100,6 +99,9 @@ const DiceValueContainerTitle = styled.div`
 
 const TileContainer = styled.div<{ zoom: number }>`
   position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 
   width: ${(props) => CONTAINER_WIDTH * props.zoom}px;
   height: ${(props) => CONTAINER_HEIGHT * props.zoom}px;
