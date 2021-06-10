@@ -153,6 +153,11 @@ export type BuyDevCardAction = {
   name: "buyDevCard";
 };
 
+export type PlayDevCardAction = {
+  name: "playDevCard";
+  card: DevelopmentCardType;
+};
+
 export type DiscardCardsAction = {
   name: "discardCards";
   discarding: ResourceCount[];
@@ -182,7 +187,8 @@ export type CatanAction =
   | PlaceRobberAction
   | StealCardAction
   | EndTurnAction
-  | BuyDevCardAction;
+  | BuyDevCardAction
+  | PlayDevCardAction;
 
 export type CatanConfig = {
   cardDiscardLimit: number;

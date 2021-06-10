@@ -1,9 +1,17 @@
 import {
+  Building,
+  CatanPlayersState,
+  CatanState,
   EdgeCoordinate,
+  ExchangeRate,
+  GameBoard,
   GameTile,
+  PortResource,
+  Road,
   TileCoordinate,
   VertexCoordinate,
 } from "../state/game_types";
+import { range } from "./utils";
 
 export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
   x: x - y,
@@ -54,10 +62,30 @@ export const vertexCoordinateEqual = (
   b: VertexCoordinate
 ): boolean => vectorsEqual(a.tile, b.tile) && a.vertexIndex === b.vertexIndex;
 
+export const vertexCoordinateEquivalent = (
+  tiles: GameTile[],
+  a: VertexCoordinate,
+  b: VertexCoordinate
+) =>
+  vertexCoordinateEqual(
+    getCommonVertexCoordinate(tiles, a),
+    getCommonVertexCoordinate(tiles, b)
+  );
+
 export const edgeCoordinateEqual = (
   a: EdgeCoordinate,
   b: EdgeCoordinate
 ): boolean => vectorsEqual(a.tile, b.tile) && a.edgeIndex === b.edgeIndex;
+
+export const edgeCoordinateEquivalent = (
+  tiles: GameTile[],
+  a: EdgeCoordinate,
+  b: EdgeCoordinate
+) =>
+  edgeCoordinateEqual(
+    getCommonEdgeCoordinate(tiles, a),
+    getCommonEdgeCoordinate(tiles, b)
+  );
 
 export const tileAlongEdge = (
   position: TileCoordinate,
@@ -67,8 +95,14 @@ export const tileAlongEdge = (
   return addVectors(position, delta);
 };
 
+export const findTile = (
+  tiles: GameTile[],
+  position: TileCoordinate
+): GameTile | undefined =>
+  tiles.find(({ location }) => vectorsEqual(location, position));
+
 export const hasTile = (tiles: GameTile[], position: TileCoordinate): boolean =>
-  !!tiles.find(({ location }) => vectorsEqual(location, position));
+  !!findTile(tiles, position);
 
 export const hasTileAlongEdge = (
   tiles: GameTile[],
@@ -76,6 +110,8 @@ export const hasTileAlongEdge = (
   edgeIndex: number
 ) => hasTile(tiles, tileAlongEdge(tile, edgeIndex));
 
+/// Since each vertex coordinate can be represented in multiple ways, this returns a single representation of a
+/// vertex coordinate.
 export const getCommonVertexCoordinate = (
   tiles: GameTile[],
   vertexCoord: VertexCoordinate
@@ -141,6 +177,7 @@ export const getCommonVertexCoordinate = (
   return vertexCoord;
 };
 
+/// Returns the edge 180 degrees behind the given edge
 export const reciropcalEdges: { [index: number]: number } = {
   [EdgeDir.NE]: EdgeDir.SW,
   [EdgeDir.E]: EdgeDir.W,
@@ -149,6 +186,26 @@ export const reciropcalEdges: { [index: number]: number } = {
   [EdgeDir.SW]: EdgeDir.NE,
   [EdgeDir.W]: EdgeDir.E,
   [EdgeDir.NW]: EdgeDir.SE,
+};
+
+/// Maps a given vertex direction to the two edges that touch that vertex
+export const vertexAdjacenies: { [index: number]: EdgeDir[] } = {
+  [VertexDir.N]: [EdgeDir.NW, EdgeDir.NE],
+  [VertexDir.NE]: [EdgeDir.NE, EdgeDir.E],
+  [VertexDir.SE]: [EdgeDir.E, EdgeDir.SE],
+  [VertexDir.S]: [EdgeDir.SE, EdgeDir.SW],
+  [VertexDir.SW]: [EdgeDir.SW, EdgeDir.W],
+  [VertexDir.NW]: [EdgeDir.W, EdgeDir.NW],
+};
+
+/// Maps a given edge direction to its two vertex direction
+export const edgeVerticies: { [index: number]: VertexDir[] } = {
+  [EdgeDir.NE]: [VertexDir.N, VertexDir.NE],
+  [EdgeDir.E]: [VertexDir.NE, VertexDir.SE],
+  [EdgeDir.SE]: [VertexDir.SE, VertexDir.S],
+  [EdgeDir.SW]: [VertexDir.S, VertexDir.SW],
+  [EdgeDir.W]: [VertexDir.SW, VertexDir.NW],
+  [EdgeDir.NW]: [VertexDir.NW, VertexDir.N],
 };
 
 /// Since two tiles can touch each edge, decide which one should draw the vertex button/label
@@ -175,4 +232,230 @@ export const getCommonEdgeCoordinate = (
   }
 
   return edgeCoord;
+};
+
+/// Get the six verticies touching a given tile
+export const tileVerticies = (tiles: GameTile[], location: TileCoordinate) => {
+  return range(6).map((vertexIndex) =>
+    getCommonVertexCoordinate(tiles, { tile: location, vertexIndex })
+  );
+};
+
+/// Return the game tiles which are touching a given vertex
+export const tilesTouchingVertex = (
+  tiles: GameTile[],
+  vertexCoord: VertexCoordinate
+): GameTile[] => {
+  const common = getCommonVertexCoordinate(tiles, vertexCoord);
+  const commonTile = findTile(tiles, common.tile);
+
+  if (!commonTile) throw new Error("Invalid tile?");
+
+  const edges = vertexAdjacenies[common.vertexIndex];
+
+  const otherTiles: any[] = edges
+    .map((edgeIndex) => findTile(tiles, tileAlongEdge(common.tile, edgeIndex)))
+    .filter((t) => t !== undefined);
+
+  return [commonTile, ...otherTiles];
+};
+
+export const edgeToVertices = (tiles: GameTile[], edge: EdgeCoordinate) => {
+  const edges = edgeVerticies[edge.edgeIndex];
+
+  return [
+    getCommonVertexCoordinate(tiles, {
+      tile: edge.tile,
+      vertexIndex: edges[0],
+    }),
+    getCommonVertexCoordinate(tiles, {
+      tile: edge.tile,
+      vertexIndex: edges[1],
+    }),
+  ];
+};
+
+type RoadGraph = { [key: string]: Set<string> };
+
+const vertexKey = ({ tile: { x, y, z }, vertexIndex: v }: VertexCoordinate) =>
+  `${x}|${y}|${z}/${v}`;
+
+const roadsToGraph = (state: CatanState, playerId: string): RoadGraph => {
+  const { tiles } = state.board;
+  const roads = state.roads.filter((road) => road.playerId === playerId);
+
+  let graph: RoadGraph = {};
+
+  const addVertexToGraph = (fromKey: string, toKey: string) => {
+    if (fromKey in graph) {
+      graph[fromKey].add(toKey);
+    } else {
+      graph[fromKey] = new Set([toKey]);
+    }
+  };
+
+  roads.forEach(({ location }) => {
+    const [vertexA, vertexB] = edgeToVertices(tiles, location);
+
+    const keyA = vertexKey(vertexA);
+    const keyB = vertexKey(vertexB);
+
+    addVertexToGraph(keyA, keyB);
+    addVertexToGraph(keyB, keyA);
+  });
+
+  return graph;
+};
+
+const longestPathFrom = (graph: RoadGraph, start: string) => {
+  let stack: { node: string; depth: number }[] = [];
+  let seen = new Set<string>();
+  let maxDepth = 0;
+
+  /// Perform a DFS starting from the given start node
+  stack.push({ node: start, depth: 0 });
+
+  while (stack.length > 0) {
+    const edge = stack.pop();
+    if (!edge) continue;
+
+    /// Keep track of which nodes we've been to
+    seen.add(edge.node);
+
+    /// Keep track of the longest branch
+    if (edge.depth > maxDepth) {
+      maxDepth = edge.depth;
+    }
+
+    const neighbors = graph[edge.node];
+    neighbors.forEach((neighbor) => {
+      if (!seen.has(neighbor)) {
+        stack.push({ node: neighbor, depth: edge.depth + 1 });
+      }
+    });
+  }
+
+  return maxDepth;
+};
+
+export const computeLongestRoad = (
+  state: CatanState,
+  playerId: string
+): number => {
+  const graph = roadsToGraph(state, playerId);
+  const startNodes = Object.keys(graph);
+
+  const longestRoad = Math.max(
+    ...startNodes.map((start) => longestPathFrom(graph, start))
+  );
+
+  return longestRoad;
+};
+
+/// Get a list of all available exchange rate available to a player based on their proximity to ports on the game board
+/// Always returns a 4:1 any ratio
+export const getAvailableExchanges = (
+  state: CatanState,
+  playerId: string
+): ExchangeRate[] => {
+  const { tiles } = state.board;
+
+  const buildings = state.buildings.filter(
+    (building) => building.playerId === playerId
+  );
+
+  const allPorts = state.board.tiles.flatMap(({ ports, location }) =>
+    ports.map((port) => ({
+      port,
+      location: { tile: location, vertexIndex: port.vertexIndex },
+    }))
+  );
+
+  const usablePorts = allPorts
+    .filter(({ location }) =>
+      buildings.some((building) =>
+        vertexCoordinateEquivalent(tiles, building.location, location)
+      )
+    )
+    .map(({ port: { resource, ratio } }) => ({ resource, ratio }));
+
+  return [
+    { resource: PortResource.ANY, ratio: 4 }, /// default maritime trade
+    ...usablePorts,
+  ];
+};
+
+export const roadExists = (
+  roads: Road[],
+  tile: TileCoordinate,
+  edgeIndex: number
+) =>
+  roads.find((road) =>
+    edgeCoordinateEqual({ tile, edgeIndex }, road.location)
+  ) != undefined;
+
+export const buildingExists = (
+  buildings: Building[],
+  tile: TileCoordinate,
+  vertexIndex: number
+) =>
+  buildings.find((building) =>
+    vertexCoordinateEqual({ tile, vertexIndex }, building.location)
+  ) != undefined;
+
+/// Returns true if the given position is next to a current road that the player has built, or a building
+export const isValidRoadPosition = (
+  { tiles }: GameBoard,
+  roads: Road[],
+  buildings: Building[],
+  playerId: string,
+  edgeCoord: EdgeCoordinate
+): boolean => {
+  if (roadExists(roads, edgeCoord.tile, edgeCoord.edgeIndex)) {
+    return false;
+  }
+
+  const yourRoads = roads.filter((road) => road.playerId === playerId);
+  const yourBuildings = buildings.filter(
+    (building) => building.playerId === playerId
+  );
+
+  const occupiedVerticies = [
+    ...yourBuildings.map(({ location }) => location),
+    ...yourRoads.flatMap(({ location }) => edgeToVertices(tiles, location)),
+  ];
+
+  const verticies = edgeToVertices(tiles, edgeCoord);
+
+  const allowBuilding = verticies.some((roadEdgeVertex) =>
+    occupiedVerticies.some((occupiedVertex) =>
+      vertexCoordinateEquivalent(tiles, roadEdgeVertex, occupiedVertex)
+    )
+  );
+
+  return allowBuilding;
+};
+
+/// Returns true if the given playerId has a building adjacent to the given robber position
+export const playerHasBuildingNextToRobber = (
+  tiles: GameTile[],
+  robber: TileCoordinate | null,
+  buildings: Building[],
+  playerId: string
+) => {
+  if (robber) {
+    const verticies = tileVerticies(tiles, robber);
+
+    const playersBuilindgs = buildings.filter(
+      (building) => building.playerId === playerId
+    );
+
+    return verticies.some((vertex) =>
+      playersBuilindgs.some((building) =>
+        vertexCoordinateEquivalent(tiles, vertex, building.location)
+      )
+    );
+  }
+
+  return false;
 };

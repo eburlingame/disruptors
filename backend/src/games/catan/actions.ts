@@ -5,6 +5,7 @@ import {
   findTile,
   getCommonEdgeCoordinate,
   getCommonVertexCoordinate,
+  playerHasBuildingNextToRobber,
   tilesTouchingVertex,
   vectorsEqual,
   vertexCoordinateEqual,
@@ -680,30 +681,29 @@ const playDevCard = (
   playerId: string,
   action: CatanAction
 ): CatanState => {
-  // if (state.activePlayerId !== playerId) {
-  //   throw new Error("Not your turn");
-  // }
+  if (state.activePlayerId !== playerId) {
+    throw new Error("Not your turn");
+  }
 
-  // if (action.name !== "buyDevCard") {
-  //   throw Error("Invalid action");
-  // }
+  if (action.name !== "playDevCard") {
+    throw new Error("Invalid action");
+  }
 
-  // const player = getPlayer(state, playerId);
-  // const playerIndex = getPlayerIndex(state, playerId);
+  const player = getPlayer(state, playerId);
+  const playerIndex = getPlayerIndex(state, playerId);
 
-  // if (!canBuyDevelopmentCard(player)) {
-  //   throw new Error("Not enough resources to buy development card");
-  // }
+  const { card } = action;
 
-  // /// Pay for the development card
-  // state = resourceFromBankToPlayer(state, playerId, ResourceType.ORE, -1);
-  // state = resourceFromBankToPlayer(state, playerId, ResourceType.WHEAT, -1);
-  // state = resourceFromBankToPlayer(state, playerId, ResourceType.SHEEP, -1);
+  if (player.developmentCards[card] <= 0) {
+    throw new Error("You don't have that card to play");
+  }
 
-  // const { drawnCard, state: newState } = drawDevelopmentCard(state);
-  // state = newState;
+  /// Performt the card action
+  if (card === DevelopmentCardType.KNIGHT) {
+    state.activePlayerTurnState = PlayerTurnState.MUST_PLACE_ROBBER;
+  }
 
-  // state.players[playerIndex].developmentCards[drawnCard] += 1;
+  state.players[playerIndex].developmentCards[card] -= 1;
 
   return state;
 };
@@ -713,10 +713,6 @@ const discardCards = (
   playerId: string,
   action: CatanAction
 ): CatanState => {
-  if (state.activePlayerId !== playerId) {
-    throw new Error("Not your turn");
-  }
-
   if (action.name !== "discardCards") {
     throw Error("Invalid action");
   }
@@ -761,6 +757,20 @@ const placeRobber = (
   state.robber = action.location;
   state.activePlayerTurnState = PlayerTurnState.MUST_STEAL_CARD;
 
+  const nobodyToStealFrom = state.players.every(
+    (player) =>
+      !playerHasBuildingNextToRobber(
+        state.board.tiles,
+        state.robber,
+        state.buildings,
+        player.playerId
+      )
+  );
+
+  if (nobodyToStealFrom) {
+    state.activePlayerTurnState = PlayerTurnState.IDLE;
+  }
+
   return state;
 };
 
@@ -781,18 +791,32 @@ const stealCard = (
     throw new Error("No need to steal a card");
   }
 
-  if (
-    !state.players
-      .filter((player) => player.playerId !== playerId)
-      .some((player) => player.playerId === action.stealFrom)
-  ) {
+  const canStealFrom = state.players
+    .filter((player) => player.playerId !== playerId)
+    .filter((player) =>
+      playerHasBuildingNextToRobber(
+        state.board.tiles,
+        state.robber,
+        state.buildings,
+        player.playerId
+      )
+    )
+    .map((player) => player.playerId);
+
+  if (!canStealFrom.includes(action.stealFrom)) {
     throw new Error("Invalid player to steal from");
   }
 
   const resourceToSteal = pickRandomResource(state, action.stealFrom);
 
   if (resourceToSteal) {
-    tradePlayerResource(state, playerId, action.stealFrom, resourceToSteal, 1);
+    state = tradePlayerResource(
+      state,
+      playerId,
+      action.stealFrom,
+      resourceToSteal,
+      1
+    );
   } else {
     console.warn("Player has no cards to steal");
   }
@@ -960,6 +984,7 @@ const actionMap: { [name: string]: ActionHandler } = {
   rollDice,
   changeTurnAction,
   buyDevCard,
+  playDevCard,
   requestTrade,
   acceptTrade,
   completeTrade,

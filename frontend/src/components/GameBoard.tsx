@@ -14,6 +14,7 @@ import {
   BuildRoadAction,
   BuildSettlementAction,
   EdgeCoordinate,
+  GamePhase,
   GameTile,
   PlaceRobberAction,
   PlayerTurnState,
@@ -39,6 +40,7 @@ import {
   vertexCoordinateEqual,
   edgeCoordinateEqual,
   vectorsEqual,
+  isValidRoadPosition,
 } from "../utils/board_utils";
 import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
@@ -359,6 +361,8 @@ const shouldDrawEdge = (
 const GameBoard = ({}) => {
   const { you } = useSessionState();
   const { gameState } = useGameViewState();
+  const { state } = gameState;
+
   const {
     players,
     board: { tiles },
@@ -376,7 +380,7 @@ const GameBoard = ({}) => {
   const zoomOut = () =>
     setZoom((current) => (current > 0.25 ? current - 0.25 : current));
 
-  const { activePlayerId, activePlayerTurnState } = gameState.state;
+  const { activePlayerId, activePlayerTurnState } = state;
 
   const lastDiceRoll: RollDiceAction | undefined = last(
     gameState.actions
@@ -515,6 +519,38 @@ const GameBoard = ({}) => {
     return <></>;
   };
 
+  const hasRobber = (tile: TileCoordinate) => {
+    if (robber) {
+      return vectorsEqual(robber, tile);
+    }
+
+    return false;
+  };
+
+  const canBuildRoad = (edgeCoord: EdgeCoordinate) => {
+    let buildings = state.buildings;
+    let roads = state.roads;
+
+    /// When building initial roads, only allow building off of the first or second buildings
+    if (state.phase === GamePhase.SETUP_ROUND_2) {
+      const playersBuildings = state.buildings.filter(
+        (building) => building.playerId === state.you.playerId
+      );
+
+      /// Only allow building off of the second building the player built
+      buildings = [playersBuildings[1]];
+      roads = [];
+    }
+
+    return isValidRoadPosition(
+      state.board,
+      roads,
+      buildings,
+      state.you.playerId,
+      edgeCoord
+    );
+  };
+
   const tileBackgroundImage = useColorModeValue(tileLightImg, tileDarkImg);
   const boardBackgroundColor = useColorModeValue("#fefefe", "#121212");
 
@@ -558,7 +594,7 @@ const GameBoard = ({}) => {
                   <TileIcon
                     diceNumber={diceNumber > 0 ? diceNumber.toString() : ""}
                     tileType={tileType}
-                    hasRobber={vectorsEqual(robber, { x, y, z })}
+                    hasRobber={hasRobber({ x, y, z })}
                   />
 
                   <TileImage src={tileBackgroundImage} />
@@ -594,7 +630,9 @@ const GameBoard = ({}) => {
                       .filter((index) =>
                         shouldDrawEdge(tiles, { x, y, z }, index)
                       )
-                      .filter((index) => !roadExists({ x, y, z }, index))
+                      .filter((index) =>
+                        canBuildRoad({ tile: { x, y, z }, edgeIndex: index })
+                      )
                       .map((index) => (
                         <EdgeContainer index={index}>
                           <IconButton

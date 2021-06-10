@@ -1,3 +1,4 @@
+import { range } from "lodash";
 import {
   GameTile,
   TileCoordinate,
@@ -6,6 +7,9 @@ import {
   ExchangeRate,
   PortResource,
   CatanState,
+  GameBoard,
+  Road,
+  Building,
 } from "./types";
 
 export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
@@ -105,6 +109,8 @@ export const hasTileAlongEdge = (
   edgeIndex: number
 ) => hasTile(tiles, tileAlongEdge(tile, edgeIndex));
 
+/// Since each vertex coordinate can be represented in multiple ways, this returns a single representation of a
+/// vertex coordinate.
 export const getCommonVertexCoordinate = (
   tiles: GameTile[],
   vertexCoord: VertexCoordinate
@@ -170,6 +176,7 @@ export const getCommonVertexCoordinate = (
   return vertexCoord;
 };
 
+/// Returns the edge 180 degrees behind the given edge
 export const reciropcalEdges: { [index: number]: number } = {
   [EdgeDir.NE]: EdgeDir.SW,
   [EdgeDir.E]: EdgeDir.W,
@@ -180,6 +187,7 @@ export const reciropcalEdges: { [index: number]: number } = {
   [EdgeDir.NW]: EdgeDir.SE,
 };
 
+/// Maps a given vertex direction to the two edges that touch that vertex
 export const vertexAdjacenies: { [index: number]: EdgeDir[] } = {
   [VertexDir.N]: [EdgeDir.NW, EdgeDir.NE],
   [VertexDir.NE]: [EdgeDir.NE, EdgeDir.E],
@@ -189,6 +197,7 @@ export const vertexAdjacenies: { [index: number]: EdgeDir[] } = {
   [VertexDir.NW]: [EdgeDir.W, EdgeDir.NW],
 };
 
+/// Maps a given edge direction to its two vertex direction
 export const edgeVerticies: { [index: number]: VertexDir[] } = {
   [EdgeDir.NE]: [VertexDir.N, VertexDir.NE],
   [EdgeDir.E]: [VertexDir.NE, VertexDir.SE],
@@ -224,6 +233,14 @@ export const getCommonEdgeCoordinate = (
   return edgeCoord;
 };
 
+/// Get the six verticies touching a given tile
+export const tileVerticies = (tiles: GameTile[], location: TileCoordinate) => {
+  return range(6).map((vertexIndex) =>
+    getCommonVertexCoordinate(tiles, { tile: location, vertexIndex })
+  );
+};
+
+/// Return the game tiles which are touching a given vertex
 export const tilesTouchingVertex = (
   tiles: GameTile[],
   vertexCoord: VertexCoordinate
@@ -334,6 +351,8 @@ export const computeLongestRoad = (
   return longestRoad;
 };
 
+/// Get a list of all available exchange rate available to a player based on their proximity to ports on the game board
+/// Always returns a 4:1 any ratio
 export const getAvailableExchanges = (
   state: CatanState,
   playerId: string
@@ -363,4 +382,79 @@ export const getAvailableExchanges = (
     { resource: PortResource.ANY, ratio: 4 }, /// default maritime trade
     ...usablePorts,
   ];
+};
+
+export const roadExists = (
+  roads: Road[],
+  tile: TileCoordinate,
+  edgeIndex: number
+) =>
+  roads.find((road) =>
+    edgeCoordinateEqual({ tile, edgeIndex }, road.location)
+  ) != undefined;
+
+export const buildingExists = (
+  buildings: Building[],
+  tile: TileCoordinate,
+  vertexIndex: number
+) =>
+  buildings.find((building) =>
+    vertexCoordinateEqual({ tile, vertexIndex }, building.location)
+  ) != undefined;
+
+/// Returns true if the given position is next to a current road that the player has built, or a building
+export const isValidRoadPosition = (
+  { tiles }: GameBoard,
+  roads: Road[],
+  buildings: Building[],
+  playerId: string,
+  edgeCoord: EdgeCoordinate
+): boolean => {
+  if (roadExists(roads, edgeCoord.tile, edgeCoord.edgeIndex)) {
+    return false;
+  }
+
+  const yourRoads = roads.filter((road) => road.playerId === playerId);
+  const yourBuildings = buildings.filter(
+    (building) => building.playerId === playerId
+  );
+
+  const occupiedVerticies = [
+    ...yourBuildings.map(({ location }) => location),
+    ...yourRoads.flatMap(({ location }) => edgeToVertices(tiles, location)),
+  ];
+
+  const verticies = edgeToVertices(tiles, edgeCoord);
+
+  const allowBuilding = verticies.some((roadEdgeVertex) =>
+    occupiedVerticies.some((occupiedVertex) =>
+      vertexCoordinateEquivalent(tiles, roadEdgeVertex, occupiedVertex)
+    )
+  );
+
+  return allowBuilding;
+};
+
+/// Returns true if the given playerId has a building adjacent to the given robber position
+export const playerHasBuildingNextToRobber = (
+  tiles: GameTile[],
+  robber: TileCoordinate | null,
+  buildings: Building[],
+  playerId: string
+) => {
+  if (robber) {
+    const verticies = tileVerticies(tiles, robber);
+
+    const playersBuilindgs = buildings.filter(
+      (building) => building.playerId === playerId
+    );
+
+    return verticies.some((vertex) =>
+      playersBuilindgs.some((building) =>
+        vertexCoordinateEquivalent(tiles, vertex, building.location)
+      )
+    );
+  }
+
+  return false;
 };

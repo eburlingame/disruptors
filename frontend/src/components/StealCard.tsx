@@ -1,12 +1,20 @@
 import React, { useState } from "react";
-import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
-import { StealCardAction } from "../state/game_types";
+import { Box, HStack, VStack } from "@chakra-ui/layout";
+import {
+  CatanPlayersState,
+  GameBoard,
+  StealCardAction,
+} from "../state/game_types";
 import { useGameViewState } from "./GameView";
-import { Button, IconButton } from "@chakra-ui/button";
+import { Button } from "@chakra-ui/button";
 import { useGameAction } from "../hooks/game";
 import { useSessionState } from "../hooks/session";
-import { getRoomPlayer } from "../utils/utils";
+import { getRoomPlayer, range } from "../utils/utils";
 import gameTheme from "../utils/game_theme";
+import {
+  playerHasBuildingNextToRobber,
+  tileVerticies,
+} from "../utils/board_utils";
 
 const StealCard = ({}) => {
   const { room } = useSessionState();
@@ -30,6 +38,14 @@ const StealCard = ({}) => {
     <VStack alignItems="stretch">
       {state.players
         .filter((player) => player.playerId !== state.you.playerId)
+        .filter((player) =>
+          playerHasBuildingNextToRobber(
+            state.board.tiles,
+            state.robber,
+            state.buildings,
+            player.playerId
+          )
+        )
         .map((player) => ({
           ...player,
           ...getRoomPlayer(room, player.playerId),

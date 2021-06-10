@@ -63,6 +63,29 @@ export const areActionsAvailable = (state: CatanPlayersState) => {
   return yourTurn;
 };
 
+const hasMandatoryAction = (state: CatanPlayersState) => {
+  if (
+    state.you.mustDiscard > 0 ||
+    state.phase === GamePhase.ROBBER_ROLLER ||
+    state.activePlayerTurnState === PlayerTurnState.MUST_PLACE_ROBBER ||
+    state.activePlayerTurnState === PlayerTurnState.MUST_STEAL_CARD ||
+    state.activePlayerTurnState === PlayerTurnState.MUST_ROLL
+  ) {
+    return true;
+  }
+
+  if (
+    state.phase === GamePhase.SETUP_ROUND_1 &&
+    (state.activePlayerTurnState === PlayerTurnState.PLACING_CITY ||
+      state.activePlayerTurnState === PlayerTurnState.PLACING_SETTLEMENT ||
+      state.activePlayerTurnState === PlayerTurnState.PLACING_ROAD)
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 const Actions = ({}) => {
   const {
     gameState: { state },
@@ -80,12 +103,7 @@ const Actions = ({}) => {
   const isIdle =
     yourTurn && state.activePlayerTurnState === PlayerTurnState.IDLE;
 
-  const mandatoryAction =
-    state.you.mustDiscard > 0 ||
-    state.phase === GamePhase.ROBBER_ROLLER ||
-    state.activePlayerTurnState === PlayerTurnState.MUST_PLACE_ROBBER ||
-    state.activePlayerTurnState === PlayerTurnState.MUST_STEAL_CARD ||
-    state.activePlayerTurnState === PlayerTurnState.MUST_ROLL;
+  const mandatoryAction = hasMandatoryAction(state);
 
   const onDiceRoll = async () => {
     if (mustRoll) {
@@ -236,7 +254,7 @@ const Actions = ({}) => {
         </Button>
       </HStack>
 
-      {isIdle && (
+      {(isIdle || !yourTurn) && (
         <Button
           leftIcon={<FaArrowRight />}
           justifyContent="left"
@@ -248,7 +266,7 @@ const Actions = ({}) => {
         </Button>
       )}
 
-      {!isIdle && (
+      {yourTurn && !isIdle && (
         <Button
           leftIcon={<FaTimes />}
           justifyContent="left"

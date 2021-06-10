@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
+import { Box, HStack, VStack } from "@chakra-ui/layout";
 import { useGameViewState } from "./GameView";
 import CardCount from "./CardCount";
-import { useSessionState } from "../hooks/session";
-import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
+import gameTheme, { resources } from "../utils/game_theme";
 import {
   DevelopmentCardType,
   GamePhase,
   PlayerTurnState,
   ResourceType,
   DiscardCardsAction,
+  PlayDevCardAction,
 } from "../state/game_types";
 import { Button } from "@chakra-ui/button";
 import { sum } from "lodash";
@@ -139,6 +139,18 @@ const Players = ({}) => {
   const mustDiscard =
     gameState.state.phase === GamePhase.ROBBER_ROLLER && you.mustDiscard > 0;
 
+  const { performAction } = useGameAction();
+  const onPlayDevCard = (devCard: DevelopmentCardType) => async () => {
+    if (yourTurn) {
+      const action: PlayDevCardAction = {
+        name: "playDevCard",
+        card: devCard,
+      };
+
+      await performAction(action);
+    }
+  };
+
   if (mustDiscard) {
     return <DiscardPicker />;
   }
@@ -168,22 +180,27 @@ const Players = ({}) => {
       <HStack alignItems="stretch" overflowY="scroll">
         {Object.values(DevelopmentCardType)
           .map((devCard: DevelopmentCardType) => ({
-            resource: gameTheme.developmentCards[devCard],
+            devCard,
+            cardTheme: gameTheme.developmentCards[devCard],
             count: you.developmentCards[devCard],
           }))
           .filter(({ count }) => count > 0)
-          .map(({ resource, count }) => {
-            const IconComponent = resource.icon;
+          .map(({ devCard, cardTheme, count }) => {
+            const IconComponent = cardTheme.icon;
 
             return (
               <VStack>
                 <CardCount
                   icon={<IconComponent />}
-                  label={resource.label}
+                  label={cardTheme.label}
                   count={count}
                 />
                 {playingDevCard && (
-                  <Button size="sm" colorScheme="green">
+                  <Button
+                    size="sm"
+                    colorScheme="green"
+                    onClick={onPlayDevCard(devCard)}
+                  >
                     Play
                   </Button>
                 )}
