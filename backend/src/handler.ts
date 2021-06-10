@@ -478,6 +478,12 @@ export default class Handler {
         who: player.playerId,
         action: preparedAction,
       });
+
+      /// If the game is over, change the room into the complete phase
+      const isGameOver = game.gameOver(newState);
+      if (isGameOver) {
+        room.phase = RoomPhase.GAME_COMPLETE;
+      }
     } catch (e) {
       console.warn(e);
       return errorResponse(request, e.message);

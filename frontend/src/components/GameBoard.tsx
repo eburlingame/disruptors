@@ -68,7 +68,7 @@ const Container = styled.div<{ backgroundColor: string }>`
 const OverflowContainer = styled.div`
   width: 100%;
   height: 100%;
-  overflow: hidden; // scroll
+  overflow: scroll; // scroll
   position: relative;
 `;
 
@@ -99,9 +99,10 @@ const DiceValueContainerTitle = styled.div`
 
 const TileContainer = styled.div<{ zoom: number }>`
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+
+  // left: 50%;
+  // top: 50%;
+  // transform: translate(-50%, -50%);
 
   width: ${(props) => CONTAINER_WIDTH * props.zoom}px;
   height: ${(props) => CONTAINER_HEIGHT * props.zoom}px;

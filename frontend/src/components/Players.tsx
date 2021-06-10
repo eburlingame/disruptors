@@ -28,7 +28,12 @@ const Players = ({}) => {
   }));
 
   return (
-    <VStack alignItems="stretch" overflowY="scroll">
+    <VStack
+      alignItems="stretch"
+      flex="1 1 auto"
+      height="0px"
+      overflowY="scroll"
+    >
       {players.map(
         ({
           roomPlayer,
@@ -42,11 +47,12 @@ const Players = ({}) => {
             points,
           },
         }) => (
-          <HStack
+          <VStack
             borderStyle="solid"
             rounded="md"
             p="2"
             justifyContent="space-between"
+            alignItems="flex-start"
             borderColor={
               gameState.state.activePlayerId === playerId
                 ? activeColor
@@ -57,17 +63,15 @@ const Players = ({}) => {
             }
           >
             <HStack marginLeft="2">
-              <VStack>
-                <Box fontSize="xl">
-                  <FaUser color={gameTheme.playerColors[color].primary} />
-                </Box>
-                <Box fontWeight="900" fontSize="xl" marginTop="2">
-                  {roomPlayer?.name}
-                </Box>
-              </VStack>
+              <Box fontSize="xl">
+                <FaUser color={gameTheme.playerColors[color].primary} />
+              </Box>
+              <Box fontWeight="900" fontSize="xl" marginTop="4" marginLeft="2">
+                {roomPlayer?.name}
+              </Box>
             </HStack>
 
-            <HStack>
+            <HStack justifyContent="center" width="100%">
               <CardCount
                 icon={<gameTheme.victoryPoints.icon />}
                 label={gameTheme.victoryPoints.label}
@@ -77,6 +81,11 @@ const Players = ({}) => {
                 icon={<gameTheme.buildings.road.icon />}
                 label={gameTheme.buildings.road.label}
                 count={longestRoad}
+              />
+              <CardCount
+                icon={<gameTheme.robber.icon />}
+                label={gameTheme.robber.label + " uses"}
+                count={robberDeployCount}
               />
               <CardCount
                 icon={<gameTheme.resourceCards.icon />}
@@ -89,7 +98,7 @@ const Players = ({}) => {
                 count={totalDevelopmentCards}
               />
             </HStack>
-          </HStack>
+          </VStack>
         )
       )}
     </VStack>

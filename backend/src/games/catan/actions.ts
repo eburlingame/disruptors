@@ -565,17 +565,19 @@ const rollDice = (
     }
   }
   /// Otherwise, distribute resources normally
-  else if (action.distribution) {
-    Object.entries(action.distribution).forEach(([playerId, got]) => {
-      Object.entries(got).forEach(([resource, count]) => {
-        state = resourceFromBankToPlayer(
-          state,
-          playerId,
-          resource as ResourceType,
-          count
-        );
+  else {
+    if (action.distribution) {
+      Object.entries(action.distribution).forEach(([playerId, got]) => {
+        Object.entries(got).forEach(([resource, count]) => {
+          state = resourceFromBankToPlayer(
+            state,
+            playerId,
+            resource as ResourceType,
+            count
+          );
+        });
       });
-    });
+    }
 
     state.activePlayerTurnState = PlayerTurnState.IDLE;
   }

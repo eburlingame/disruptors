@@ -11,7 +11,6 @@ import {
   GamePhase,
   BuyDevCardAction,
 } from "../state/game_types";
-import { Tooltip } from "@chakra-ui/tooltip";
 import { useGameViewState } from "./GameView";
 import { Button } from "@chakra-ui/button";
 import {
@@ -74,7 +73,8 @@ const hasMandatoryAction = (state: CatanPlayersState) => {
   }
 
   if (
-    state.phase === GamePhase.SETUP_ROUND_1 &&
+    (state.phase === GamePhase.SETUP_ROUND_1 ||
+      state.phase === GamePhase.SETUP_ROUND_2) &&
     (state.activePlayerTurnState === PlayerTurnState.PLACING_CITY ||
       state.activePlayerTurnState === PlayerTurnState.PLACING_SETTLEMENT ||
       state.activePlayerTurnState === PlayerTurnState.PLACING_ROAD)

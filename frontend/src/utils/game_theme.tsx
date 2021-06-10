@@ -143,28 +143,28 @@ const theme: GameTheme = {
   },
   playerColors: {
     [PlayerColor.Red]: {
-      primary: "#FF0000",
+      primary: "#F94144",
     },
     [PlayerColor.Green]: {
-      primary: "#00FF00",
+      primary: "#90BE6D",
     },
     [PlayerColor.Blue]: {
-      primary: "#0000FF",
+      primary: "#577590",
     },
     [PlayerColor.Purple]: {
-      primary: "#FF00FF",
+      primary: "#F8961E",
     },
     [PlayerColor.Teal]: {
-      primary: "#00FFFF",
+      primary: "#43AA8B",
     },
     [PlayerColor.Orange]: {
-      primary: "#FFFF00",
+      primary: "#F3722C",
     },
   },
   robber: {
     name: "malware",
     pluralName: "malwares",
-    label: "Malare",
+    label: "Malware",
     icon: RiVirusFill,
   },
   victoryPoints: {

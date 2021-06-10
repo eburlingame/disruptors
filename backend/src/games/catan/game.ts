@@ -151,4 +151,11 @@ export default class CatanGame
       })),
     };
   }
+
+  gameOver(gameState: CatanState): boolean {
+    return gameState.players.some(
+      ({ points: { private: privatePoints, public: publicPoints } }) =>
+        privatePoints + publicPoints >= 10
+    );
+  }
 }

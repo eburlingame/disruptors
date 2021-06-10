@@ -8,9 +8,7 @@ import Bank from "./Bank";
 import Board from "./GameBoard";
 import Resources from "./Resources";
 import Players from "./Players";
-import Actions, { areActionsAvailable } from "./Actions";
-import { useGameViewState } from "./GameView";
-import { GamePhase } from "../state/game_types";
+import Actions from "./Actions";
 import Log from "./Log";
 
 const GameColumn = ({
@@ -143,16 +141,7 @@ const GameLayout = () => {
               {
                 name: "Game Board",
                 shownOn: "xs",
-                content: () => (
-                  <Box
-                    bgColor="blue.800"
-                    flex="1"
-                    alignSelf="stretch"
-                    minHeight="400px"
-                  >
-                    <Board />
-                  </Box>
-                ),
+                content: Board,
               },
               { name: "Players", content: Players },
               { name: "Log", content: Log },

@@ -23,4 +23,7 @@ export default interface Game<C, A, S, P> {
 
   /// Sanitize the game state for a given player (hide the card of other players, etc.)
   sanitizeState(gameState: S, playerId: string): P;
+
+  /// Returns true if the game is over and completed
+  gameOver(gameState: S): boolean;
 }

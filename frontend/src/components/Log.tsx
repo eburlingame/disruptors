@@ -1,15 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Box, HStack } from "@chakra-ui/layout";
-import Icon from "@chakra-ui/icon";
-import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
-import {
-  BuildingType,
-  CatanAction,
-  CatanPlayersState,
-  ResourceType,
-} from "../state/game_types";
-import { Tooltip } from "@chakra-ui/tooltip";
-import CardCount from "./CardCount";
+import gameTheme from "../utils/game_theme";
+import { CatanAction, ResourceType } from "../state/game_types";
 import { useGameViewState } from "./GameView";
 import { useSessionState } from "../hooks/session";
 import { getRoomPlayer, range } from "../utils/utils";
