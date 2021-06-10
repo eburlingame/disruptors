@@ -16,7 +16,7 @@ import actions from "./actions";
 
 import { random, shuffle, sum } from "lodash";
 import { randomInt } from "../../util";
-import { getAvailableExchanges } from "./board_utils";
+import { distributeResources, getAvailableExchanges } from "./board_utils";
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
@@ -91,9 +91,24 @@ export default class CatanGame
     action: CatanAction
   ): CatanAction {
     if (action.name === "rollDice") {
+      const [diceA, diceB] = [randomInt(6) + 1, randomInt(6) + 1];
+      const diceTotal = diceA + diceB;
+
+      const distribution = distributeResources(
+        gameState.board.tiles,
+        gameState.robber,
+        gameState.players,
+        gameState.buildings,
+        diceTotal
+      );
+
       return {
         ...action,
-        values: [randomInt(6) + 1, randomInt(6) + 1],
+        values: [diceA, diceB],
+
+        /// Cache the distribution amounts in the action so we can display them in the game log
+        distribution:
+          Object.values(distribution).length > 0 ? distribution : undefined,
       };
     }
 

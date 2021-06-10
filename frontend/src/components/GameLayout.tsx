@@ -69,7 +69,7 @@ type TabDefn = {
 
 const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
   return (
-    <Tabs variant="enclosed" flex="1" display="flex" flexDir="column">
+    <Tabs variant="enclosed">
       <TabList>
         {tabs
           .filter(({ shownIf }) => (shownIf != undefined ? shownIf : true))
@@ -96,7 +96,9 @@ const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
       >
         {tabs.map(({ hiddenOn, shownOn, content: ContentComponent }) => (
           <TabPanel
-            display={responsiveVisibiity(hiddenOn, shownOn, "inherit", "none")}
+            display={responsiveVisibiity(hiddenOn, shownOn, "flex", "none")}
+            height="100%"
+            flexDirection="column"
           >
             <ContentComponent />
           </TabPanel>

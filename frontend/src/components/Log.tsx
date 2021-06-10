@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Box, HStack } from "@chakra-ui/layout";
 import Icon from "@chakra-ui/icon";
 import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
@@ -12,7 +12,7 @@ import { Tooltip } from "@chakra-ui/tooltip";
 import CardCount from "./CardCount";
 import { useGameViewState } from "./GameView";
 import { useSessionState } from "../hooks/session";
-import { getRoomPlayer } from "../utils/utils";
+import { getRoomPlayer, range } from "../utils/utils";
 import { keyBy } from "lodash";
 import { RoomPlayer } from "../state/atoms";
 import { GamePlayer } from "../state/model";
@@ -27,7 +27,7 @@ import {
 import { IconType } from "react-icons";
 import { tilesTouchingVertex, vectorsEqual } from "../utils/board_utils";
 
-type CompeltePlayer = RoomPlayer & GamePlayer;
+type CompletePlayer = RoomPlayer & GamePlayer;
 
 const InlineIcon = ({ icon: Icon }: { icon: React.FC }) => (
   <Box marginX={2}>
@@ -70,11 +70,13 @@ const DiceIcon = ({ number }: { number: number }) => {
 const ActionRow = ({
   action,
   player,
+  players,
 }: {
-  player: CompeltePlayer;
+  player: CompletePlayer;
   action: CatanAction;
+  players: { [playerId: string]: CompletePlayer };
 }) => {
-  const { robber, buildings } = gameTheme;
+  const { robber, buildings, resources } = gameTheme;
 
   switch (action.name) {
     case "buildSettlement":
@@ -106,13 +108,27 @@ const ActionRow = ({
             <DiceIcon number={action.values[1]} /> ={" "}
             {action.values[0] + action.values[1]}
           </Box>
+
+          {action.distribution &&
+            Object.entries(action.distribution).map(([playerId, got]) => (
+              <HStack>
+                <Box>{players[playerId].name} got </Box>
+                {Object.entries(got).map(([resource, count]) =>
+                  range(count).map(() => (
+                    <InlineIcon
+                      icon={resources[resource as ResourceType].icon}
+                    />
+                  ))
+                )}
+              </HStack>
+            ))}
         </>
       );
 
     case "placeRobber":
       return (
         <Box display="flex" alignItems="center">
-          {player.name} placed a <InlineIcon icon={robber.icon} />
+          {player.name} placed the <InlineIcon icon={robber.icon} />
         </Box>
       );
   }
@@ -121,6 +137,8 @@ const ActionRow = ({
 };
 
 const Log = ({}) => {
+  const ref = useRef<any>();
+
   const { room } = useSessionState();
 
   const {
@@ -134,11 +152,23 @@ const Log = ({}) => {
 
   const playerMap = keyBy(players, "playerId");
 
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollTop = ref.current.scrollHeight;
+      console.log(ref.current.scrollHeight);
+    }
+  }, [actions.length]);
+
   return (
-    <Box overflowY="scroll" maxH="300px">
+    <Box overflowY="scroll" flex="1" maxH="500px" ref={ref}>
       <Box>
         {actions.map(({ id, at, who, action }) => (
-          <ActionRow key={id} player={playerMap[who]} action={action} />
+          <ActionRow
+            key={id}
+            player={playerMap[who]}
+            action={action}
+            players={playerMap}
+          />
         ))}
       </Box>
     </Box>

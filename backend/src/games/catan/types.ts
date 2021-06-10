@@ -1,4 +1,5 @@
 import { GamePlayer } from "../model";
+import { ResourceDistribution } from "./board_utils";
 
 export enum GamePhase {
   SETUP_ROUND_1 = "setup1",
@@ -106,6 +107,7 @@ export type BuildRoadAction = {
 export type RollDiceAction = {
   name: "rollDice";
   values: [number, number];
+  distribution?: ResourceDistribution;
 };
 
 export type RequestTradeAction = {

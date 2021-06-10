@@ -1,4 +1,4 @@
-import { range } from "lodash";
+import { range, sum } from "lodash";
 import {
   GameTile,
   TileCoordinate,
@@ -525,5 +525,16 @@ export const distributeResources = (
       });
   });
 
-  return distribution;
+  /// Filter out players who didn't recieve anything
+  const onlyReceievers = Object.entries(distribution).reduce(
+    (obj, [playerId, got]) => {
+      if (sum(Object.values(got)) > 0) {
+        return { ...obj, [playerId]: got };
+      }
+      return obj;
+    },
+    {}
+  );
+
+  return onlyReceievers;
 };

@@ -565,16 +565,8 @@ const rollDice = (
     }
   }
   /// Otherwise, distribute resources normally
-  else {
-    const disribution = distributeResources(
-      state.board.tiles,
-      state.robber,
-      state.players,
-      state.buildings,
-      diceTotal
-    );
-
-    Object.entries(disribution).forEach(([playerId, got]) => {
+  else if (action.distribution) {
+    Object.entries(action.distribution).forEach(([playerId, got]) => {
       Object.entries(got).forEach(([resource, count]) => {
         state = resourceFromBankToPlayer(
           state,

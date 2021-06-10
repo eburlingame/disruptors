@@ -1,5 +1,5 @@
 import { Box, Center } from "@chakra-ui/layout";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
 
@@ -380,6 +380,14 @@ const GameBoard = ({}) => {
   const zoomOut = () =>
     setZoom((current) => (current > 0.25 ? current - 0.25 : current));
 
+  const scrollRef = useRef<any>();
+
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollLeft = (zoom * CONTAINER_WIDTH) / 2.0;
+  //   }
+  // }, [zoom]);
+
   const { activePlayerId, activePlayerTurnState } = state;
 
   const lastDiceRoll: RollDiceAction | undefined = last(
@@ -582,7 +590,7 @@ const GameBoard = ({}) => {
         </DiceValueContainer>
       )}
 
-      <OverflowContainer>
+      <OverflowContainer ref={scrollRef}>
         <TileContainer zoom={zoom}>
           <TileOriginContainer zoom={zoom}>
             <BackgroundImage src={backerImg} />
