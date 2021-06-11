@@ -1,24 +1,12 @@
 import React from "react";
 
-import {
-  FaBitcoin,
-  FaBroom,
-  FaNetworkWired,
-  FaLayerGroup,
-} from "react-icons/fa";
-import { RiVirusFill } from "react-icons/ri";
+import { FaBitcoin, FaNetworkWired, FaLayerGroup } from "react-icons/fa";
 
 import devLargeImg from "../images/icons_dev_l.svg";
 import internLargeImg from "../images/icons_intern_l.svg";
 import serverLargeImg from "../images/icons_server_l.svg";
 import shuttleLargeImg from "../images/icons_shuttle_l.svg";
 import snacksLargeImg from "../images/icons_snacks_l.svg";
-
-import devSmallImg from "../images/icons_dev_s.svg";
-import internSmallImg from "../images/icons_intern_s.svg";
-import serverSmallImg from "../images/icons_server_s.svg";
-import shuttleSmallImg from "../images/icons_shuttle_s.svg";
-import snacksSmallImg from "../images/icons_snacks_s.svg";
 
 import officeImg from "../images/icons_office.svg";
 import garageImg from "../images/icons_garage.svg";
