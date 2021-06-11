@@ -84,7 +84,7 @@ const Players = ({}) => {
               />
               <CardCount
                 icon={<gameTheme.robber.icon />}
-                label={gameTheme.robber.label + " uses"}
+                label={gameTheme.robber.label + " attacks"}
                 count={robberDeployCount}
               />
               <CardCount

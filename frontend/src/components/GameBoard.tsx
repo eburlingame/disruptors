@@ -41,6 +41,7 @@ import {
   edgeCoordinateEqual,
   vectorsEqual,
   isValidRoadPosition,
+  isValidSettlementPosition,
 } from "../utils/board_utils";
 import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
@@ -268,8 +269,8 @@ const VertexContainer = styled.div<{ index: number }>`
   );
 
   text-align: center;
-  width: 25px;
-  height: 25px;
+  width: 40px;
+  height: 40px;
 `;
 
 const Building = styled.div<{ playerColor: string }>`
@@ -277,8 +278,8 @@ const Building = styled.div<{ playerColor: string }>`
   left: 0px;
   top: 0px;
 
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 0.25em;
   background-color: ${(props) => props.playerColor};
 
@@ -563,6 +564,24 @@ const GameBoard = ({}) => {
     );
   };
 
+  const canBuildSettlement = (vertexCoord: VertexCoordinate) => {
+    let buildings = state.buildings;
+    let roads = state.roads;
+
+    /// Allow building on any empty space during the first setup round
+    if (state.phase === GamePhase.SETUP_ROUND_1) {
+      return !buildingExists(vertexCoord.tile, vertexCoord.vertexIndex);
+    }
+
+    return isValidSettlementPosition(
+      state.board,
+      roads,
+      buildings,
+      state.you.playerId,
+      vertexCoord
+    );
+  };
+
   const tileBackgroundImage = useColorModeValue(tileLightImg, tileDarkImg);
   const boardBackgroundColor = useColorModeValue("#fefefe", "#121212");
 
@@ -574,13 +593,13 @@ const GameBoard = ({}) => {
             aria-label="Zoom in"
             icon={<FaSearchPlus />}
             onClick={zoomIn}
-            colorScheme="blue"
+            colorScheme="gray"
           />
           <IconButton
             aria-label="Zoom out"
             icon={<FaSearchMinus />}
             onClick={zoomOut}
-            colorScheme="blue"
+            colorScheme="gray"
           />
         </ButtonGroup>
       </ZoomControls>
@@ -672,7 +691,10 @@ const GameBoard = ({}) => {
                       .filter((index) =>
                         placingCity
                           ? settlementExists(you?.playerId, { x, y, z }, index)
-                          : !buildingExists({ x, y, z }, index)
+                          : canBuildSettlement({
+                              tile: { x, y, z },
+                              vertexIndex: index,
+                            })
                       )
                       .map((index) => (
                         <VertexContainer index={index}>

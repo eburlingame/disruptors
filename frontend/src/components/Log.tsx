@@ -123,6 +123,17 @@ const ActionRow = ({
           {player.name} placed the <InlineIcon icon={robber.icon} />
         </Box>
       );
+
+    case "endTurn":
+      return (
+        <Box
+          width="100%"
+          borderTop="solid"
+          borderTopColor="#999"
+          borderTopWidth="1px"
+          marginY="4"
+        />
+      );
   }
 
   return <></>;

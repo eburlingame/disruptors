@@ -397,6 +397,8 @@ const buildSettlement = (
     });
   }
 
+  state = computeVictoryPoints(state);
+
   return state;
 };
 
@@ -676,6 +678,8 @@ const buyDevCard = (
 
   state.players[playerIndex].developmentCards[drawnCard] += 1;
 
+  state = computeVictoryPoints(state);
+
   return state;
 };
 
@@ -707,6 +711,8 @@ const playDevCard = (
   }
 
   state.players[playerIndex].developmentCards[card] -= 1;
+
+  state = computeVictoryPoints(state);
 
   return state;
 };
@@ -976,6 +982,8 @@ const endTurn = (
 
   state.activePlayerTurnState = PlayerTurnState.MUST_ROLL;
   state.activePlayerId = nextPlayer(state);
+
+  state = computeVictoryPoints(state);
 
   return state;
 };

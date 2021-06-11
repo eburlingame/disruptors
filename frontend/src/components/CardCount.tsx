@@ -14,8 +14,8 @@ const CardCount = ({
   return (
     <Tooltip label={label}>
       <Box
-        height="90px"
-        width="62px"
+        height="84px"
+        width="58px"
         rounded="md"
         borderWidth="0.5px"
         borderStyle="solid"
@@ -25,8 +25,17 @@ const CardCount = ({
         justifyContent="center"
         paddingY="2"
       >
-        <Box fontSize="xl">{icon}</Box>
-        <Box fontWeight="900" fontSize="xl" marginTop="2">
+        <Box
+          fontSize="xl"
+          minW="40px"
+          minH="40px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          {icon}
+        </Box>
+        <Box fontWeight="900" fontSize="xl" marginTop="1">
           {count}
         </Box>
       </Box>

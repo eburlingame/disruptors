@@ -10,6 +10,7 @@ import Resources from "./Resources";
 import Players from "./Players";
 import Actions from "./Actions";
 import Log from "./Log";
+import Prices from "./Prices";
 
 const GameColumn = ({
   flex,
@@ -153,10 +154,11 @@ const GameLayout = () => {
           <TabSet
             tabs={[
               { name: "Resources", content: Resources },
+              { name: "Prices", content: Prices },
               {
                 name: "Bank",
                 shownOn: "xs",
-                content: () => <Bank />,
+                content: Bank,
               },
               {
                 name: "Actions",

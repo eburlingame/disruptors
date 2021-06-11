@@ -6,6 +6,8 @@ import { ResourceType } from "../state/game_types";
 import { Tooltip } from "@chakra-ui/tooltip";
 import CardCount from "./CardCount";
 import { useGameViewState } from "./GameView";
+import { FaCreditCard } from "react-icons/fa";
+import { sum } from "lodash";
 
 const Bank = ({}) => {
   const { gameState } = useGameViewState();
@@ -29,6 +31,12 @@ const Bank = ({}) => {
             />
           );
         })}
+
+      <CardCount
+        icon={<FaCreditCard />}
+        label={"Development cards"}
+        count={sum(Object.values(bank.developmentCards))}
+      />
     </HStack>
   );
 };

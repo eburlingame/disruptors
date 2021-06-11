@@ -440,6 +440,34 @@ export const isValidRoadPosition = (
   return allowBuilding;
 };
 
+/// Returns true if the given position is next to a current road that the player has built, or a building
+export const isValidSettlementPosition = (
+  { tiles }: GameBoard,
+  roads: Road[],
+  buildings: Building[],
+  playerId: string,
+  vertexCoord: VertexCoordinate
+): boolean => {
+  if (buildingExists(buildings, vertexCoord.tile, vertexCoord.vertexIndex)) {
+    return false;
+  }
+
+  const yourRoads = roads.filter((road) => road.playerId === playerId);
+  const yourBuildings = buildings.filter(
+    (building) => building.playerId === playerId
+  );
+
+  const connectedVerticies = yourRoads.flatMap(({ location }) =>
+    edgeToVertices(tiles, location)
+  );
+
+  const allowBuilding = connectedVerticies.some((occupiedVertex) =>
+    vertexCoordinateEquivalent(tiles, vertexCoord, occupiedVertex)
+  );
+
+  return allowBuilding;
+};
+
 /// Returns true if the given playerId has a building adjacent to the given robber position
 export const playerHasBuildingNextToRobber = (
   tiles: GameTile[],

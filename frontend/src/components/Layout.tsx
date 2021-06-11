@@ -1,5 +1,7 @@
 import { Button } from "@chakra-ui/button";
+import { useColorModeValue } from "@chakra-ui/color-mode";
 import { Box, HStack } from "@chakra-ui/layout";
+import { Tooltip } from "@chakra-ui/tooltip";
 import { exit } from "node:process";
 import React, { ReactNode } from "react";
 import { useHistory } from "react-router";
@@ -25,6 +27,9 @@ const Layout = ({
     history.push("/");
   };
 
+  const backgroundColor = useColorModeValue("gray.700", "gray.700");
+  const color = useColorModeValue("gray.400", "gray.300");
+
   return (
     <Box
       height="100%"
@@ -33,11 +38,18 @@ const Layout = ({
       flexDir="column"
       overflow="hidden"
     >
-      <HStack bgColor="gray.700" justifyContent="flex-end" p={2}>
-        <Button variant="ghost" size="xs" onClick={onExit}>
-          Exit
-        </Button>
+      <HStack
+        bgColor={backgroundColor}
+        color={color}
+        justifyContent="space-between"
+        p={2}
+      >
         <ColorModeSwitcher size="xs" />
+        <Tooltip label="Leave game">
+          <Button variant="ghost" size="xs" onClick={onExit} colorScheme="red">
+            Quit
+          </Button>
+        </Tooltip>
       </HStack>
       <Box flex="1" display="flex" flexDir="column">
         {children}

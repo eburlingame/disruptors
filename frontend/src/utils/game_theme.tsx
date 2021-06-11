@@ -1,21 +1,7 @@
 import React from "react";
 
-import {
-  FaBitcoin,
-  FaBroom,
-  FaBuilding,
-  FaBus,
-  FaCoffee,
-  FaCreditCard,
-  FaGraduationCap,
-  FaIdBadge,
-  FaNetworkWired,
-  FaPlusSquare,
-  FaServer,
-  FaWarehouse,
-} from "react-icons/fa";
+import { FaBitcoin, FaBroom, FaNetworkWired, FaLayerGroup } from "react-icons/fa";
 import { RiVirusFill } from "react-icons/ri";
-import { GrResources } from "react-icons/gr";
 
 import devLargeImg from "../images/icons_dev_l.svg";
 import internLargeImg from "../images/icons_intern_l.svg";
@@ -28,6 +14,9 @@ import internSmallImg from "../images/icons_intern_s.svg";
 import serverSmallImg from "../images/icons_server_s.svg";
 import shuttleSmallImg from "../images/icons_shuttle_s.svg";
 import snacksSmallImg from "../images/icons_snacks_s.svg";
+
+import officeImg from "../images/icons_office.svg";
+import garageImg from "../images/icons_garage.svg";
 
 import {
   ResourceType,
@@ -132,13 +121,13 @@ const theme: GameTheme = {
       name: "garage",
       pluralName: "garages",
       label: "Garages",
-      icon: FaWarehouse,
+      icon: resourceIcon(garageImg),
     },
     city: {
       name: "office",
       pluralName: "offices",
       label: "Office",
-      icon: FaBuilding,
+      icon: resourceIcon(officeImg),
     },
   },
   playerColors: {
@@ -177,7 +166,7 @@ const theme: GameTheme = {
     name: "resource card",
     pluralName: "resource cards",
     label: "Resource cards",
-    icon: GrResources,
+    icon: FaLayerGroup,
   },
   developmentCards: {
     [DevelopmentCardType.KNIGHT]: {
