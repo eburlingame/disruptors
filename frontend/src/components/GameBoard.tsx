@@ -569,7 +569,10 @@ const GameBoard = ({}) => {
     let roads = state.roads;
 
     /// Allow building on any empty space during the first setup round
-    if (state.phase === GamePhase.SETUP_ROUND_1) {
+    if (
+      state.phase === GamePhase.SETUP_ROUND_1 ||
+      state.phase === GamePhase.SETUP_ROUND_2
+    ) {
       return !buildingExists(vertexCoord.tile, vertexCoord.vertexIndex);
     }
 
