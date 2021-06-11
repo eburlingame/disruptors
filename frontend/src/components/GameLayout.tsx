@@ -68,7 +68,13 @@ type TabDefn = {
 
 const TabSet = ({ tabs }: { tabs: TabDefn[] }) => {
   return (
-    <Tabs variant="enclosed" display="flex" flexDirection="column" flex="1">
+    <Tabs
+      variant="enclosed"
+      colorScheme="colorScheme"
+      display="flex"
+      flexDirection="column"
+      flex="1"
+    >
       <TabList>
         {tabs
           .filter(({ shownIf }) => (shownIf != undefined ? shownIf : true))

@@ -1,6 +1,11 @@
 import React from "react";
 
-import { FaBitcoin, FaBroom, FaNetworkWired, FaLayerGroup } from "react-icons/fa";
+import {
+  FaBitcoin,
+  FaBroom,
+  FaNetworkWired,
+  FaLayerGroup,
+} from "react-icons/fa";
 import { RiVirusFill } from "react-icons/ri";
 
 import devLargeImg from "../images/icons_dev_l.svg";
@@ -17,6 +22,9 @@ import snacksSmallImg from "../images/icons_snacks_s.svg";
 
 import officeImg from "../images/icons_office.svg";
 import garageImg from "../images/icons_garage.svg";
+import shieldImg from "../images/icons_shield.svg";
+import malwareImg from "../images/icons_malware.svg";
+import bitcoinImg from "../images/icons_bitcoin.svg";
 
 import {
   ResourceType,
@@ -154,13 +162,13 @@ const theme: GameTheme = {
     name: "malware",
     pluralName: "malwares",
     label: "Malware",
-    icon: RiVirusFill,
+    icon: resourceIcon(malwareImg),
   },
   victoryPoints: {
     name: "bitcoin",
     pluralName: "bitcoins",
     label: "Bitcoin",
-    icon: FaBitcoin,
+    icon: resourceIcon(bitcoinImg),
   },
   resourceCards: {
     name: "resource card",
@@ -173,7 +181,7 @@ const theme: GameTheme = {
       name: "antivirus",
       pluralName: "antiviruses",
       label: "Antivirus",
-      icon: FaBroom,
+      icon: resourceIcon(shieldImg),
     },
     [DevelopmentCardType.VICTORY_POINT]: {
       name: "free Bitcoin",
