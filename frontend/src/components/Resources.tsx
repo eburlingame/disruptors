@@ -195,15 +195,16 @@ const Players = ({}) => {
                   label={cardTheme.label}
                   count={count}
                 />
-                {playingDevCard && (
-                  <Button
-                    size="sm"
-                    colorScheme="green"
-                    onClick={onPlayDevCard(devCard)}
-                  >
-                    Play
-                  </Button>
-                )}
+                {playingDevCard &&
+                  devCard != DevelopmentCardType.VICTORY_POINT && (
+                    <Button
+                      size="sm"
+                      colorScheme="green"
+                      onClick={onPlayDevCard(devCard)}
+                    >
+                      Play
+                    </Button>
+                  )}
               </VStack>
             );
           })}

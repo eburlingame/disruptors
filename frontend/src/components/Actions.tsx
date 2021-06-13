@@ -177,25 +177,29 @@ const Actions = ({}) => {
         Roll the dice
       </Button>
 
-      <Button
-        leftIcon={<FaExchangeAlt />}
-        justifyContent="left"
-        colorScheme="yellow"
-        disabled={!isIdle}
-        onClick={onChangeTurnAction("startPlayerTradeRequest")}
-      >
-        Trade with others
-      </Button>
+      <HStack>
+        <Button
+          flex="1"
+          leftIcon={<FaExchangeAlt />}
+          justifyContent="left"
+          colorScheme="yellow"
+          disabled={!isIdle}
+          onClick={onChangeTurnAction("startPlayerTradeRequest")}
+        >
+          Trade with others
+        </Button>
 
-      <Button
-        leftIcon={<FaUniversity />}
-        justifyContent="left"
-        colorScheme="yellow"
-        disabled={!isIdle}
-        onClick={onChangeTurnAction("startBankTradeRequest")}
-      >
-        Trade with the bank
-      </Button>
+        <Button
+          flex="1"
+          leftIcon={<FaUniversity />}
+          justifyContent="left"
+          colorScheme="yellow"
+          disabled={!isIdle}
+          onClick={onChangeTurnAction("startBankTradeRequest")}
+        >
+          Trade with bank
+        </Button>
+      </HStack>
 
       <HStack>
         <Button

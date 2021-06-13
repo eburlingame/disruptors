@@ -172,6 +172,13 @@ const TileIconContainer = styled.div`
   font-size: 2.5em;
 `;
 
+const RobberIconContainer = styled.div`
+  position: absolute;
+  width: 50px;
+  left: 25px;
+  top: -10px;
+`;
+
 const Tile = styled.div<{ position: { x: number; y: number } }>`
   width: ${TILE_WIDTH}px;
   height: ${TILE_HEIGHT}px;
@@ -325,11 +332,25 @@ const TileIcon = ({
         >
           {diceNumber}
         </Box>
+
+        {hasRobber && (
+          <RobberIconContainer>
+            <gameTheme.robber.icon />
+          </RobberIconContainer>
+        )}
       </TileIconContainer>
     );
   }
 
-  return <TileIconContainer></TileIconContainer>;
+  return (
+    <TileIconContainer>
+      {hasRobber && (
+        <RobberIconContainer>
+          <gameTheme.robber.icon />
+        </RobberIconContainer>
+      )}
+    </TileIconContainer>
+  );
 };
 
 /// Since tiles touch each vertex, only draw the "common" vertex
@@ -585,6 +606,10 @@ const GameBoard = ({}) => {
     );
   };
 
+  const drawPlaceRobberButton = (tile: TileCoordinate) =>
+    placingRobber &&
+    !vectorsEqual(state.robber || { x: -1, y: -1, z: -1 }, tile);
+
   const tileBackgroundImage = useColorModeValue(tileLightImg, tileDarkImg);
   const boardBackgroundColor = useColorModeValue("#fefefe", "#121212");
 
@@ -704,11 +729,12 @@ const GameBoard = ({}) => {
                           <IconButton
                             zIndex="4"
                             position="absolute"
-                            transform="translate(-50%, 0%)"
+                            top="20px"
+                            transform="translate(-50%, -50%)"
                             icon={<FaHammer />}
                             aria-label=""
                             variant="solid"
-                            size="xs"
+                            size="sm"
                             colorScheme="green"
                             onClick={onPlaceBuilding({
                               tile: { x, y, z },
@@ -718,11 +744,11 @@ const GameBoard = ({}) => {
                         </VertexContainer>
                       ))}
 
-                  {placingRobber && (
+                  {drawPlaceRobberButton({ x, y, z }) && (
                     <PlaceRobberButtonContainer>
                       <IconButton
                         variant="solid"
-                        colorScheme="purple"
+                        colorScheme="red"
                         icon={<FaArrowCircleDown />}
                         aria-label="Place robber"
                         onClick={onPlaceRobber({ x, y, z })}

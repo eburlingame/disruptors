@@ -28,9 +28,7 @@ const Prices = ({}) => {
             <gameTheme.resources.brick.icon />
           </Box>
         </Tooltip>
-        <Box>
-          <FaPlus />
-        </Box>
+
         <Tooltip label={`One ${gameTheme.resources.wood.name}`}>
           <Box>
             <gameTheme.resources.wood.icon />
@@ -55,29 +53,17 @@ const Prices = ({}) => {
           </Box>
         </Tooltip>
 
-        <Box>
-          <FaPlus />
-        </Box>
-
         <Tooltip label={`One ${gameTheme.resources.wood.name}`}>
           <Box>
             <gameTheme.resources.wood.icon />
           </Box>
         </Tooltip>
 
-        <Box>
-          <FaPlus />
-        </Box>
-
         <Tooltip label={`One ${gameTheme.resources.sheep.name}`}>
           <Box>
             <gameTheme.resources.sheep.icon />
           </Box>
         </Tooltip>
-
-        <Box>
-          <FaPlus />
-        </Box>
 
         <Tooltip label={`One ${gameTheme.resources.wheat.name}`}>
           <Box>
@@ -103,39 +89,23 @@ const Prices = ({}) => {
           </Box>
         </Tooltip>
 
-        <Box>
-          <FaPlus />
-        </Box>
-
         <Tooltip label={`One ${gameTheme.resources.ore.name}`}>
           <Box>
             <gameTheme.resources.ore.icon />
           </Box>
         </Tooltip>
 
-        <Box>
-          <FaPlus />
-        </Box>
-
         <Tooltip label={`One ${gameTheme.resources.ore.name}`}>
           <Box>
             <gameTheme.resources.ore.icon />
           </Box>
         </Tooltip>
-
-        <Box>
-          <FaPlus />
-        </Box>
 
         <Tooltip label={`One ${gameTheme.resources.wheat.name}`}>
           <Box>
             <gameTheme.resources.wheat.icon />
           </Box>
         </Tooltip>
-
-        <Box>
-          <FaPlus />
-        </Box>
 
         <Tooltip label={`One ${gameTheme.resources.wheat.name}`}>
           <Box>
@@ -161,19 +131,11 @@ const Prices = ({}) => {
           </Box>
         </Tooltip>
 
-        <Box>
-          <FaPlus />
-        </Box>
-
         <Tooltip label={`One ${gameTheme.resources.sheep.name}`}>
           <Box>
             <gameTheme.resources.sheep.icon />
           </Box>
         </Tooltip>
-
-        <Box>
-          <FaPlus />
-        </Box>
 
         <Tooltip label={`One ${gameTheme.resources.wheat.name}`}>
           <Box>

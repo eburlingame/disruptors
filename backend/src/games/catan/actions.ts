@@ -11,6 +11,7 @@ import {
   tileTypeToResourceType,
   vectorsEqual,
   vertexCoordinateEqual,
+  vertexCoordinateEquivalent,
 } from "./board_utils";
 import {
   BuildingType,
@@ -415,39 +416,31 @@ const buildCity = (
     throw Error("Invalid action");
   }
 
-  const location = getCommonVertexCoordinate(
-    state.board.tiles,
-    action.location
-  );
-
   const player = getPlayer(state, playerId);
 
   if (!canBuildCity(player)) {
     throw new Error("Not enough resources to build a city");
   }
 
-  const existingSettlement = state.buildings.find(
-    (building) =>
+  state.buildings = state.buildings.map((building) => {
+    if (
       building.playerId === playerId &&
       building.type === BuildingType.Settlement &&
-      vertexCoordinateEqual(
-        location,
-        getCommonVertexCoordinate(state.board.tiles, action.location)
+      vertexCoordinateEquivalent(
+        state.board.tiles,
+        action.location,
+        building.location
       )
-  );
-
-  if (existingSettlement) {
-    state.buildings = [
-      ...state.buildings,
-      {
-        location: location,
+    ) {
+      /// Upgrade the settlement to a city
+      return {
+        ...building,
         type: BuildingType.City,
-        playerId,
-      },
-    ];
-  } else {
-    throw new Error("You must have an existing settlement to build a city");
-  }
+      };
+    }
+
+    return building;
+  });
 
   /// Pay for the city
   state = resourceFromBankToPlayer(state, playerId, ResourceType.ORE, -3);
@@ -766,15 +759,17 @@ const placeRobber = (
   state.robber = action.location;
   state.activePlayerTurnState = PlayerTurnState.MUST_STEAL_CARD;
 
-  const nobodyToStealFrom = state.players.every(
-    (player) =>
-      !playerHasBuildingNextToRobber(
-        state.board.tiles,
-        state.robber,
-        state.buildings,
-        player.playerId
-      )
-  );
+  const nobodyToStealFrom = state.players
+    .filter((player) => player.playerId !== playerId)
+    .every(
+      (player) =>
+        !playerHasBuildingNextToRobber(
+          state.board.tiles,
+          state.robber,
+          state.buildings,
+          player.playerId
+        )
+    );
 
   if (nobodyToStealFrom) {
     state.activePlayerTurnState = PlayerTurnState.IDLE;

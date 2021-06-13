@@ -15,6 +15,7 @@ import { FaExchangeAlt, FaWindowClose } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
 import { Tag } from "@chakra-ui/tag";
 import { sum } from "lodash";
+import { useColorModeValue } from "@chakra-ui/color-mode";
 
 type ResourceCount = {
   resource: ResourceType;
@@ -115,6 +116,7 @@ const ResourcePicker = ({
                     right="-10px"
                     zIndex="1"
                     backgroundColor="red.600"
+                    color="white"
                     fontSize="md"
                     fontWeight="bold"
                   >
