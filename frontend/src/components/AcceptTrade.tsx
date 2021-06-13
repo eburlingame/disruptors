@@ -9,14 +9,12 @@ import { useGameAction } from "../hooks/game";
 import { useSessionState } from "../hooks/session";
 import { getRoomPlayer } from "../utils/utils";
 
-const AcceptTrade = ({}) => {
+export const TradePreview = ({}) => {
   const { room } = useSessionState();
   const {
     gameState: { state },
   } = useGameViewState();
   const { activeTradeRequest } = state;
-
-  const { performAction } = useGameAction();
 
   const requestingPlayer = getRoomPlayer(
     room,
@@ -38,6 +36,58 @@ const AcceptTrade = ({}) => {
     .map((giving) => ({
       ...giving,
       ...gameTheme.resources[giving.resource],
+    }))
+    .filter(({ count }) => count > 0);
+
+  return (
+    <>
+      <Box>
+        <Box fontSize="lg" fontWeight="bold">
+          {state.you.playerId === requestingPlayer.playerId
+            ? "You are offering:"
+            : requestingPlayer?.name + " is offering"}
+        </Box>
+
+        {giving.map(({ count, name, pluralName, icon: Icon }) => (
+          <HStack>
+            <Icon />
+            <Box>{`${count} ${count === 1 ? name : pluralName}`}</Box>
+          </HStack>
+        ))}
+        {giving.length === 0 && <Box>Nothing</Box>}
+      </Box>
+      <Box>
+        <Box fontSize="lg" fontWeight="bold">
+          In exchange for:
+        </Box>
+
+        {seeking.map(({ count, name, pluralName, icon: Icon }) => (
+          <HStack>
+            <Icon />
+            <Box>{`${count} ${count === 1 ? name : pluralName}`}</Box>
+          </HStack>
+        ))}
+      </Box>
+    </>
+  );
+};
+
+const AcceptTrade = ({ showButtons }: { showButtons: boolean }) => {
+  const {
+    gameState: { state },
+  } = useGameViewState();
+  const { activeTradeRequest } = state;
+
+  const { performAction } = useGameAction();
+
+  if (!activeTradeRequest) {
+    return <></>;
+  }
+
+  const seeking = activeTradeRequest.seeking
+    .map((seeking) => ({
+      ...seeking,
+      ...gameTheme.resources[seeking.resource],
     }))
     .filter(({ count }) => count > 0);
 
@@ -69,31 +119,7 @@ const AcceptTrade = ({}) => {
 
   return (
     <VStack alignItems="stretch">
-      <Box>
-        <Box fontSize="lg" fontWeight="bold">
-          {requestingPlayer?.name} is offering:
-        </Box>
-
-        {giving.map(({ count, name, pluralName, icon: Icon }) => (
-          <HStack>
-            <Icon />
-            <Box>{`${count} ${count === 1 ? name : pluralName}`}</Box>
-          </HStack>
-        ))}
-        {giving.length === 0 && <Box>Nothing</Box>}
-      </Box>
-      <Box>
-        <Box fontSize="lg" fontWeight="bold">
-          In exchange for:
-        </Box>
-
-        {seeking.map(({ count, name, pluralName, icon: Icon }) => (
-          <HStack>
-            <Icon />
-            <Box>{`${count} ${count === 1 ? name : pluralName}`}</Box>
-          </HStack>
-        ))}
-      </Box>
+      <TradePreview />
 
       <Box marginTop="2" />
 

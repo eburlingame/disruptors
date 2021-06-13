@@ -9,7 +9,7 @@ const CardCount = ({
 }: {
   icon: React.ReactElement;
   label: string;
-  count: number;
+  count: string;
 }) => {
   return (
     <Tooltip label={label}>

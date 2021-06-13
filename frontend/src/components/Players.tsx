@@ -27,6 +27,19 @@ const Players = ({}) => {
     gamePlayer: gamePlayer,
   }));
 
+  const getPointsText = (playerId: string, points: number) => {
+    if (playerId === gameState.state.you.playerId) {
+      const { public: publicPoints, private: privatePoints } =
+        gameState.state.you.points;
+
+      if (privatePoints > 0) {
+        return `${publicPoints} + ${privatePoints}`;
+      }
+    }
+
+    return points.toString();
+  };
+
   return (
     <VStack
       alignItems="stretch"
@@ -75,27 +88,27 @@ const Players = ({}) => {
               <CardCount
                 icon={<gameTheme.victoryPoints.icon />}
                 label={gameTheme.victoryPoints.label}
-                count={points}
+                count={getPointsText(playerId, points)}
               />
               <CardCount
                 icon={<gameTheme.buildings.road.icon />}
                 label={gameTheme.buildings.road.label}
-                count={longestRoad}
+                count={longestRoad.toString()}
               />
               <CardCount
                 icon={<gameTheme.robber.icon />}
                 label={gameTheme.robber.label + " attacks"}
-                count={robberDeployCount}
+                count={robberDeployCount.toString()}
               />
               <CardCount
                 icon={<gameTheme.resourceCards.icon />}
                 label={gameTheme.resourceCards.label}
-                count={totalResourceCards}
+                count={totalResourceCards.toString()}
               />
               <CardCount
                 icon={<FaCreditCard />}
                 label={"Development cards"}
-                count={totalDevelopmentCards}
+                count={totalDevelopmentCards.toString()}
               />
             </HStack>
           </VStack>

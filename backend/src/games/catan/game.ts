@@ -80,6 +80,8 @@ export default class CatanGame
         mustDiscard: 0,
       })),
       robber: null,
+      longestRoadOwner: null,
+      largestArmyOwner: null,
       activePlayerId: gamePlayers[0].playerId,
       activePlayerTurnState: PlayerTurnState.PLACING_SETTLEMENT,
     };

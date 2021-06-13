@@ -311,6 +311,8 @@ export type CatanState = {
   bank: Bank;
   players: CatanPlayer[];
   robber: TileCoordinate | null;
+  longestRoadOwner: string | null;
+  largestArmyOwner: string | null;
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
   activeTradeRequest?: TradeRequest;

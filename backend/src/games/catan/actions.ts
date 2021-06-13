@@ -1,4 +1,4 @@
-import { first, range, shuffle, sum } from "lodash";
+import { first, max, range, shuffle, sum } from "lodash";
 import {
   computeLongestRoad,
   distributeResources,
@@ -273,24 +273,44 @@ const collectResourceFromTile = (
   return state;
 };
 
+const updateLargestArmy = (state: CatanState, playerId: string) => {
+  const playerIndex = getPlayerIndex(state, playerId);
+
+  const currentDeployCount =
+    max(state.players.map((player) => player.robberDeployCount)) || 0;
+
+  const yourDeployCount = state.players[playerIndex].robberDeployCount + 1;
+
+  if (yourDeployCount > currentDeployCount && yourDeployCount > 3) {
+    state.largestArmyOwner = playerId;
+  }
+
+  state.players[playerIndex].robberDeployCount = yourDeployCount;
+
+  return state;
+};
+
+const updateLongestRoad = (state: CatanState, playerId: string) => {
+  const playerIndex = getPlayerIndex(state, playerId);
+
+  const currentLongestRoad =
+    max(state.players.map((player) => player.longestRoad)) || 0;
+
+  const yourLongestRoad = computeLongestRoad(state, playerId);
+  state.players[playerIndex].longestRoad = yourLongestRoad;
+
+  if (yourLongestRoad > currentLongestRoad && yourLongestRoad > 5) {
+    state.longestRoadOwner = playerId;
+  }
+
+  return state;
+};
+
 const playersVictoryPoints = (state: CatanState, playerId: string) => {
   const player = getPlayer(state, playerId);
 
-  const longestRoad = Math.max(
-    ...state.players.map(({ longestRoad }) => longestRoad)
-  );
-
-  const longestRoadPoints =
-    player.longestRoad === longestRoad && longestRoad >= 5 ? 2 : 0;
-
-  const mostRobberDeploys = Math.max(
-    ...state.players.map(({ robberDeployCount }) => robberDeployCount)
-  );
-
-  const largestArmyPoints =
-    player.robberDeployCount === mostRobberDeploys && mostRobberDeploys >= 3
-      ? 2
-      : 0;
+  const longestRoadPoints = playerId === state.longestRoadOwner ? 2 : 0;
+  const largestArmyPoints = playerId === state.largestArmyOwner ? 2 : 0;
 
   const cityCount = state.buildings.filter(
     (building) =>
@@ -515,8 +535,7 @@ const buildRoad = (
     }
   }
 
-  state.players[playerIndex].longestRoad = computeLongestRoad(state, playerId);
-
+  state = updateLongestRoad(state, playerId);
   state = computeVictoryPoints(state);
 
   return state;
@@ -698,14 +717,15 @@ const playDevCard = (
     throw new Error("You don't have that card to play");
   }
 
-  /// Performt the card action
+  /// Perform the card action
   if (card === DevelopmentCardType.KNIGHT) {
     state.activePlayerTurnState = PlayerTurnState.MUST_PLACE_ROBBER;
+
+    state = updateLargestArmy(state, playerId);
+    state = computeVictoryPoints(state);
   }
 
   state.players[playerIndex].developmentCards[card] -= 1;
-
-  state = computeVictoryPoints(state);
 
   return state;
 };

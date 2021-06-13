@@ -201,7 +201,7 @@ export const vertexAdjacenies: { [index: number]: EdgeDir[] } = {
   [VertexDir.NW]: [EdgeDir.W, EdgeDir.NW],
 };
 
-/// Maps a given edge direction to its two vertex direction
+/// Maps a given edge direction to its two vertex directions
 export const edgeVerticies: { [index: number]: VertexDir[] } = {
   [EdgeDir.NE]: [VertexDir.N, VertexDir.NE],
   [EdgeDir.E]: [VertexDir.NE, VertexDir.SE],
@@ -244,6 +244,13 @@ export const tileVerticies = (tiles: GameTile[], location: TileCoordinate) => {
   );
 };
 
+/// Get the six edges touching a given tile
+export const tileEdges = (tiles: GameTile[], location: TileCoordinate) => {
+  return range(6).map((edgeIndex) =>
+    getCommonEdgeCoordinate(tiles, { tile: location, edgeIndex })
+  );
+};
+
 /// Return the game tiles which are touching a given vertex
 export const tilesTouchingVertex = (
   tiles: GameTile[],
@@ -263,6 +270,15 @@ export const tilesTouchingVertex = (
   return [commonTile, ...otherTiles];
 };
 
+export const edgeTouchingVertex = (
+  tiles: GameTile[],
+  edge: EdgeCoordinate,
+  vertexCoord: VertexCoordinate
+) =>
+  edgeToVertices(tiles, edge).some((edgeVertex) =>
+    vertexCoordinateEquivalent(tiles, edgeVertex, vertexCoord)
+  );
+
 export const edgeToVertices = (tiles: GameTile[], edge: EdgeCoordinate) => {
   const edges = edgeVerticies[edge.edgeIndex];
 
@@ -276,6 +292,13 @@ export const edgeToVertices = (tiles: GameTile[], edge: EdgeCoordinate) => {
       vertexIndex: edges[1],
     }),
   ];
+};
+
+/// Get the two or three edges touching a given vertex
+export const vertexToEdges = (tiles: GameTile[], vertex: VertexCoordinate) => {
+  return tilesTouchingVertex(tiles, vertex)
+    .flatMap((tile) => tileEdges(tiles, tile.location))
+    .filter((edge) => edgeTouchingVertex(tiles, edge, vertex));
 };
 
 type RoadGraph = { [key: string]: Set<string> };
@@ -437,6 +460,47 @@ export const isValidRoadPosition = (
   );
 
   return allowBuilding;
+};
+
+/// Returns true if the given position is next to a current road that the player has built, or a building
+export const isValidSettlementPosition = (
+  { tiles }: GameBoard,
+  roads: Road[],
+  buildings: Building[],
+  playerId: string,
+  vertexCoord: VertexCoordinate,
+  mustConnect: boolean = true
+): boolean => {
+  if (buildingExists(buildings, vertexCoord.tile, vertexCoord.vertexIndex)) {
+    return false;
+  }
+
+  const yourRoads = roads.filter((road) => road.playerId === playerId);
+
+  const connectedVerticies = yourRoads.flatMap(({ location }) =>
+    edgeToVertices(tiles, location)
+  );
+
+  const isConnected = connectedVerticies.some((occupiedVertex) =>
+    vertexCoordinateEquivalent(tiles, vertexCoord, occupiedVertex)
+  );
+
+  const hasBuilding = (vertex: VertexCoordinate) =>
+    buildings.find((building) =>
+      vertexCoordinateEquivalent(tiles, vertex, building.location)
+    ) != undefined;
+
+  const obeysDistanceRule = vertexToEdges(tiles, vertexCoord).every((edge) =>
+    edgeToVertices(tiles, edge).every(
+      (adjacentVertex) => !hasBuilding(adjacentVertex)
+    )
+  );
+
+  if (mustConnect) {
+    return isConnected && obeysDistanceRule;
+  }
+
+  return obeysDistanceRule;
 };
 
 /// Returns true if the given playerId has a building adjacent to the given robber position

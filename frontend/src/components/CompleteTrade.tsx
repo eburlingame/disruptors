@@ -1,27 +1,13 @@
 import React, { useState } from "react";
 import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
-import { CgCloseO } from "react-icons/cg";
-import gameTheme, { resources } from "../utils/game_theme";
-import {
-  RequestTradeAction,
-  ChangeTurnAction,
-  ResourceType,
-  TradeAcceptance,
-  CompleteTradeAction,
-} from "../state/game_types";
-import { Tooltip } from "@chakra-ui/tooltip";
+import { TradeAcceptance, CompleteTradeAction } from "../state/game_types";
 import { useGameViewState } from "./GameView";
-import { Button, IconButton } from "@chakra-ui/button";
-import {
-  FaCheckCircle,
-  FaExchangeAlt,
-  FaQuestionCircle,
-  FaTimes,
-  FaWindowClose,
-} from "react-icons/fa";
+import { Button } from "@chakra-ui/button";
+import { FaCheckCircle, FaQuestionCircle, FaTimes } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
 import { useSessionState } from "../hooks/session";
 import { getRoomPlayer } from "../utils/utils";
+import { TradePreview } from "./AcceptTrade";
 
 const CompleteTrade = ({}) => {
   const { room } = useSessionState();
@@ -60,6 +46,8 @@ const CompleteTrade = ({}) => {
 
   return (
     <VStack alignItems="stretch">
+      <TradePreview />
+
       <VStack>
         {activeTradeRequest.acceptance
           .filter(
@@ -70,17 +58,17 @@ const CompleteTrade = ({}) => {
             player: getRoomPlayer(room, acceptance.playerId),
           }))
           .map(({ acceptance, player }) => (
-            <HStack>
+            <>
               {acceptance === TradeAcceptance.UNDECIDED && (
-                <>
+                <HStack justifyContent="space-between">
                   <Box>
                     <FaQuestionCircle />
                   </Box>
                   <Box>{player.name} hasn't responded</Box>
-                </>
+                </HStack>
               )}
               {acceptance === TradeAcceptance.ACCEPTED && (
-                <>
+                <HStack justifyContent="space-between">
                   <Box>
                     <FaCheckCircle />
                   </Box>
@@ -92,17 +80,17 @@ const CompleteTrade = ({}) => {
                   >
                     Complete Trade
                   </Button>
-                </>
+                </HStack>
               )}
               {acceptance === TradeAcceptance.REJECTED && (
-                <>
+                <HStack justifyContent="space-between">
                   <Box>
                     <FaTimes />
                   </Box>
                   <Box>{player.name} has rejected your trade</Box>
-                </>
+                </HStack>
               )}
-            </HStack>
+            </>
           ))}
       </VStack>
 

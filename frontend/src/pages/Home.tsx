@@ -8,15 +8,6 @@ import Layout from "../components/Layout";
 import { useSessionState } from "../hooks/session";
 
 const HomePage = ({}) => {
-  const history = useHistory();
-  const sessionState = useSessionState();
-
-  useEffect(() => {
-    if (sessionState.room && sessionState.room.roomCode.length === 4) {
-      history.push(`/room/${sessionState.room.roomCode}`);
-    }
-  }, [sessionState.room]);
-
   return (
     <Layout title="Welcome">
       <Center mt="8">

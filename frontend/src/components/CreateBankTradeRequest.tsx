@@ -51,9 +51,11 @@ const ResourcePicker = ({
   exchangeRates,
   addCount,
   clearCount,
+  maxTotalCount = -1,
 }: {
   label: string;
   counts: ResourceCount[];
+  maxTotalCount?: number;
   exchangeRates?: ExchangeRate[];
   addCount: (resource: ResourceType) => void;
   clearCount: () => void;
@@ -67,6 +69,20 @@ const ResourcePicker = ({
 
   const onAdd = (resource: ResourceType) => () => addCount(resource);
   const onClear = () => clearCount();
+
+  const totalCount = sum(counts.map(({ count }) => count));
+
+  const resourceEnabled = (count: number, maxCount: number) => {
+    if (maxTotalCount != -1 && totalCount >= maxTotalCount) {
+      return false;
+    }
+
+    if (maxCount != -1 && count >= maxCount) {
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <VStack
@@ -102,7 +118,7 @@ const ResourcePicker = ({
                   size="lg"
                   zIndex="0"
                   onClick={onAdd(resource)}
-                  disabled={maxCount != -1 && count >= maxCount}
+                  disabled={!resourceEnabled(count, maxCount)}
                 />
                 <Center fontWeight="bold">
                   {lowestRatioFor(exchangeRates, resource) &&
@@ -170,7 +186,10 @@ const CreateBankTradeRequest = ({}) => {
       })
     );
 
-  const clearGivingCount = () => setGivingCounts(emptyGivingCounts());
+  const clearGivingCount = () => {
+    setGivingCounts(emptyGivingCounts());
+    setSeekingCounts(emptyGivingCounts());
+  };
 
   const addSeekingCount = (resourceType: ResourceType) =>
     setSeekingCounts((counts) =>
@@ -253,12 +272,10 @@ const CreateBankTradeRequest = ({}) => {
 
       <ResourcePicker
         label="In exchange for:"
-        counts={seekingCounts.map((count) => ({
-          ...count,
-          maxCount: maxSeekingCount - currentSeekingCount,
-        }))}
+        counts={seekingCounts.map((count) => ({ ...count, maxCount: -1 }))}
         addCount={addSeekingCount}
         clearCount={clearSeekingCount}
+        maxTotalCount={maxSeekingCount}
       />
 
       <Box marginTop="2" />

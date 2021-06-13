@@ -588,13 +588,14 @@ const GameBoard = ({}) => {
   const canBuildSettlement = (vertexCoord: VertexCoordinate) => {
     let buildings = state.buildings;
     let roads = state.roads;
+    let mustConnect = true;
 
     /// Allow building on any empty space during the first setup round
     if (
       state.phase === GamePhase.SETUP_ROUND_1 ||
       state.phase === GamePhase.SETUP_ROUND_2
     ) {
-      return !buildingExists(vertexCoord.tile, vertexCoord.vertexIndex);
+      mustConnect = false;
     }
 
     return isValidSettlementPosition(
@@ -602,7 +603,8 @@ const GameBoard = ({}) => {
       roads,
       buildings,
       state.you.playerId,
-      vertexCoord
+      vertexCoord,
+      mustConnect
     );
   };
 
