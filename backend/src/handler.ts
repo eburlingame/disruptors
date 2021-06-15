@@ -222,9 +222,13 @@ export default class Handler {
   private async onRoomUpdates(msg: string) {
     /// Send out the current state when the room has been updated
     console.log("Game room was updated externally");
-    return this.broadcastFn(
-      adhocResponse("room.updated", await this.commonState())
-    );
+    try {
+      return this.broadcastFn(
+        adhocResponse("room.updated", await this.commonState())
+      );
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   /// Handler functions
@@ -340,6 +344,16 @@ export default class Handler {
     room.players = room.players.filter(
       (player) => player.playerId !== session.playerId
     );
+
+    /// Remove the room if all players have left
+    if (room.players.length === 0) {
+      this.rooms.deleteRoom(room);
+      return sucessResponse(request, await this.commonState());
+    }
+    /// If the room has no host, elect a new one
+    else if (room.players.every(({ isHost }) => !isHost)) {
+      room.players[0].isHost = true;
+    }
 
     /// Update the game configuration
     const game = new games.Catan();

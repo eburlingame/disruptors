@@ -61,8 +61,8 @@ export default (context: Context) => {
     return null;
   };
 
-  const deleteRoom = async (session: PersistedRoom) => {
-    return redis.del(roomKey(session.roomCode));
+  const deleteRoom = async (room: PersistedRoom) => {
+    return redis.del(roomKey(room.roomCode));
   };
 
   const subscribeToRoom = (
