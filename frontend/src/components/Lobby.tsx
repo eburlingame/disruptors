@@ -118,7 +118,7 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
             onChange={(e) => setDraftPlayerName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && changeName()}
           />
-          <Button onClick={changeName}>Change Name</Button>
+          <Button onClick={changeName}>Set Name</Button>
         </HStack>
 
         <HStack width="100%" marginTop="8" alignItems="stretch">
@@ -134,7 +134,10 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
             </Box>
 
             {sessionState.room?.players.map((p) => (
-              <Box>{p.name === "" ? "No name" : p.name}</Box>
+              <HStack>
+                <Box>{p.name === "" ? "No name" : p.name}</Box>
+                {sessionState.you?.playerId === p.playerId && <Box>(You)</Box>}
+              </HStack>
             ))}
           </VStack>
 

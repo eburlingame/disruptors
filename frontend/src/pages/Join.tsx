@@ -43,10 +43,12 @@ const JoinGame = ({}) => {
 
   return (
     <Layout title="Welcome">
-      <VStack mt="8" maxW="60ch" marginX="auto">
-        <HStack marginBottom="4">
-          <Box>Game code:</Box>
+      <Box mt="8" maxW="60ch" marginX="auto" textAlign="center">
+        <Box fontSize="xl" fontWeight="bold" marginBottom="4">
+          Join a Game
+        </Box>
 
+        <HStack marginY="4">
           <Input
             placeholder="Enter the game code"
             onChange={onGameCodeChange}
@@ -59,14 +61,20 @@ const JoinGame = ({}) => {
 
         {error && <Box color="red.600">{error}</Box>}
 
-        <Button onClick={tryjoinRoom} isLoading={joining} size="lg">
-          Join game
-        </Button>
-
-        <Button onClick={goHome} isLoading={joining} variant="ghost">
-          Go back
-        </Button>
-      </VStack>
+        <VStack>
+          <Button
+            onClick={tryjoinRoom}
+            isLoading={joining}
+            size="lg"
+            colorScheme="green"
+          >
+            Join game
+          </Button>
+          <Button onClick={goHome} isLoading={joining} variant="ghost">
+            Go back
+          </Button>
+        </VStack>
+      </Box>
     </Layout>
   );
 };
