@@ -3,9 +3,7 @@ import { VStack, Spinner } from "@chakra-ui/react";
 import { Switch, Route } from "react-router-dom";
 import { useSessionLoadingState } from "./hooks/session";
 import Layout from "./components/Layout";
-import ProtectedRoute from "./ProtectedRoute";
 import HomePage from "./pages/Home";
-import CreateGamePage from "./pages/Create";
 import JoinGamePage from "./pages/Join";
 import GamePage from "./pages/Game";
 
@@ -26,10 +24,6 @@ const Routes = () => {
     <Switch>
       <Route path="/join">
         <JoinGamePage />
-      </Route>
-
-      <Route path="/create">
-        <CreateGamePage />
       </Route>
 
       <Route path="/room/:roomCode">

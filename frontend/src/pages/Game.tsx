@@ -6,10 +6,6 @@ import { useSessionLoadingState, useSessionState } from "../hooks/session";
 import { RoomPhase } from "../state/atoms";
 
 const GamePage = ({}) => {
-  const history = useHistory();
-
-  const { isOpen } = useSessionLoadingState();
-  const { roomCode } = useParams<{ roomCode: string }>();
   const sessionState = useSessionState();
 
   if (

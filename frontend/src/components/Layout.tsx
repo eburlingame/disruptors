@@ -12,9 +12,11 @@ import { ColorModeSwitcher } from "./ColorModeSwitcher";
 const Layout = ({
   title,
   children,
+  hideQuit = false,
 }: {
   title: string;
   children: ReactNode;
+  hideQuit?: boolean;
 }) => {
   const history = useHistory();
   const sessionState = useSessionState();
@@ -45,11 +47,18 @@ const Layout = ({
         p={2}
       >
         <ColorModeSwitcher size="xs" />
-        <Tooltip label="Leave game">
-          <Button variant="ghost" size="xs" onClick={onExit} colorScheme="red">
-            Quit
-          </Button>
-        </Tooltip>
+        {!hideQuit && (
+          <Tooltip label="Leave game">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={onExit}
+              colorScheme="red"
+            >
+              Quit
+            </Button>
+          </Tooltip>
+        )}
       </HStack>
       <Box flex="1" display="flex" flexDir="column">
         {children}

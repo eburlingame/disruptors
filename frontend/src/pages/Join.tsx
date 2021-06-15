@@ -1,6 +1,6 @@
 import { Button } from "@chakra-ui/button";
 import { Input } from "@chakra-ui/input";
-import { Box, Center } from "@chakra-ui/layout";
+import { Box, Center, HStack, VStack } from "@chakra-ui/layout";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import Cleave from "cleave.js/react";
@@ -16,11 +16,22 @@ const JoinGame = ({}) => {
 
   const { joinRoom, joining, error: joinError } = useJoinRoom();
 
+  const goHome = async () => {
+    history.push(`/`);
+  };
+
   const tryjoinRoom = async () => {
     const result = await joinRoom(draftGameCode);
 
     if (result && result.room) {
       history.push(`/room/${result.room.roomCode}`);
+    }
+  };
+
+  const onGameCodeChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const newValue = e.target.value.toUpperCase();
+    if (newValue.length <= 4) {
+      setDraftGameCode(newValue);
     }
   };
 
@@ -32,25 +43,30 @@ const JoinGame = ({}) => {
 
   return (
     <Layout title="Welcome">
-      <Center mt="8">
-        {error && <Box>{error}</Box>}
+      <VStack mt="8" maxW="60ch" marginX="auto">
+        <HStack marginBottom="4">
+          <Box>Game code:</Box>
 
-        <Input
-          placeholder="Enter the game code"
-          onChange={(e) => {
-            const newValue = e.target.value.toUpperCase();
-            if (newValue.length <= 4) {
-              setDraftGameCode(newValue);
-            }
-          }}
-          value={draftGameCode}
-        />
-        <Button onClick={tryjoinRoom} isLoading={joining}>
+          <Input
+            placeholder="Enter the game code"
+            onChange={onGameCodeChange}
+            onKeyDown={(e) => e.key === "Enter" && tryjoinRoom()}
+            value={draftGameCode}
+            autoFocus={true}
+            flex="1"
+          />
+        </HStack>
+
+        {error && <Box color="red.600">{error}</Box>}
+
+        <Button onClick={tryjoinRoom} isLoading={joining} size="lg">
           Join game
         </Button>
-      </Center>
 
-      <Link to="/">Home</Link>
+        <Button onClick={goHome} isLoading={joining} variant="ghost">
+          Go back
+        </Button>
+      </VStack>
     </Layout>
   );
 };

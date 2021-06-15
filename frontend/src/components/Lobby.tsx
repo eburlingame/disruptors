@@ -18,6 +18,7 @@ import {
 import { Input } from "@chakra-ui/input";
 import { Select } from "@chakra-ui/select";
 import { SessionState } from "../state/atoms";
+import { useColorModeValue } from "@chakra-ui/color-mode";
 
 const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   const history = useHistory();
@@ -26,6 +27,7 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   const { isOpen } = useSessionLoadingState();
   const { roomCode } = useParams<{ roomCode: string }>();
 
+  const [adhocError, setAdhocError] = useState<string | null>(null);
   const { joinRoom, joining, error: joinError } = useJoinRoom();
   const { leaveRoom, leaving } = useLeaveRoom();
 
@@ -53,7 +55,19 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
 
   const { configurePlayer, error: configPlayerError } = useConfigurePlayer();
   const changeName = async () => {
-    const result = await configurePlayer(draftPlayerName);
+    setAdhocError(null);
+
+    if (draftPlayerName.length === 0) {
+      setAdhocError("Name cannot be empty");
+      return;
+    }
+
+    if (draftPlayerName.length > 20) {
+      setAdhocError("Name must be less than 20 chars");
+      return;
+    }
+
+    await configurePlayer(draftPlayerName);
   };
 
   const { configureGame, error: configGameError } = useConfigureGame();
@@ -71,10 +85,18 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
 
   useEffect(() => {
     /// Open error modal if new error is encountered
-    if (joinError || configGameError || configPlayerError || startError) {
+    if (
+      joinError ||
+      configGameError ||
+      configPlayerError ||
+      startError ||
+      adhocError
+    ) {
       errorModalDisclosure.onOpen();
     }
-  }, [joinError, configGameError, configPlayerError, startError]);
+  }, [joinError, configGameError, configPlayerError, startError, adhocError]);
+
+  const borderColor = useColorModeValue("gray.100", "gray.700");
 
   if (joining) {
     return <Layout title="">Joining the game room...</Layout>;
@@ -82,16 +104,75 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
 
   return (
     <Layout title="Game">
-      <VStack mt="8" maxWidth="60ch" marginX="auto">
-        <Box>Room Code: {roomCode}</Box>
+      <Box mt="8" maxWidth="60ch" marginX="auto" textAlign="center" p="2">
+        <Box fontWeight="extrabold" fontSize="2xl" marginBottom="4">
+          Game Lobby
+        </Box>
 
-        <VStack>
-          <Box>Game configuration:</Box>
+        <HStack marginTop="8">
+          <Box>Your name:</Box>
+
+          <Input
+            flex={1}
+            value={draftPlayerName}
+            onChange={(e) => setDraftPlayerName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && changeName()}
+          />
+          <Button onClick={changeName}>Change Name</Button>
+        </HStack>
+
+        <HStack width="100%" marginTop="8" alignItems="stretch">
+          <VStack
+            borderWidth="thin"
+            rounded="md"
+            borderColor={borderColor}
+            p={2}
+            flex="1"
+          >
+            <Box fontSize="lg" fontWeight="medium" marginBottom="2">
+              Players
+            </Box>
+
+            {sessionState.room?.players.map((p) => (
+              <Box>{p.name === "" ? "No name" : p.name}</Box>
+            ))}
+          </VStack>
+
+          <Box
+            borderWidth="thin"
+            rounded="md"
+            borderColor={borderColor}
+            p={2}
+            flex="1"
+          >
+            <Box fontSize="lg" fontWeight="medium" marginBottom="2">
+              Game Code
+            </Box>
+            <Box fontWeight="extrabold" fontSize="3xl">
+              {roomCode}
+            </Box>
+          </Box>
+        </HStack>
+
+        <VStack
+          borderWidth="thin"
+          rounded="md"
+          borderColor={borderColor}
+          p={4}
+          width="100%"
+          marginTop="4"
+        >
+          <Box fontSize="lg" fontWeight="medium">
+            Game Options
+          </Box>
+
           {sessionState.you?.isHost && (
-            <Box>
-              <HStack>
-                <Box>Card Discard Limit:</Box>
+            <HStack width="100%" justifyContent="space-between">
+              <Box>Card Discard Limit:</Box>
+
+              <Box>
                 <Select
+                  width="inherit"
                   value={draftGameConfig.cardDiscardLimit}
                   onChange={(e) =>
                     changeGameConfig({
@@ -102,50 +183,44 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
                   <option value="7">7 cards</option>
                   <option value="10">10 cards</option>
                 </Select>
-              </HStack>
-            </Box>
+              </Box>
+            </HStack>
           )}
+
           {!sessionState.you?.isHost && (
-            <HStack>
+            <HStack width="100%" justifyContent="space-between">
               <Box>Card Discard Limit:</Box>
-              <Box>{sessionState.room?.gameConfig.cardDiscardLimit}</Box>
+
+              <Box fontWeight="bold">
+                {sessionState.room?.gameConfig.cardDiscardLimit}
+              </Box>
             </HStack>
           )}
         </VStack>
 
-        <HStack>
-          <Box>Your name:</Box>
-          <Input
-            flex={1}
-            value={draftPlayerName}
-            onChange={(e) => setDraftPlayerName(e.target.value)}
-          />
-          <Button onClick={changeName}>Change Name</Button>
-        </HStack>
+        <VStack marginTop="8">
+          {sessionState.you?.isHost && (
+            <Button onClick={() => startGame()} colorScheme="green">
+              Start Game
+            </Button>
+          )}
 
-        <Box>
-          <Box>Players:</Box>
-          {sessionState.room?.players
-            .filter((player) => player.playerId !== sessionState.you?.playerId)
-            .map((p) => (
-              <li>{p.name}</li>
-            ))}
-        </Box>
-
-        {sessionState.you?.isHost && (
-          <Button onClick={() => startGame()} colorScheme="green">
-            Start Game
+          <Button
+            onClick={onLeave}
+            variant="outline"
+            colorScheme="red"
+            size="sm"
+          >
+            Leave Game
           </Button>
-        )}
-
-        <Button onClick={onLeave} variant="outline" colorScheme="red" size="sm">
-          Leave Game
-        </Button>
-      </VStack>
+        </VStack>
+      </Box>
 
       <ErrorAlert
         title={"Error"}
-        body={joinError || configPlayerError || configGameError || ""}
+        body={
+          joinError || configPlayerError || configGameError || adhocError || ""
+        }
         {...errorModalDisclosure}
       />
     </Layout>

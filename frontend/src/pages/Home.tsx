@@ -1,24 +1,39 @@
 import { Button } from "@chakra-ui/button";
-import { Center } from "@chakra-ui/layout";
-import React, { useEffect } from "react";
+import { Box, VStack } from "@chakra-ui/layout";
+import React from "react";
 import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
-import { useRecoilValue } from "recoil";
 import Layout from "../components/Layout";
-import { useSessionState } from "../hooks/session";
+import { useCreateGame } from "../hooks/room";
 
 const HomePage = ({}) => {
+  const history = useHistory();
+
+  const { createGame } = useCreateGame();
+
+  const onCreateGame = async () => {
+    const result = await createGame("");
+
+    if (result && result.room && result.room.roomCode) {
+      history.push(`/room/${result.room.roomCode}`);
+    }
+  };
+
   return (
-    <Layout title="Welcome">
-      <Center mt="8">
+    <Layout title="Welcome" hideQuit={true}>
+      <VStack mt="10">
+        <Box fontSize="2xl" fontWeight="bold" marginBottom="4">
+          Disruptors of Silitan Valley
+        </Box>
+
         <Link to="/join">
-          <Button>Join a game</Button>
+          <Button size="lg">Join game</Button>
         </Link>
 
-        <Link to="/create">
-          <Button>Create a game</Button>
-        </Link>
-      </Center>
+        <Button size="lg" onClick={onCreateGame}>
+          Create game
+        </Button>
+      </VStack>
     </Layout>
   );
 };
