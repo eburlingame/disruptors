@@ -3,6 +3,7 @@ import { Box, HStack, VStack } from "@chakra-ui/layout";
 import gameTheme from "../utils/game_theme";
 import {
   CatanAction,
+  DevelopmentCardType,
   ResourceCount,
   ResourceQuantities,
   ResourceType,
@@ -80,7 +81,7 @@ const ResourceCounts = ({ counts }: { counts: ResourceCount[] }) => {
   }
 
   return (
-    <Box marginLeft="1">
+    <Box marginLeft="1" display="flex">
       {counts
         .filter(({ count }) => count > 0)
         .map(({ resource, count }) => (
@@ -104,7 +105,7 @@ const ActionRow = ({
   action: CatanAction;
   players: { [playerId: string]: CompletePlayer };
 }) => {
-  const { robber, buildings, resources } = gameTheme;
+  const { robber, buildings, resources, developmentCards } = gameTheme;
 
   switch (action.name) {
     case "buildSettlement":
@@ -182,6 +183,20 @@ const ActionRow = ({
           {player.name} placed the <InlineIcon icon={robber.icon} />
         </Box>
       );
+
+    case "playDevCard":
+      if (action.card === DevelopmentCardType.KNIGHT) {
+        return (
+          <Box display="flex" alignItems="center">
+            {player.name} played a{" "}
+            <InlineIcon icon={developmentCards.knight.icon} />
+          </Box>
+        );
+      }
+      break;
+
+    case "buyDevCard":
+      return <Box>{player.name} bought a development card.</Box>;
 
     case "endTurn":
       return (
