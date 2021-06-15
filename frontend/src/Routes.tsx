@@ -1,23 +1,16 @@
 import * as React from "react";
-import { VStack, Spinner } from "@chakra-ui/react";
 import { Switch, Route } from "react-router-dom";
 import { useSessionLoadingState } from "./hooks/session";
-import Layout from "./components/Layout";
 import HomePage from "./pages/Home";
 import JoinGamePage from "./pages/Join";
 import GamePage from "./pages/Game";
+import Loading from "./pages/Loading";
 
 const Routes = () => {
   const { isLoading } = useSessionLoadingState();
 
   if (isLoading) {
-    return (
-      <Layout title="">
-        <VStack>
-          <Spinner />
-        </VStack>
-      </Layout>
-    );
+    return <Loading />;
   }
 
   return (

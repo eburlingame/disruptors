@@ -2,7 +2,7 @@ import { Context } from "src";
 
 export type PersistedSession = {
   sessionId: string;
-  playerId?: string;
+  playerId: string;
   roomCode?: string;
 };
 

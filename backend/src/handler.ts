@@ -215,6 +215,7 @@ export default class Handler {
   private emptySession(): PersistedSession {
     return {
       sessionId: uuid(),
+      playerId: uuid(),
     };
   }
 
@@ -299,7 +300,7 @@ export default class Handler {
   private async joinRoom(request: Request, { roomCode }: { roomCode: string }) {
     /// Default to an empty session
     let session = await this.getCurrentSession();
-    const playerId = session.playerId || uuid();
+    const { playerId } = session;
 
     let room = await this.rooms.getRoom(roomCode);
     if (!room) throw new Error(`Could not find room: ${roomCode}`);
@@ -365,7 +366,6 @@ export default class Handler {
     await this.rooms.unsubscribeFromRoom(room.roomCode, session.sessionId);
 
     /// Update the session and persist
-    session.playerId = undefined;
     session.roomCode = undefined;
     await this.putCurrentSession(session);
 
