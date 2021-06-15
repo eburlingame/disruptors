@@ -48,7 +48,7 @@ import { useGameAction } from "../hooks/game";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { FormLabel } from "@chakra-ui/form-control";
 import { useColorModeValue } from "@chakra-ui/color-mode";
-import { useTheme } from "@chakra-ui/system";
+import useResizeAware from "react-resize-aware";
 
 const TILE_WIDTH = 146;
 const TILE_HEIGHT = 169;
@@ -98,15 +98,17 @@ const DiceValueContainerTitle = styled.div`
   font-weight: 400;
 `;
 
-const TileContainer = styled.div<{ zoom: number }>`
+const TileContainer = styled.div<{
+  zoom: number;
+  containerW: number;
+  containerH: number;
+}>`
   position: absolute;
 
-  // left: 50%;
-  // top: 50%;
-  // transform: translate(-50%, -50%);
-
-  width: ${(props) => CONTAINER_WIDTH * props.zoom}px;
-  height: ${(props) => CONTAINER_HEIGHT * props.zoom}px;
+  width: ${(props) =>
+    Math.max(CONTAINER_WIDTH * props.zoom, props.containerW)}px;
+  height: ${(props) =>
+    Math.max(CONTAINER_HEIGHT * props.zoom, props.containerH)}px;
 `;
 
 const BackgroundImage = styled.img`
@@ -405,6 +407,7 @@ const GameBoard = ({}) => {
   const zoomOut = () =>
     setZoom((current) => (current > 0.25 ? current - 0.25 : current));
 
+  const [resizeListener, { width, height }] = useResizeAware();
   const scrollRef = useRef<any>();
 
   // useEffect(() => {
@@ -617,6 +620,8 @@ const GameBoard = ({}) => {
 
   return (
     <Container backgroundColor={boardBackgroundColor}>
+      {resizeListener}
+
       <ZoomControls>
         <ButtonGroup isAttached variant="solid">
           <IconButton
@@ -643,7 +648,11 @@ const GameBoard = ({}) => {
       )}
 
       <OverflowContainer ref={scrollRef}>
-        <TileContainer zoom={zoom}>
+        <TileContainer
+          zoom={zoom}
+          containerW={width || 100}
+          containerH={height || 100}
+        >
           <TileOriginContainer zoom={zoom}>
             <BackgroundImage src={backerImg} />
 
