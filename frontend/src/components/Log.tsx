@@ -96,6 +96,9 @@ const ResourceCounts = ({ counts }: { counts: ResourceCount[] }) => {
   );
 };
 
+const totalResources = (counts: ResourceCount[]) =>
+  sum(counts.map(({ count }) => count));
+
 const ActionRow = ({
   action,
   player,
@@ -197,6 +200,20 @@ const ActionRow = ({
 
     case "buyDevCard":
       return <Box>{player.name} bought a development card.</Box>;
+
+    case "stealCard":
+      return (
+        <Box>
+          {player.name} stole a card from {players[action.stealFrom].name}
+        </Box>
+      );
+
+    case "discardCards":
+      return (
+        <Box>
+          {player.name} discarded {totalResources(action.discarding)} cards.
+        </Box>
+      );
 
     case "endTurn":
       return (
