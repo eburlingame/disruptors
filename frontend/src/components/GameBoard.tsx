@@ -178,7 +178,7 @@ const RobberIconContainer = styled.div`
   position: absolute;
   width: 50px;
   left: 25px;
-  top: -10px;
+  top: 25px;
 `;
 
 const Tile = styled.div<{ position: { x: number; y: number } }>`
