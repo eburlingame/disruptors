@@ -114,6 +114,18 @@ export default class CatanGame
       };
     }
 
+    if (action.name === "completeTrade") {
+      const { activeTradeRequest } = gameState;
+
+      if (activeTradeRequest && action.completeTrade) {
+        return {
+          ...action,
+          seeking: activeTradeRequest.seeking,
+          giving: activeTradeRequest.giving,
+        };
+      }
+    }
+
     return action;
   }
 

@@ -96,7 +96,7 @@ const Players = ({}) => {
                 count={longestRoad.toString()}
               />
               <CardCount
-                icon={<gameTheme.robber.icon />}
+                icon={<gameTheme.developmentCards.knight.icon />}
                 label={gameTheme.robber.label + " attacks"}
                 count={robberDeployCount.toString()}
               />

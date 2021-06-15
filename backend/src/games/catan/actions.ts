@@ -163,6 +163,9 @@ const resourceFromBankToPlayer = (
   throw new Error("Not enough resources");
 };
 
+const resourceCount = (player: CatanPlayer) =>
+  sum(Object.values(player.resources));
+
 const tradePlayerResource = (
   state: CatanState,
   seekerPlayerId: string,
@@ -276,12 +279,12 @@ const collectResourceFromTile = (
 const updateLargestArmy = (state: CatanState, playerId: string) => {
   const playerIndex = getPlayerIndex(state, playerId);
 
-  const currentDeployCount =
+  const maxDeployCount =
     max(state.players.map((player) => player.robberDeployCount)) || 0;
 
   const yourDeployCount = state.players[playerIndex].robberDeployCount + 1;
 
-  if (yourDeployCount > currentDeployCount && yourDeployCount > 3) {
+  if (yourDeployCount > maxDeployCount && yourDeployCount > 3) {
     state.largestArmyOwner = playerId;
   }
 
@@ -777,22 +780,22 @@ const placeRobber = (
   }
 
   state.robber = action.location;
-  state.activePlayerTurnState = PlayerTurnState.MUST_STEAL_CARD;
+  state.activePlayerTurnState = PlayerTurnState.IDLE;
 
-  const nobodyToStealFrom = state.players
+  const somebodyToStealFrom = state.players
     .filter((player) => player.playerId !== playerId)
-    .every(
+    .some(
       (player) =>
-        !playerHasBuildingNextToRobber(
+        playerHasBuildingNextToRobber(
           state.board.tiles,
           state.robber,
           state.buildings,
           player.playerId
-        )
+        ) && resourceCount(player) > 0
     );
 
-  if (nobodyToStealFrom) {
-    state.activePlayerTurnState = PlayerTurnState.IDLE;
+  if (somebodyToStealFrom) {
+    state.activePlayerTurnState = PlayerTurnState.MUST_STEAL_CARD;
   }
 
   return state;

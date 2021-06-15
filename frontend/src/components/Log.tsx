@@ -1,7 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { Box, HStack } from "@chakra-ui/layout";
+import { Box, HStack, VStack } from "@chakra-ui/layout";
 import gameTheme from "../utils/game_theme";
-import { CatanAction, ResourceType } from "../state/game_types";
+import {
+  CatanAction,
+  ResourceCount,
+  ResourceQuantities,
+  ResourceType,
+} from "../state/game_types";
 import { useGameViewState } from "./GameView";
 import { useSessionState } from "../hooks/session";
 import { getRoomPlayer, range } from "../utils/utils";
@@ -17,7 +22,7 @@ import {
   FaDiceTwo,
 } from "react-icons/fa";
 import { IconType } from "react-icons";
-import { tilesTouchingVertex, vectorsEqual } from "../utils/board_utils";
+import { sum } from "lodash";
 
 type CompletePlayer = RoomPlayer & GamePlayer;
 
@@ -57,6 +62,37 @@ const DiceIcon = ({ number }: { number: number }) => {
   }
 
   return <InlineIcon icon={icon} />;
+};
+
+const quantitiesToCounts = (
+  distribution: ResourceQuantities
+): ResourceCount[] =>
+  Object.entries(distribution).map(([resource, count]) => ({
+    resource: resource as ResourceType,
+    count,
+  }));
+
+const ResourceCounts = ({ counts }: { counts: ResourceCount[] }) => {
+  const { resources } = gameTheme;
+
+  if (sum(counts.map(({ count }) => count)) === 0) {
+    return <Box>nothing</Box>;
+  }
+
+  return (
+    <Box marginLeft="1">
+      {counts
+        .filter(({ count }) => count > 0)
+        .map(({ resource, count }) => (
+          <Box display="flex">
+            {range(count).map(() => {
+              const Icon = resources[resource as ResourceType].icon;
+              return <Icon />;
+            })}
+          </Box>
+        ))}
+    </Box>
+  );
 };
 
 const ActionRow = ({
@@ -103,17 +139,40 @@ const ActionRow = ({
 
           {action.distribution &&
             Object.entries(action.distribution).map(([playerId, got]) => (
-              <HStack>
+              <Box display="flex" alignItems="center">
                 <Box>{players[playerId].name} got </Box>
-                {Object.entries(got).map(([resource, count]) =>
-                  range(count).map(() => (
-                    <InlineIcon
-                      icon={resources[resource as ResourceType].icon}
-                    />
-                  ))
-                )}
-              </HStack>
+                <ResourceCounts counts={quantitiesToCounts(got)} />
+              </Box>
             ))}
+        </>
+      );
+
+    case "completeTrade":
+      if (action.completeTrade && action.giving && action.seeking) {
+        return (
+          <>
+            <HStack>
+              <Box>
+                {player.name} gave {players[action.acceptedTradeFrom].name}
+              </Box>
+              <ResourceCounts counts={action.giving || []} />
+              <Box>for</Box>
+              <ResourceCounts counts={action.seeking || []} />
+            </HStack>
+          </>
+        );
+      }
+      break;
+
+    case "bankTrade":
+      return (
+        <>
+          <HStack>
+            <Box>{player.name} gave the bank</Box>
+            <ResourceCounts counts={action.giving || []} />
+            <Box>for</Box>
+            <ResourceCounts counts={action.seeking || []} />
+          </HStack>
         </>
       );
 

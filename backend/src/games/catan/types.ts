@@ -1,5 +1,4 @@
 import { GamePlayer } from "../model";
-import { ResourceDistribution } from "./board_utils";
 
 export enum GamePhase {
   SETUP_ROUND_1 = "setup1",
@@ -139,6 +138,8 @@ export type CompleteTradeAction = {
   name: "completeTrade";
   completeTrade: boolean;
   acceptedTradeFrom: string;
+  seeking?: ResourceCount[];
+  giving?: ResourceCount[];
 };
 
 export type EndTurnAction = {
@@ -263,6 +264,18 @@ export type TradeRequest = {
   seeking: ResourceCount[];
   giving: ResourceCount[];
   acceptance: PlayerTradeAcceptance[];
+};
+
+export type ResourceQuantities = {
+  [ResourceType.BRICK]: number;
+  [ResourceType.ORE]: number;
+  [ResourceType.WHEAT]: number;
+  [ResourceType.SHEEP]: number;
+  [ResourceType.WOOD]: number;
+};
+
+export type ResourceDistribution = {
+  [playerId: string]: ResourceQuantities;
 };
 
 export enum PlayerColor {

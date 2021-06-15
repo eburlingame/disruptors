@@ -1,4 +1,3 @@
-import { ResourceDistribution } from "../utils/board_utils";
 import { GamePlayer } from "./model";
 
 export enum GamePhase {
@@ -139,6 +138,8 @@ export type CompleteTradeAction = {
   name: "completeTrade";
   completeTrade: boolean;
   acceptedTradeFrom: string;
+  seeking?: ResourceCount[];
+  giving?: ResourceCount[];
 };
 
 export type EndTurnAction = {
@@ -265,6 +266,18 @@ export type TradeRequest = {
   acceptance: PlayerTradeAcceptance[];
 };
 
+export type ResourceQuantities = {
+  [ResourceType.BRICK]: number;
+  [ResourceType.ORE]: number;
+  [ResourceType.WHEAT]: number;
+  [ResourceType.SHEEP]: number;
+  [ResourceType.WOOD]: number;
+};
+
+export type ResourceDistribution = {
+  [playerId: string]: ResourceQuantities;
+};
+
 export enum PlayerColor {
   Red = "red",
   Green = "green",
@@ -311,6 +324,8 @@ export type CatanState = {
   bank: Bank;
   players: CatanPlayer[];
   robber: TileCoordinate | null;
+  longestRoadOwner: string | null;
+  largestArmyOwner: string | null;
   activePlayerId: string;
   activePlayerTurnState: PlayerTurnState;
   activeTradeRequest?: TradeRequest;

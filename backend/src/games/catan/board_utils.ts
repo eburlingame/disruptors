@@ -14,6 +14,7 @@ import {
   TileType,
   BuildingType,
   CatanPlayer,
+  ResourceDistribution,
 } from "./types";
 
 export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
@@ -525,16 +526,6 @@ export const playerHasBuildingNextToRobber = (
   }
 
   return false;
-};
-
-export type ResourceDistribution = {
-  [playerId: string]: {
-    [ResourceType.BRICK]: number;
-    [ResourceType.ORE]: number;
-    [ResourceType.WHEAT]: number;
-    [ResourceType.SHEEP]: number;
-    [ResourceType.WOOD]: number;
-  };
 };
 
 export const tileTypeToResourceType = (
