@@ -106,8 +106,8 @@ const Players = ({}) => {
                 count={totalResourceCards.toString()}
               />
               <CardCount
-                icon={<FaCreditCard />}
-                label={"Development cards"}
+                icon={<gameTheme.genericDevelopmentCards.icon />}
+                label={gameTheme.genericDevelopmentCards.label}
                 count={totalDevelopmentCards.toString()}
               />
             </HStack>

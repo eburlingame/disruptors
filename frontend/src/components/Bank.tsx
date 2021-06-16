@@ -27,15 +27,15 @@ const Bank = ({}) => {
             <CardCount
               icon={<IconComponent />}
               label={resource.label}
-              count={count}
+              count={count.toString()}
             />
           );
         })}
 
       <CardCount
-        icon={<FaCreditCard />}
-        label={"Development cards"}
-        count={sum(Object.values(bank.developmentCards))}
+        icon={<gameTheme.genericDevelopmentCards.icon />}
+        label={gameTheme.genericDevelopmentCards.label}
+        count={sum(Object.values(bank.developmentCards)).toString()}
       />
     </HStack>
   );

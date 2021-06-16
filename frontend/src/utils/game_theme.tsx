@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FaBitcoin, FaNetworkWired, FaLayerGroup } from "react-icons/fa";
+import { FaBitcoin } from "react-icons/fa";
 
 import devLargeImg from "../images/icons_dev_l.svg";
 import internLargeImg from "../images/icons_intern_l.svg";
@@ -13,6 +13,10 @@ import garageImg from "../images/icons_garage.svg";
 import shieldImg from "../images/icons_shield.svg";
 import malwareImg from "../images/icons_malware.svg";
 import bitcoinImg from "../images/icons_bitcoin.svg";
+
+import angelImg from "../images/icons_angel.svg";
+import resourceCardsImg from "../images/icons_resource_cards.svg";
+import fiberImg from "../images/icons_fiber.svg";
 
 import {
   ResourceType,
@@ -53,6 +57,7 @@ export type GameTheme = {
     [PlayerColor.Orange]: PlayerColorValue;
   };
   robber: ThemeResource;
+  genericDevelopmentCards: ThemeResource;
   developmentCards: {
     [DevelopmentCardType.KNIGHT]: ThemeResource;
     [DevelopmentCardType.VICTORY_POINT]: ThemeResource;
@@ -111,7 +116,7 @@ const theme: GameTheme = {
       name: "fiber",
       pluralName: "fiber cables",
       label: "Fiber cable",
-      icon: FaNetworkWired,
+      icon: resourceIcon(fiberImg),
     },
     settlement: {
       name: "garage",
@@ -162,7 +167,13 @@ const theme: GameTheme = {
     name: "resource card",
     pluralName: "resource cards",
     label: "Resource cards",
-    icon: FaLayerGroup,
+    icon: resourceIcon(resourceCardsImg),
+  },
+  genericDevelopmentCards: {
+    name: "development card",
+    pluralName: "development cards",
+    label: "Development cards",
+    icon: resourceIcon(angelImg),
   },
   developmentCards: {
     [DevelopmentCardType.KNIGHT]: {
