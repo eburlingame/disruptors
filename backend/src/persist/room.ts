@@ -1,17 +1,11 @@
 import { Context } from "src";
+import { GameActionRecord } from "src/games/model";
 import { PubSubCallback } from "src/pubsub";
 
 export type RoomPlayer = {
   playerId: string;
   name: string;
   isHost: boolean;
-};
-
-export type GameActionRecord = {
-  id: string;
-  at: number; // date
-  who: string; /// playerId
-  action: any;
 };
 
 export type PersistedGameState = {
@@ -34,6 +28,7 @@ export type PersistedRoom = {
   gameConfig: any;
   gameReady: boolean;
   gameState?: PersistedGameState;
+  gameSummary?: any;
 };
 
 const ROOM_PREFIX = "room|";

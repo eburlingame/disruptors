@@ -1,4 +1,4 @@
-import Game, { GamePlayer } from "../model";
+import Game, { GameActionRecord, GamePlayer } from "../model";
 import { generateStaticBoard } from "./board";
 import { sumResources } from "./utils";
 
@@ -10,20 +10,33 @@ import {
   CatanPlayersState,
   PlayerTurnState,
   PlayerColor,
+  CatanGameSummary,
+  RollDiceAction,
 } from "./types";
 
 import actions from "./actions";
 
-import { random, shuffle, sum } from "lodash";
+import { range, shuffle, sum } from "lodash";
 import { randomInt } from "../../util";
-import { distributeResources, getAvailableExchanges } from "./board_utils";
+import {
+  distributeResources,
+  getAvailableExchanges,
+  playerHasWon,
+} from "./board_utils";
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
 };
 
 export default class CatanGame
-  implements Game<CatanConfig, CatanAction, CatanState, CatanPlayersState>
+  implements
+    Game<
+      CatanConfig,
+      CatanAction,
+      CatanState,
+      CatanPlayersState,
+      CatanGameSummary
+    >
 {
   constructor() {}
 
@@ -181,9 +194,38 @@ export default class CatanGame
   }
 
   gameOver(gameState: CatanState): boolean {
-    return gameState.players.some(
-      ({ points: { private: privatePoints, public: publicPoints } }) =>
-        privatePoints + publicPoints >= 10
-    );
+    return gameState.players.some((player) => playerHasWon(player));
+  }
+
+  gameSummary(
+    gameState: CatanState,
+    actions: GameActionRecord[]
+  ): CatanGameSummary {
+    console.log(gameState);
+
+    const winner = gameState.players.find((player) => playerHasWon(player));
+    if (!winner) throw new Error("Nobody won?");
+
+    const diceFrequencies = actions
+      .map((action) => action.action as CatanAction)
+      .filter((action) => action.name === "rollDice")
+      .map((action) => {
+        const diceRollAction = action as RollDiceAction;
+        const [a, b] = diceRollAction.values;
+
+        return a + b;
+      })
+      .reduce(
+        (counts, diceValue) => {
+          counts[diceValue] += 1;
+          return counts;
+        },
+        range(13).map(() => 0)
+      );
+
+    return {
+      winner: winner.playerId,
+      diceFrequencies,
+    };
   }
 }

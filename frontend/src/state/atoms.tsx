@@ -35,6 +35,7 @@ export type Room = {
   gameConfig: any;
   gameReady: boolean;
   gameState?: GameState;
+  gameSummary?: any;
 };
 
 export type SessionState = {

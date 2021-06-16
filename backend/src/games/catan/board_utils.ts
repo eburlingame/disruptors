@@ -593,3 +593,7 @@ export const distributeResources = (
 
   return onlyReceievers;
 };
+
+export const playerHasWon = ({
+  points: { private: privatePoints, public: publicPoints },
+}: CatanPlayer) => privatePoints + publicPoints >= 10;

@@ -2,7 +2,14 @@ export type GamePlayer = {
   playerId: string;
 };
 
-export default interface Game<C, A, S, P> {
+export type GameActionRecord = {
+  id: string;
+  at: number; // date
+  who: string; /// playerId
+  action: any;
+};
+
+export default interface Game<C, A, S, P, M> {
   /// Called when a game is created to get the default game configuration
   newGameConfig(): C;
 
@@ -26,4 +33,7 @@ export default interface Game<C, A, S, P> {
 
   /// Returns true if the game is over and completed
   gameOver(gameState: S): boolean;
+
+  /// Returns true if the game is over and completed
+  gameSummary(gameState: S, gameActions: GameActionRecord[]): M;
 }

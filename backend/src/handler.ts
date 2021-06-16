@@ -198,8 +198,15 @@ export default class Handler {
           state.you = you;
         }
 
-        if (state.you && state.room.gameState) {
+        if (state.you && room.gameState && state.room.gameState) {
           const game = new games.Catan();
+
+          if (room.phase === RoomPhase.GAME_COMPLETE) {
+            state.room.gameSummary = game.gameSummary(
+              room.gameState.state,
+              room.gameState.actions
+            );
+          }
 
           state.room.gameState.state = game.sanitizeState(
             state.room.gameState.state,

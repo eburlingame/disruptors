@@ -347,3 +347,9 @@ export type CatanPlayersState = {
   activeTradeRequest?: TradeRequest;
   availableExchanges: ExchangeRate[];
 };
+
+/// The state that is seen by any given player
+export type CatanGameSummary = {
+  winner: string;
+  diceFrequencies: number[];
+};
