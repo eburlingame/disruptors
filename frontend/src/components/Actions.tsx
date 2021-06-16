@@ -196,7 +196,7 @@ const Actions = ({}) => {
         </HStack>
       )}
 
-      {!diceOverride && (
+      {!diceOverrideEnabled && (
         <Button
           flex="4"
           leftIcon={<FaDice />}
