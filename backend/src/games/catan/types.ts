@@ -297,6 +297,7 @@ export type CatanPlayer = GamePlayer & {
     sheep: number;
   };
   developmentCards: DevelopmentCards;
+  pendingDevelopmentCards?: DevelopmentCards;
   points: {
     public: number; /// includes cities, settlements, longest road, largest army
     private: number; /// includes development cards victory poitns

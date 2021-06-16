@@ -182,7 +182,11 @@ const Players = ({}) => {
           .map((devCard: DevelopmentCardType) => ({
             devCard,
             cardTheme: gameTheme.developmentCards[devCard],
-            count: you.developmentCards[devCard],
+            count:
+              you.developmentCards[devCard] +
+              (you.pendingDevelopmentCards
+                ? you.pendingDevelopmentCards[devCard]
+                : 0),
           }))
           .filter(({ count }) => count > 0)
           .map(({ devCard, cardTheme, count }) => {
@@ -193,7 +197,7 @@ const Players = ({}) => {
                 <CardCount
                   icon={<IconComponent />}
                   label={cardTheme.label}
-                  count={count}
+                  count={count.toString()}
                 />
                 {playingDevCard &&
                   devCard != DevelopmentCardType.VICTORY_POINT && (

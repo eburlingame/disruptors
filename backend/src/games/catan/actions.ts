@@ -166,6 +166,11 @@ const resourceFromBankToPlayer = (
 const resourceCount = (player: CatanPlayer) =>
   sum(Object.values(player.resources));
 
+const emptyDevelopmentCards = () => ({
+  knight: 0,
+  victoryPoint: 0,
+});
+
 const tradePlayerResource = (
   state: CatanState,
   seekerPlayerId: string,
@@ -691,9 +696,16 @@ const buyDevCard = (
   const { drawnCard, state: newState } = drawDevelopmentCard(state);
   state = newState;
 
-  state.players[playerIndex].developmentCards[drawnCard] += 1;
+  const { pendingDevelopmentCards } = state.players[playerIndex];
 
-  state = computeVictoryPoints(state);
+  if (pendingDevelopmentCards) {
+    pendingDevelopmentCards[drawnCard] += 1;
+  } else {
+    state.players[playerIndex].pendingDevelopmentCards = {
+      ...emptyDevelopmentCards(),
+      [drawnCard]: 1,
+    };
+  }
 
   return state;
 };
@@ -996,6 +1008,23 @@ const endTurn = (
 
   if (action.name !== "endTurn") {
     throw Error("Invalid action");
+  }
+
+  const player = getPlayer(state, playerId);
+  const playerIndex = getPlayerIndex(state, playerId);
+
+  const { pendingDevelopmentCards } = player;
+
+  /// Add any pending development cards so they can be played on the next round
+  if (pendingDevelopmentCards) {
+    Object.keys(pendingDevelopmentCards).forEach((card) => {
+      const cardType = card as DevelopmentCardType;
+      const addition = pendingDevelopmentCards[cardType];
+
+      state.players[playerIndex].developmentCards[cardType] += addition;
+    });
+
+    state.players[playerIndex].pendingDevelopmentCards = undefined;
   }
 
   state.activePlayerTurnState = PlayerTurnState.MUST_ROLL;
