@@ -72,7 +72,7 @@ export const TradePreview = ({}) => {
   );
 };
 
-const AcceptTrade = ({ showButtons }: { showButtons: boolean }) => {
+const AcceptTrade = () => {
   const {
     gameState: { state },
   } = useGameViewState();

@@ -10,11 +10,9 @@ import { useSessionState } from "../hooks/session";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
 
 const Layout = ({
-  title,
   children,
   hideQuit = false,
 }: {
-  title: string;
   children: ReactNode;
   hideQuit?: boolean;
 }) => {

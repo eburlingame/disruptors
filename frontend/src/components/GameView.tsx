@@ -7,7 +7,7 @@ export type GameViewState = {
   gameState: GameState | null;
 };
 
-const GameStateContext = createContext<GameViewState>({
+export const GameStateContext = createContext<GameViewState>({
   gameState: null,
 });
 
@@ -23,13 +23,9 @@ const GameView = ({ gameState }: { gameState: GameState }) => {
     gameState,
   };
 
-  // useEffect(() => {
-  //   console.log(gameState);
-  // }, [gameState]);
-
   return (
     <GameStateContext.Provider value={gameViewState}>
-      <Layout title="Game">
+      <Layout>
         <GameLayout />
       </Layout>
     </GameStateContext.Provider>

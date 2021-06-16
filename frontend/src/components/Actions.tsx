@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { HStack, VStack } from "@chakra-ui/layout";
 import gameTheme from "../utils/game_theme";
 import {
@@ -28,6 +28,7 @@ import CompleteTrade from "./CompleteTrade";
 import AcceptTrade from "./AcceptTrade";
 import CreateBankTradeRequest from "./CreateBankTradeRequest";
 import StealCard from "./StealCard";
+import { Input } from "@chakra-ui/input";
 
 const canBuildRoad = (state: CatanPlayersState): boolean =>
   state.you.resources.brick >= 1 && state.you.resources.wood >= 1;
@@ -90,6 +91,9 @@ const Actions = ({}) => {
     gameState: { state },
   } = useGameViewState();
 
+  const diceOverrideEnabled = process.env.NODE_ENV === "development";
+  const [diceOverride, setDiceOverride] = useState(-1);
+
   const { performAction } = useGameAction();
 
   const yourTurn = state.activePlayerId === state.you.playerId;
@@ -106,7 +110,11 @@ const Actions = ({}) => {
 
   const onDiceRoll = async () => {
     if (mustRoll) {
-      const action: RollDiceAction = { name: "rollDice", values: [-1, -1] };
+      const action: RollDiceAction = {
+        name: "rollDice",
+        values: diceOverrideEnabled ? [diceOverride, 0] : [-1, -1],
+      };
+
       await performAction(action);
     }
   };
@@ -167,15 +175,39 @@ const Actions = ({}) => {
 
   return (
     <VStack alignItems="stretch">
-      <Button
-        leftIcon={<FaDice />}
-        justifyContent="left"
-        colorScheme="purple"
-        onClick={onDiceRoll}
-        disabled={!mustRoll}
-      >
-        Roll the dice
-      </Button>
+      {diceOverrideEnabled && (
+        <HStack width="100%">
+          <Input
+            value={diceOverride}
+            onChange={(e) => setDiceOverride(parseInt(e.target.value))}
+            flex="1"
+          />
+
+          <Button
+            flex="4"
+            leftIcon={<FaDice />}
+            justifyContent="left"
+            colorScheme="purple"
+            onClick={onDiceRoll}
+            disabled={!mustRoll}
+          >
+            Roll the dice
+          </Button>
+        </HStack>
+      )}
+
+      {!diceOverride && (
+        <Button
+          flex="4"
+          leftIcon={<FaDice />}
+          justifyContent="left"
+          colorScheme="purple"
+          onClick={onDiceRoll}
+          disabled={!mustRoll}
+        >
+          Roll the dice
+        </Button>
+      )}
 
       <HStack>
         <Button

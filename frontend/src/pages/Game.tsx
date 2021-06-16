@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router";
+import GameSummary from "../components/GameSummary";
 import GameView from "../components/GameView";
 import Lobby from "../components/Lobby";
 import { useJoinRoom } from "../hooks/room";
@@ -30,12 +31,14 @@ const GamePage = ({}) => {
     return <Loading />;
   }
 
-  if (
-    sessionState.room &&
-    sessionState.room.phase === RoomPhase.PLAYING &&
-    sessionState.room.gameState
-  ) {
-    return <GameView gameState={sessionState.room.gameState} />;
+  if (sessionState.room && sessionState.room.gameState) {
+    if (sessionState.room.phase === RoomPhase.PLAYING) {
+      return <GameView gameState={sessionState.room.gameState} />;
+    }
+
+    if (sessionState.room.phase === RoomPhase.GAME_COMPLETE) {
+      return <GameSummary gameState={sessionState.room.gameState} />;
+    }
   }
 
   return <Lobby sessionState={sessionState} />;

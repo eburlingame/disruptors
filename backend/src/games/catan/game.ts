@@ -93,7 +93,21 @@ export default class CatanGame
     action: CatanAction
   ): CatanAction {
     if (action.name === "rollDice") {
-      const [diceA, diceB] = [randomInt(6) + 1, randomInt(6) + 1];
+      let [diceA, diceB] = [randomInt(6) + 1, randomInt(6) + 1];
+
+      console.log(process.env.NODE_ENV);
+      /// In development, use the value passed in from the UI (if provided)
+      if (
+        process.env.NODE_ENV === "development" &&
+        action.values[0] + action.values[1] < 12 &&
+        action.values[0] + action.values[1] >= 0
+      ) {
+        const [a, b] = action.values;
+
+        diceA = a;
+        diceB = b;
+      }
+
       const diceTotal = diceA + diceB;
 
       const distribution = distributeResources(
