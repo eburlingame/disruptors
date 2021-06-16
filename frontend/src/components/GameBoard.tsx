@@ -3,7 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
 
-import backerImg from "../images/board_backing.svg";
+import backerLightImg from "../images/board_backing.svg";
+import backerDarkImg from "../images/board_backing_dark.svg";
+
 import tileDarkImg from "../images/tile_dark.svg";
 import tileLightImg from "../images/tile_light.svg";
 
@@ -615,6 +617,7 @@ const GameBoard = ({}) => {
     placingRobber &&
     !vectorsEqual(state.robber || { x: -1, y: -1, z: -1 }, tile);
 
+  const backerImg = useColorModeValue(backerLightImg, backerDarkImg);
   const tileBackgroundImage = useColorModeValue(tileLightImg, tileDarkImg);
   const boardBackgroundColor = useColorModeValue("#fefefe", "#121212");
 

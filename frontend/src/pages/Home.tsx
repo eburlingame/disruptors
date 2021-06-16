@@ -5,6 +5,7 @@ import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useCreateGame } from "../hooks/room";
+import logoImg from "../images/icons_logo.svg";
 
 const HomePage = ({}) => {
   const history = useHistory();
@@ -23,7 +24,7 @@ const HomePage = ({}) => {
     <Layout title="Welcome" hideQuit={true}>
       <VStack mt="10">
         <Box fontSize="2xl" fontWeight="bold" marginBottom="4">
-          Disruptors of Silitan Valley
+          <img src={logoImg} />
         </Box>
 
         <Link to="/join">
