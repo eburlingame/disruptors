@@ -200,6 +200,7 @@ const Players = ({}) => {
                   count={count.toString()}
                 />
                 {playingDevCard &&
+                  you.developmentCards[devCard] > 0 &&
                   devCard != DevelopmentCardType.VICTORY_POINT && (
                     <Button
                       size="sm"

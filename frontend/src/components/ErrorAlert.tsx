@@ -19,7 +19,6 @@ export type ErrorAlertProps = {
 };
 
 const ErrorAlert = ({ title, body, isOpen, onClose }: ErrorAlertProps) => {
-  const history = useHistory();
   const homeRef = React.useRef<any>();
 
   return (
@@ -37,8 +36,8 @@ const ErrorAlert = ({ title, body, isOpen, onClose }: ErrorAlertProps) => {
         <AlertDialogCloseButton />
         <AlertDialogBody>{body}</AlertDialogBody>
         <AlertDialogFooter>
-          <Button ml={3} onClick={() => history.push("/")} ref={homeRef}>
-            Go Home
+          <Button ml={3} onClick={onClose} ref={homeRef}>
+            Close
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

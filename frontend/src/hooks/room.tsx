@@ -83,3 +83,16 @@ export const useStartGame = () => {
 
   return { startGame, starting: loading, error };
 };
+
+export const useFinishGame = () => {
+  const processCommandResponse = useProcessCommandReponse();
+  const { sendCommand, loading, error } = useCommand();
+
+  const finishGame = async () => {
+    const result = await sendCommand("game.finish", {});
+
+    return processCommandResponse(result);
+  };
+
+  return { finishGame, finishing: loading, error };
+};

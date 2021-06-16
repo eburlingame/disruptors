@@ -18,6 +18,7 @@ import RoomPersistor, {
 } from "./persist/room";
 import games from "./games";
 import { CatanAction, CatanState } from "./games/catan/types";
+import room from "./persist/room";
 
 export type SessionState = {
   sessionId: string;
@@ -91,6 +92,10 @@ export default class Handler {
       "game.action": {
         schema: Joi.object({ action: Joi.object().required() }),
         handler: this.gameAction.bind(this),
+      },
+      "game.finish": {
+        schema: Joi.object({}),
+        handler: this.finishGame.bind(this),
       },
     };
   }
@@ -273,7 +278,7 @@ export default class Handler {
     /// Default to an empty session
     let session: PersistedSession = await this.getCurrentSession(); /// Persist the session
 
-    const playerId = session.playerId || uuid();
+    const playerId = session.playerId;
     const roomCode = genRoomCode();
     const game = new Games.Catan();
 
@@ -313,7 +318,9 @@ export default class Handler {
     if (!room) throw new Error(`Could not find room: ${roomCode}`);
 
     /// Add the player to the room
-    room.players = [...room.players, { playerId, name: "", isHost: false }];
+    if (room.players.every((player) => player.playerId !== playerId)) {
+      room.players = [...room.players, { playerId, name: "", isHost: false }];
+    }
 
     /// Put the room back and subscribe to future updates
     await this.rooms.putRoom(room);
@@ -382,7 +389,6 @@ export default class Handler {
   private async configurePlayer(request: Request, { name }: { name: string }) {
     /// Default to an empty session
     let session = await this.getCurrentSession();
-    const playerId = session.playerId || uuid();
 
     if (!session.roomCode) {
       throw new Error(`Not in a room`);
@@ -391,6 +397,10 @@ export default class Handler {
     let room = await this.rooms.getRoom(session.roomCode);
     if (!room) {
       throw new Error(`Could not find room: ${session.roomCode}`);
+    }
+
+    if (room.players.some((player) => player.name === name)) {
+      throw new Error(`Somebody has already used the name ${name}`);
     }
 
     /// Change the players name
@@ -512,6 +522,27 @@ export default class Handler {
 
     /// Persist the room
     await this.rooms.putRoom(room);
+
+    return sucessResponse(request, await this.commonState());
+  }
+
+  private async finishGame(request: Request, {}: {}) {
+    const { room } = await this.getCurrentRoom();
+    const game = new Games.Catan();
+
+    const intialConfig = game.newGameConfig();
+
+    const updatedRoom: PersistedRoom = {
+      ...room,
+      phase: RoomPhase.OPENED,
+      game: "Catan",
+      gameConfig: intialConfig,
+      gameReady: game.readyToStart(room.players, intialConfig),
+      gameState: undefined,
+      gameSummary: undefined,
+    };
+
+    await this.rooms.putRoom(updatedRoom);
 
     return sucessResponse(request, await this.commonState());
   }

@@ -201,8 +201,6 @@ export default class CatanGame
     gameState: CatanState,
     actions: GameActionRecord[]
   ): CatanGameSummary {
-    console.log(gameState);
-
     const winner = gameState.players.find((player) => playerHasWon(player));
     if (!winner) throw new Error("Nobody won?");
 
@@ -223,7 +221,13 @@ export default class CatanGame
         range(13).map(() => 0)
       );
 
+    const sortedPlayers = gameState.players.sort(
+      (playerA, playerB) =>
+        sum(Object.values(playerB.points)) - sum(Object.values(playerA.points))
+    );
+
     return {
+      players: sortedPlayers,
       winner: winner.playerId,
       diceFrequencies,
     };

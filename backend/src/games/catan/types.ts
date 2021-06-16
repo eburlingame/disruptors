@@ -353,4 +353,5 @@ export type CatanPlayersState = {
 export type CatanGameSummary = {
   winner: string;
   diceFrequencies: number[];
+  players: CatanPlayer[];
 };

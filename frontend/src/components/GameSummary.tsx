@@ -1,8 +1,9 @@
-import { Box, HStack, VStack } from "@chakra-ui/layout";
+import { Box, HStack } from "@chakra-ui/layout";
 import React from "react";
 import { useSessionState } from "../hooks/session";
 import { responsiveVisibiity } from "../responsiveUtils";
 import { GameState } from "../state/atoms";
+import { useFinishGame } from "../hooks/room";
 import { CatanGameSummary } from "../state/game_types";
 import { getRoomPlayer } from "../utils/utils";
 import GameBoard from "./GameBoard";
@@ -42,7 +43,9 @@ const DiceChart = ({ diceFrequencies }: { diceFrequencies: number[] }) => {
 };
 
 export default ({ gameState }: { gameState: GameState }) => {
-  const { room } = useSessionState();
+  const { room, you } = useSessionState();
+  const { finishGame } = useFinishGame();
+
   const gameViewState: GameViewState = { gameState };
 
   if (!room || !room.gameSummary) {
@@ -51,7 +54,7 @@ export default ({ gameState }: { gameState: GameState }) => {
 
   const gameSummary = room.gameSummary as CatanGameSummary;
 
-  const players = gameState.state.players.map((player) => ({
+  const players = gameSummary.players.map((player) => ({
     ...getRoomPlayer(room, player.playerId),
     ...player,
   }));
@@ -60,13 +63,21 @@ export default ({ gameState }: { gameState: GameState }) => {
     (player) => player.playerId === gameSummary.winner
   );
 
+  const onFinishGame = async () => {
+    await finishGame();
+  };
+
   return (
     <GameStateContext.Provider value={gameViewState}>
       <Layout>
         <HStack justifyContent="space-between" marginY="2" p="2">
-          <Box>
-            <Button colorScheme="green">Back to lobby</Button>
-          </Box>
+          {you?.isHost && (
+            <Box>
+              <Button colorScheme="green" onClick={onFinishGame}>
+                Done
+              </Button>
+            </Box>
+          )}
           <Box textAlign="center" fontWeight="bold" fontSize="xx-large">
             {winner?.name} won!
           </Box>
