@@ -1,13 +1,46 @@
+import React, { ReactNode } from "react";
 import { Button } from "@chakra-ui/button";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { Box, HStack } from "@chakra-ui/layout";
 import { Tooltip } from "@chakra-ui/tooltip";
-import { exit } from "node:process";
-import React, { ReactNode } from "react";
+import { Spinner } from "@chakra-ui/react";
 import { useHistory } from "react-router";
 import { useLeaveRoom } from "../hooks/room";
-import { useSessionState } from "../hooks/session";
+import { useSessionLoadingState, useSessionState } from "../hooks/session";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
+import { FaCircle } from "react-icons/fa";
+
+const ConnectionStatus = ({}) => {
+  const loading = useSessionLoadingState();
+
+  if (loading.isLoading) {
+    return (
+      <Tooltip label="Reconnecting...">
+        <Box>
+          <Spinner maxH="10px" maxW="10px" color="yellow.300" />
+        </Box>
+      </Tooltip>
+    );
+  }
+
+  if (loading.isOpen) {
+    return (
+      <Tooltip label="Connected">
+        <Box fontSize="8px" color="green.400">
+          <FaCircle />
+        </Box>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <Tooltip label="Disconnected">
+      <Box fontSize="8px" color="red.400">
+        <FaCircle />
+      </Box>
+    </Tooltip>
+  );
+};
 
 const Layout = ({
   children,
@@ -44,19 +77,26 @@ const Layout = ({
         justifyContent="space-between"
         p={2}
       >
-        <ColorModeSwitcher size="xs" />
-        {!hideQuit && (
-          <Tooltip label="Leave game">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={onExit}
-              colorScheme="red"
-            >
-              Quit
-            </Button>
-          </Tooltip>
-        )}
+        <Box marginLeft="2">
+          <ConnectionStatus />
+        </Box>
+
+        <HStack>
+          {!hideQuit && (
+            <Tooltip label="Leave game">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={onExit}
+                colorScheme="red"
+              >
+                Quit
+              </Button>
+            </Tooltip>
+          )}
+
+          <ColorModeSwitcher size="xs" />
+        </HStack>
       </HStack>
       <Box flex="1" display="flex" flexDir="column">
         {children}

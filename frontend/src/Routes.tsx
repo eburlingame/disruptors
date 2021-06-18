@@ -7,9 +7,9 @@ import GamePage from "./pages/Game";
 import Loading from "./pages/Loading";
 
 const Routes = () => {
-  const { isLoading } = useSessionLoadingState();
+  const { wasOpen, isLoading } = useSessionLoadingState();
 
-  if (isLoading) {
+  if (!wasOpen && isLoading) {
     return <Loading />;
   }
 

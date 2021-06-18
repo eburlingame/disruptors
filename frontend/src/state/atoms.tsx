@@ -56,6 +56,7 @@ export const sessionStateAtom = atom<SessionState>({
 
 export type SessionLoadingState = {
   isOpen: boolean;
+  wasOpen: boolean;
   isLoading: boolean;
 };
 
@@ -63,6 +64,7 @@ export const sessionLoadingStateAtom = atom<SessionLoadingState>({
   key: "sessionLoadingState",
   default: {
     isOpen: false,
+    wasOpen: false, // session has been opened in the past
     isLoading: true,
   },
 });

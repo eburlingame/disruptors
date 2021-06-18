@@ -25,8 +25,6 @@ export const locationToPosition = ({ x, y, z }: TileCoordinate) => ({
 export const widthInTiles = (tiles: GameTile[]) => {
   const xPositions = tiles.map((tile) => locationToPosition(tile.location).x);
 
-  console.log(xPositions);
-
   const max = Math.max(...xPositions);
   const min = Math.min(...xPositions);
 
@@ -35,8 +33,6 @@ export const widthInTiles = (tiles: GameTile[]) => {
 
 export const heightInTiles = (tiles: GameTile[]) => {
   const yPositions = tiles.map((tile) => locationToPosition(tile.location).y);
-
-  // console.log(yPositions);
 
   const max = Math.max(...yPositions);
   const min = Math.min(...yPositions);
@@ -615,3 +611,7 @@ export const distributeResources = (
 
   return onlyReceievers;
 };
+
+export const playerHasWon = ({
+  points: { private: privatePoints, public: publicPoints },
+}: CatanPlayer) => privatePoints + publicPoints >= 10;

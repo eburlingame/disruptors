@@ -385,7 +385,6 @@ const GameBoard = ({}) => {
 
   const boardWidthTiles = widthInTiles(tiles);
   const boardHeightTiles = heightInTiles(tiles);
-  console.log(boardWidthTiles, boardHeightTiles);
 
   const [zoom, setZoom] = useState(1.0);
 
@@ -623,7 +622,7 @@ const GameBoard = ({}) => {
         <TileContainer
           zoom={zoom}
           containerW={boardWidthTiles * TILE_WIDTH + BOARD_PADDING}
-          containerH={boardHeightTiles * TILE_HEIGHT + BOARD_PADDING}
+          containerH={boardHeightTiles * TILE_WIDTH + BOARD_PADDING}
           viewportW={width || 100}
           viewportH={height || 100}
         >

@@ -249,7 +249,6 @@ const Log = ({}) => {
   useEffect(() => {
     if (ref.current) {
       ref.current.scrollTop = ref.current.scrollHeight;
-      console.log(ref.current.scrollHeight);
     }
   }, [actions.length]);
 

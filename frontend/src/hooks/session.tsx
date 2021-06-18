@@ -26,7 +26,7 @@ export const useSetupSession = () => {
   );
 
   // TODO: Handle errors when opening session
-  const { sendCommand, loading, error } = useCommand();
+  const { sendCommand } = useCommand();
   const processCommandResponse = useProcessCommandReponse();
 
   useEffect(() => {
@@ -42,7 +42,12 @@ export const useSetupSession = () => {
           }
 
           /// Attempt to open the websocket
-          setLoadingState({ isOpen: false, isLoading: true });
+          setLoadingState((loading) => ({
+            ...loading,
+            isOpen: false,
+            isLoading: true,
+          }));
+
           await socket.ws.open();
         } catch (e) {
           console.warn("Error opening websocket session: " + e.message);
@@ -52,7 +57,11 @@ export const useSetupSession = () => {
           setRetryTimeout(setTimeout(() => openSession(), RETRY_DELAY) as any);
 
           /// Indicate retry as "loading"
-          setLoadingState({ isOpen: false, isLoading: true });
+          setLoadingState((loading) => ({
+            ...loading,
+            isOpen: false,
+            isLoading: true,
+          }));
 
           return;
         }
@@ -74,7 +83,13 @@ export const useSetupSession = () => {
           if (sessionId) {
             setPersistentSessionId(sessionId);
             await processCommandResponse(result);
-            setLoadingState({ isOpen: true, isLoading: false });
+
+            setLoadingState((loading) => ({
+              ...loading,
+              wasOpen: true,
+              isOpen: true,
+              isLoading: false,
+            }));
           }
         }
       }
