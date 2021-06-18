@@ -429,7 +429,13 @@ export default class Handler {
 
     /// Update the game configuration
     const game = new Games.Catan();
-    room.gameConfig = game.updateGameConfig(room.players, config);
+    room.gameConfig = game.updateGameConfig(room.players, {
+      ...room.gameConfig,
+      ...config,
+    });
+
+    console.log(room.gameConfig);
+
     room.gameReady = game.readyToStart(room.players, room.gameConfig);
 
     /// Persist the room and the session

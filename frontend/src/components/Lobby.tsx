@@ -8,7 +8,6 @@ import Layout from "../components/Layout";
 import { useSessionLoadingState, useSessionState } from "../hooks/session";
 
 import {
-  GameConfig,
   useConfigureGame,
   useConfigurePlayer,
   useJoinRoom,
@@ -19,6 +18,7 @@ import { Input } from "@chakra-ui/input";
 import { Select } from "@chakra-ui/select";
 import { SessionState } from "../state/atoms";
 import { useColorModeValue } from "@chakra-ui/color-mode";
+import { BoardType, CatanConfig } from "../state/game_types";
 
 const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   const history = useHistory();
@@ -71,14 +71,14 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   };
 
   const { configureGame, error: configGameError } = useConfigureGame();
-  const [draftGameConfig, setDraftGameConfig] = useState<GameConfig>(
+  const [draftGameConfig, setDraftGameConfig] = useState<CatanConfig>(
     sessionState.room?.gameConfig
   );
 
-  const changeGameConfig = async (updatedConfig: Partial<GameConfig>) => {
+  const changeGameConfig = async (updatedConfig: Partial<CatanConfig>) => {
     const newConfig = { ...draftGameConfig, ...updatedConfig };
     setDraftGameConfig(newConfig);
-    const reuslt = await configureGame(newConfig);
+    await configureGame(newConfig);
   };
 
   const { startGame, error: startError } = useStartGame();
@@ -99,11 +99,11 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   const borderColor = useColorModeValue("gray.100", "gray.700");
 
   if (joining) {
-    return <Layout title="">Joining the game room...</Layout>;
+    return <Layout>Joining the game room...</Layout>;
   }
 
   return (
-    <Layout title="Game">
+    <Layout>
       <Box mt="8" maxWidth="60ch" marginX="auto" textAlign="center" p="2">
         <Box fontWeight="extrabold" fontSize="2xl" marginBottom="4">
           Game Lobby
@@ -170,34 +170,65 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
           </Box>
 
           {sessionState.you?.isHost && (
-            <HStack width="100%" justifyContent="space-between">
-              <Box>Card Discard Limit:</Box>
+            <>
+              <HStack width="100%" justifyContent="space-between">
+                <Box>Board Type:</Box>
 
-              <Box>
-                <Select
-                  width="inherit"
-                  value={draftGameConfig.cardDiscardLimit}
-                  onChange={(e) =>
-                    changeGameConfig({
-                      cardDiscardLimit: parseInt(e.target.value),
-                    })
-                  }
-                >
-                  <option value="7">7 cards</option>
-                  <option value="10">10 cards</option>
-                </Select>
-              </Box>
-            </HStack>
+                <Box>
+                  <Select
+                    width="inherit"
+                    value={draftGameConfig.boardType}
+                    onChange={(e) =>
+                      changeGameConfig({
+                        boardType: e.target.value as BoardType,
+                      })
+                    }
+                  >
+                    <option value={BoardType.STATIC}>Beginner board</option>
+                    <option value={BoardType.VARIABLE}>Random Board</option>
+                  </Select>
+                </Box>
+              </HStack>
+              <HStack width="100%" justifyContent="space-between">
+                <Box>Card Discard Limit:</Box>
+
+                <Box>
+                  <Select
+                    width="inherit"
+                    value={draftGameConfig.cardDiscardLimit}
+                    onChange={(e) =>
+                      changeGameConfig({
+                        cardDiscardLimit: parseInt(e.target.value),
+                      })
+                    }
+                  >
+                    <option value="7">7 cards</option>
+                    <option value="10">10 cards</option>
+                  </Select>
+                </Box>
+              </HStack>
+            </>
           )}
 
           {!sessionState.you?.isHost && (
-            <HStack width="100%" justifyContent="space-between">
-              <Box>Card Discard Limit:</Box>
+            <>
+              <HStack width="100%" justifyContent="space-between">
+                <Box>Board Type:</Box>
 
-              <Box fontWeight="bold">
-                {sessionState.room?.gameConfig.cardDiscardLimit}
-              </Box>
-            </HStack>
+                <Box fontWeight="bold">
+                  {sessionState.room?.gameConfig.boardType === BoardType.STATIC
+                    ? "Beginner board"
+                    : "Random board"}
+                </Box>
+              </HStack>
+              <HStack width="100%" justifyContent="space-between">
+                <Box>Card Discard Limit:</Box>
+
+                <Box fontWeight="bold">
+                  {sessionState.room?.gameConfig.cardDiscardLimit}
+                </Box>
+              </HStack>
+            </>
           )}
         </VStack>
 

@@ -193,8 +193,14 @@ export type CatanAction =
   | BuyDevCardAction
   | PlayDevCardAction;
 
+export enum BoardType {
+  STATIC = "static",
+  VARIABLE = "variable",
+}
+
 export type CatanConfig = {
   cardDiscardLimit: number;
+  boardType: BoardType;
 };
 
 export enum DevelopmentCardType {

@@ -1,7 +1,28 @@
+import { range, shuffle } from "lodash";
 import { GameBoard, PortResource, TileType } from "./types";
 
+const frequenciesToList = <V>(frequencies: {
+  [key: string]: number;
+}): string[] =>
+  Object.entries(frequencies).flatMap(([key, count]) =>
+    range(count).map(() => key)
+  );
+
+const variableSmallBoardTileCounts = {
+  [TileType.ORE]: 3,
+  [TileType.WHEAT]: 4,
+  [TileType.WOOD]: 4,
+  [TileType.SHEEP]: 4,
+  [TileType.BRICK]: 3,
+  [TileType.DESERT]: 1,
+};
+
+const variableSmallBoardDiceNumbers = [
+  5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11,
+];
+
 /// This is a static "beginner" board that comes straight out of the directions
-export const generateStaticBoard = (): GameBoard => ({
+export const generateStaticSmallBoard = (): GameBoard => ({
   tiles: [
     // Outer ring
     {
@@ -158,3 +179,36 @@ export const generateStaticBoard = (): GameBoard => ({
     },
   ],
 });
+
+export const generateVariableSmallBoard = () => {
+  const { tiles: staticTiles } = generateStaticSmallBoard();
+
+  const shuffledTiles = shuffle(
+    frequenciesToList(variableSmallBoardTileCounts).map(
+      (tileType) => tileType as TileType
+    )
+  );
+
+  let diceNumberIndex = 0;
+
+  const variableTiles = staticTiles.map((tile, index) => {
+    const tileType = shuffledTiles[index];
+
+    if (tileType === TileType.DESERT) {
+      return {
+        ...tile,
+        tileType,
+      };
+    }
+
+    return {
+      ...tile,
+      tileType,
+      diceNumber: variableSmallBoardDiceNumbers[diceNumberIndex++],
+    };
+  });
+
+  return {
+    tiles: variableTiles,
+  };
+};

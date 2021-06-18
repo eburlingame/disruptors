@@ -1,3 +1,4 @@
+import { CatanConfig } from "../state/game_types";
 import { useCommand, useProcessCommandReponse } from "./command";
 
 export const useCreateGame = () => {
@@ -39,17 +40,16 @@ export const useLeaveRoom = () => {
   return { leaveRoom, leaving: loading, error };
 };
 
-export type GameConfig = {
-  cardDiscardLimit: number;
-};
-
 export const useConfigureGame = () => {
   const processCommandResponse = useProcessCommandReponse();
   const { sendCommand, loading, error } = useCommand();
 
-  const configureGame = async ({ cardDiscardLimit }: GameConfig) => {
+  const configureGame = async ({
+    cardDiscardLimit,
+    boardType,
+  }: CatanConfig) => {
     const result = await sendCommand("game.configure", {
-      config: { cardDiscardLimit },
+      config: { cardDiscardLimit, boardType },
     });
 
     return processCommandResponse(result);

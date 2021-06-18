@@ -1,5 +1,5 @@
 import Game, { GameActionRecord, GamePlayer } from "../model";
-import { generateStaticBoard } from "./board";
+import { generateStaticSmallBoard, generateVariableSmallBoard } from "./board";
 import { sumResources } from "./utils";
 
 import {
@@ -12,6 +12,7 @@ import {
   PlayerColor,
   CatanGameSummary,
   RollDiceAction,
+  BoardType,
 } from "./types";
 
 import actions from "./actions";
@@ -26,6 +27,7 @@ import {
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
+  boardType: BoardType.VARIABLE,
 };
 
 export default class CatanGame
@@ -59,10 +61,15 @@ export default class CatanGame
   startGame(players: GamePlayer[], gameConfig: CatanConfig): CatanState {
     const gamePlayers = shuffle(players);
 
+    const board =
+      gameConfig.boardType === BoardType.VARIABLE
+        ? generateVariableSmallBoard()
+        : generateStaticSmallBoard();
+
     return {
+      board,
       config: gameConfig,
       phase: GamePhase.SETUP_ROUND_1,
-      board: generateStaticBoard(),
       buildings: [],
       roads: [],
       bank: {
