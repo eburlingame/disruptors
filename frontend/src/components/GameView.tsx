@@ -25,7 +25,7 @@ const GameView = ({ gameState }: { gameState: GameState }) => {
 
   return (
     <GameStateContext.Provider value={gameViewState}>
-      <Layout>
+      <Layout hideQuit={true}>
         <GameLayout />
       </Layout>
     </GameStateContext.Provider>

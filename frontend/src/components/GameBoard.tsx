@@ -44,11 +44,12 @@ import {
   vectorsEqual,
   isValidRoadPosition,
   isValidSettlementPosition,
+  widthInTiles,
+  heightInTiles,
 } from "../utils/board_utils";
 import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
 import { Tooltip } from "@chakra-ui/tooltip";
-import { FormLabel } from "@chakra-ui/form-control";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import useResizeAware from "react-resize-aware";
 
@@ -56,9 +57,6 @@ const TILE_WIDTH = 146;
 const TILE_HEIGHT = 169;
 
 const BOARD_PADDING = 230;
-
-const CONTAINER_WIDTH = 5 * TILE_WIDTH + BOARD_PADDING;
-const CONTAINER_HEIGHT = 4 * TILE_HEIGHT + BOARD_PADDING;
 
 const Container = styled.div<{ backgroundColor: string }>`
   width: 100%;
@@ -104,13 +102,15 @@ const TileContainer = styled.div<{
   zoom: number;
   containerW: number;
   containerH: number;
+  viewportW: number;
+  viewportH: number;
 }>`
   position: absolute;
 
   width: ${(props) =>
-    Math.max(CONTAINER_WIDTH * props.zoom, props.containerW)}px;
+    Math.max(props.containerW * props.zoom, props.viewportW)}px;
   height: ${(props) =>
-    Math.max(CONTAINER_HEIGHT * props.zoom, props.containerH)}px;
+    Math.max(props.containerH * props.zoom, props.viewportH)}px;
 `;
 
 const BackgroundImage = styled.img`
@@ -137,25 +137,6 @@ const TileImage = styled.img`
   z-index: 1;
 
   max-width: initial;
-`;
-
-const DebugLabel = styled.div`
-  color: #000;
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  z-index: 2;
-  text-align: center;
-`;
-
-const TileLabel = styled.div`
-  color: #000;
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  z-index: 2;
-  text-align: center;
-  transform: translate(0%, -50%);
 `;
 
 const TileIconContainer = styled.div`
@@ -402,6 +383,10 @@ const GameBoard = ({}) => {
 
   const rollBacker = useColorModeValue("#aaa", "#121212");
 
+  const boardWidthTiles = widthInTiles(tiles);
+  const boardHeightTiles = heightInTiles(tiles);
+  console.log(boardWidthTiles, boardHeightTiles);
+
   const [zoom, setZoom] = useState(1.0);
 
   const zoomIn = () =>
@@ -411,12 +396,6 @@ const GameBoard = ({}) => {
 
   const [resizeListener, { width, height }] = useResizeAware();
   const scrollRef = useRef<any>();
-
-  // useEffect(() => {
-  //   if (scrollRef.current) {
-  //     scrollRef.current.scrollLeft = (zoom * CONTAINER_WIDTH) / 2.0;
-  //   }
-  // }, [zoom]);
 
   const { activePlayerId, activePlayerTurnState } = state;
 
@@ -477,16 +456,6 @@ const GameBoard = ({}) => {
       await performAction(action);
     }
   };
-
-  const roadExists = (tile: TileCoordinate, edgeIndex: number) =>
-    roads.find((road) =>
-      edgeCoordinateEqual({ tile, edgeIndex }, road.location)
-    ) != undefined;
-
-  const buildingExists = (tile: TileCoordinate, vertexIndex: number) =>
-    buildings.find((building) =>
-      vertexCoordinateEqual({ tile, vertexIndex }, building.location)
-    ) != undefined;
 
   const settlementExists = (
     playerId: string,
@@ -653,8 +622,10 @@ const GameBoard = ({}) => {
       <OverflowContainer ref={scrollRef}>
         <TileContainer
           zoom={zoom}
-          containerW={width || 100}
-          containerH={height || 100}
+          containerW={boardWidthTiles * TILE_WIDTH + BOARD_PADDING}
+          containerH={boardHeightTiles * TILE_HEIGHT + BOARD_PADDING}
+          viewportW={width || 100}
+          viewportH={height || 100}
         >
           <TileOriginContainer zoom={zoom}>
             <BackgroundImage src={backerImg} />
@@ -662,8 +633,6 @@ const GameBoard = ({}) => {
             {tiles.map(({ diceNumber, tileType, location: { x, y, z } }) => (
               <>
                 <Tile position={locationToPosition({ x, y, z })}>
-                  {/* <DebugLabel>{`(${diceNumber} ${tileType}) ${x}, ${y}, ${z}`}</DebugLabel> */}
-
                   <TileIcon
                     diceNumber={diceNumber > 0 ? diceNumber.toString() : ""}
                     tileType={tileType}
