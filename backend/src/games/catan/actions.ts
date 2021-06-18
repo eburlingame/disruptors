@@ -289,7 +289,7 @@ const updateLargestArmy = (state: CatanState, playerId: string) => {
 
   const yourDeployCount = state.players[playerIndex].robberDeployCount + 1;
 
-  if (yourDeployCount > maxDeployCount && yourDeployCount > 3) {
+  if (yourDeployCount > maxDeployCount && yourDeployCount >= 3) {
     state.largestArmyOwner = playerId;
   }
 
@@ -307,7 +307,7 @@ const updateLongestRoad = (state: CatanState, playerId: string) => {
   const yourLongestRoad = computeLongestRoad(state, playerId);
   state.players[playerIndex].longestRoad = yourLongestRoad;
 
-  if (yourLongestRoad > currentLongestRoad && yourLongestRoad > 5) {
+  if (yourLongestRoad > currentLongestRoad && yourLongestRoad >= 5) {
     state.longestRoadOwner = playerId;
   }
 
