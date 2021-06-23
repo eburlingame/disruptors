@@ -68,7 +68,7 @@ export default class CatanGame
     // TODO: Generate big board for >4 players
     const board =
       gameConfig.boardType === BoardType.VARIABLE
-        ? generateVariableSmallBoard()
+        ? generateStaticLargeBoard()
         : generateStaticSmallBoard();
 
     return {
@@ -124,8 +124,8 @@ export default class CatanGame
       /// In development, use the value passed in from the UI (if provided)
       if (
         process.env.NODE_ENV === "development" &&
-        action.values[0] + action.values[1] < 12 &&
-        action.values[0] + action.values[1] >= 0
+        action.values[0] + action.values[1] <= 12 &&
+        action.values[0] + action.values[1] > 0
       ) {
         const [a, b] = action.values;
 
@@ -197,7 +197,9 @@ export default class CatanGame
         playerId: player.playerId,
         color: player.color,
         totalResourceCards: sumResources(player),
-        totalDevelopmentCards: sum(Object.values(player.developmentCards)),
+        totalDevelopmentCards:
+          sum(Object.values(player.developmentCards)) +
+          sum(Object.values(player.pendingDevelopmentCards || {})),
         points: player.points.public,
         longestRoad: player.longestRoad,
         robberDeployCount: player.robberDeployCount,

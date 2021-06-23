@@ -57,17 +57,20 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   const changeName = async () => {
     setAdhocError(null);
 
-    if (draftPlayerName.length === 0) {
+    const newName = draftPlayerName.trim();
+
+    if (newName.length === 0) {
       setAdhocError("Name cannot be empty");
       return;
     }
 
-    if (draftPlayerName.length > 20) {
+    if (newName.length > 20) {
       setAdhocError("Name must be less than 20 chars");
       return;
     }
 
-    await configurePlayer(draftPlayerName);
+    await configurePlayer(newName);
+    setDraftPlayerName(newName);
   };
 
   const { configureGame, error: configGameError } = useConfigureGame();

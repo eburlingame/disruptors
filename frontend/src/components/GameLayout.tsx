@@ -23,7 +23,12 @@ const GameLayout = () => {
         </TabContainer>
 
         <TabContainer flex="1">
-          <TabSet tabs={[{ name: "Players", content: Players }]} />
+          <TabSet
+            tabs={[
+              { name: "Players", content: Players },
+              { name: "Prices", content: Prices },
+            ]}
+          />
         </TabContainer>
       </GameColumn>
 
@@ -49,6 +54,7 @@ const GameLayout = () => {
                 content: Board,
               },
               { name: "Players", content: Players },
+              { name: "Prices", content: Prices },
               { name: "Log", content: Log },
             ]}
           />
@@ -58,7 +64,6 @@ const GameLayout = () => {
           <TabSet
             tabs={[
               { name: "Resources", content: Resources },
-              { name: "Prices", content: Prices },
               {
                 name: "Bank",
                 shownOn: "xs",
@@ -96,6 +101,7 @@ const GameLayout = () => {
                 shownOn: "md",
                 content: Players,
               },
+              { name: "Prices", content: Prices },
             ]}
           />
         </TabContainer>

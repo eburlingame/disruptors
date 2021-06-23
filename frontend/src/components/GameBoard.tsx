@@ -629,117 +629,123 @@ const GameBoard = ({}) => {
           <TileOriginContainer zoom={zoom}>
             <BackgroundImage src={backerImg} />
 
-            {tiles.map(({ diceNumber, tileType, location: { x, y, z } }) => (
-              <>
-                <Tile position={locationToPosition({ x, y, z })}>
-                  <TileIcon
-                    diceNumber={diceNumber > 0 ? diceNumber.toString() : ""}
-                    tileType={tileType}
-                    hasRobber={hasRobber({ x, y, z })}
-                  />
+            {tiles.map(
+              ({ diceNumber, tileType, location: { x, y, z } }, index) => (
+                <React.Fragment key={index}>
+                  <Tile position={locationToPosition({ x, y, z })}>
+                    <TileIcon
+                      diceNumber={diceNumber > 0 ? diceNumber.toString() : ""}
+                      tileType={tileType}
+                      hasRobber={hasRobber({ x, y, z })}
+                    />
 
-                  <TileImage src={tileBackgroundImage} />
-                </Tile>
+                    <TileImage src={tileBackgroundImage} />
+                  </Tile>
 
-                <EdgesContainer position={locationToPosition({ x, y, z })}>
-                  {range(6)
-                    .filter((index) =>
-                      shouldDrawEdge(tiles, { x, y, z }, index)
-                    )
-                    .map((index) => (
-                      <EdgeContainer index={index}>
-                        {renderRoad({ x, y, z }, index)}
-                      </EdgeContainer>
-                    ))}
-                </EdgesContainer>
-
-                <VertexesContainer position={locationToPosition({ x, y, z })}>
-                  {range(6)
-                    .filter((index) =>
-                      shouldDrawVertex(tiles, { x, y, z }, index)
-                    )
-                    .map((index) => (
-                      <VertexContainer index={index}>
-                        {renderBuilding({ x, y, z }, index)}
-                      </VertexContainer>
-                    ))}
-                </VertexesContainer>
-
-                <ButtonsContainer position={locationToPosition({ x, y, z })}>
-                  {placingRoad &&
-                    range(6)
+                  <EdgesContainer position={locationToPosition({ x, y, z })}>
+                    {range(6)
                       .filter((index) =>
                         shouldDrawEdge(tiles, { x, y, z }, index)
                       )
-                      .filter((index) =>
-                        canBuildRoad({ tile: { x, y, z }, edgeIndex: index })
-                      )
                       .map((index) => (
                         <EdgeContainer index={index}>
-                          <IconButton
-                            zIndex="4"
-                            position="absolute"
-                            transform="translate(-50%, 0%)"
-                            icon={<FaHammer />}
-                            aria-label=""
-                            variant="solid"
-                            size="xs"
-                            colorScheme="blue"
-                            onClick={onPlaceRoad({
-                              tile: { x, y, z },
-                              edgeIndex: index,
-                            })}
-                          />
+                          {renderRoad({ x, y, z }, index)}
                         </EdgeContainer>
                       ))}
+                  </EdgesContainer>
 
-                  {placingBuilding &&
-                    range(6)
+                  <VertexesContainer position={locationToPosition({ x, y, z })}>
+                    {range(6)
                       .filter((index) =>
                         shouldDrawVertex(tiles, { x, y, z }, index)
                       )
-                      .filter((index) =>
-                        placingCity
-                          ? settlementExists(you?.playerId, { x, y, z }, index)
-                          : canBuildSettlement({
-                              tile: { x, y, z },
-                              vertexIndex: index,
-                            })
-                      )
                       .map((index) => (
                         <VertexContainer index={index}>
-                          <IconButton
-                            zIndex="4"
-                            position="absolute"
-                            top="20px"
-                            transform="translate(-50%, -50%)"
-                            icon={<FaHammer />}
-                            aria-label=""
-                            variant="solid"
-                            size="sm"
-                            colorScheme="green"
-                            onClick={onPlaceBuilding({
-                              tile: { x, y, z },
-                              vertexIndex: index,
-                            })}
-                          />
+                          {renderBuilding({ x, y, z }, index)}
                         </VertexContainer>
                       ))}
+                  </VertexesContainer>
 
-                  {drawPlaceRobberButton({ x, y, z }) && (
-                    <PlaceRobberButtonContainer>
-                      <IconButton
-                        variant="solid"
-                        colorScheme="red"
-                        icon={<FaArrowCircleDown />}
-                        aria-label="Place robber"
-                        onClick={onPlaceRobber({ x, y, z })}
-                      />
-                    </PlaceRobberButtonContainer>
-                  )}
-                </ButtonsContainer>
-              </>
-            ))}
+                  <ButtonsContainer position={locationToPosition({ x, y, z })}>
+                    {placingRoad &&
+                      range(6)
+                        .filter((index) =>
+                          shouldDrawEdge(tiles, { x, y, z }, index)
+                        )
+                        .filter((index) =>
+                          canBuildRoad({ tile: { x, y, z }, edgeIndex: index })
+                        )
+                        .map((index) => (
+                          <EdgeContainer index={index}>
+                            <IconButton
+                              zIndex="4"
+                              position="absolute"
+                              transform="translate(-50%, 0%)"
+                              icon={<FaHammer />}
+                              aria-label=""
+                              variant="solid"
+                              size="xs"
+                              colorScheme="blue"
+                              onClick={onPlaceRoad({
+                                tile: { x, y, z },
+                                edgeIndex: index,
+                              })}
+                            />
+                          </EdgeContainer>
+                        ))}
+
+                    {placingBuilding &&
+                      range(6)
+                        .filter((index) =>
+                          shouldDrawVertex(tiles, { x, y, z }, index)
+                        )
+                        .filter((index) =>
+                          placingCity
+                            ? settlementExists(
+                                you?.playerId,
+                                { x, y, z },
+                                index
+                              )
+                            : canBuildSettlement({
+                                tile: { x, y, z },
+                                vertexIndex: index,
+                              })
+                        )
+                        .map((index) => (
+                          <VertexContainer index={index}>
+                            <IconButton
+                              zIndex="4"
+                              position="absolute"
+                              top="20px"
+                              transform="translate(-50%, -50%)"
+                              icon={<FaHammer />}
+                              aria-label=""
+                              variant="solid"
+                              size="sm"
+                              colorScheme="green"
+                              onClick={onPlaceBuilding({
+                                tile: { x, y, z },
+                                vertexIndex: index,
+                              })}
+                            />
+                          </VertexContainer>
+                        ))}
+
+                    {drawPlaceRobberButton({ x, y, z }) && (
+                      <PlaceRobberButtonContainer>
+                        <IconButton
+                          variant="solid"
+                          colorScheme="red"
+                          icon={<FaArrowCircleDown />}
+                          aria-label="Place robber"
+                          onClick={onPlaceRobber({ x, y, z })}
+                        />
+                      </PlaceRobberButtonContainer>
+                    )}
+                  </ButtonsContainer>
+                </React.Fragment>
+              )
+            )}
           </TileOriginContainer>
         </TileContainer>
       </OverflowContainer>

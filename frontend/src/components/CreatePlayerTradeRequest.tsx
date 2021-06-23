@@ -12,6 +12,7 @@ import { Button, IconButton } from "@chakra-ui/button";
 import { FaExchangeAlt, FaWindowClose } from "react-icons/fa";
 import { useGameAction } from "../hooks/game";
 import { Tag } from "@chakra-ui/tag";
+import { sum } from "lodash";
 
 type ResourceCount = {
   resource: ResourceType;
@@ -122,6 +123,8 @@ const CreateTradeRequest = ({}) => {
   const [seekingCounts, setSeekingCounts] = useState(emptySeekingCounts());
   const [givingCounts, setGivingCounts] = useState(emptyGivingCounts());
 
+  const totalSeeking = sum(seekingCounts.map((count) => count.count));
+
   const addSeekingCount = (resourceType: ResourceType) =>
     setSeekingCounts((counts) =>
       counts.map((count) => {
@@ -212,7 +215,12 @@ const CreateTradeRequest = ({}) => {
           Cancel
         </Button>
 
-        <Button colorScheme="green" flex="1" onClick={onSubmit}>
+        <Button
+          colorScheme="green"
+          flex="1"
+          onClick={onSubmit}
+          disabled={totalSeeking === 0}
+        >
           Submit
         </Button>
       </HStack>

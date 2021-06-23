@@ -171,6 +171,26 @@ const emptyDevelopmentCards = () => ({
   victoryPoint: 0,
 });
 
+const addPendingDevelopmentCard = (
+  state: CatanState,
+  playerId: string,
+  developmentCard: DevelopmentCardType
+): CatanState => {
+  const playerIndex = getPlayerIndex(state, playerId);
+  const { pendingDevelopmentCards } = state.players[playerIndex];
+
+  if (pendingDevelopmentCards) {
+    pendingDevelopmentCards[developmentCard] += 1;
+  } else {
+    state.players[playerIndex].pendingDevelopmentCards = {
+      ...emptyDevelopmentCards(),
+      [developmentCard]: 1,
+    };
+  }
+
+  return state;
+};
+
 const tradePlayerResource = (
   state: CatanState,
   seekerPlayerId: string,
@@ -696,16 +716,16 @@ const buyDevCard = (
   const { drawnCard, state: newState } = drawDevelopmentCard(state);
   state = newState;
 
-  const { pendingDevelopmentCards } = state.players[playerIndex];
-
-  if (pendingDevelopmentCards) {
-    pendingDevelopmentCards[drawnCard] += 1;
-  } else {
-    state.players[playerIndex].pendingDevelopmentCards = {
-      ...emptyDevelopmentCards(),
-      [drawnCard]: 1,
-    };
+  /// If the development card is playable (like a knight), add it to the pending dev card list
+  if (drawnCard === DevelopmentCardType.KNIGHT) {
+    state = addPendingDevelopmentCard(state, playerId, drawnCard);
   }
+  /// Otherwise, just add it to the development card list
+  else {
+    state.players[playerIndex].developmentCards[drawnCard] += 1;
+  }
+
+  state = computeVictoryPoints(state);
 
   return state;
 };
