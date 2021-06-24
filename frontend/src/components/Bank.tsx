@@ -3,10 +3,8 @@ import { Box, HStack } from "@chakra-ui/layout";
 import Icon from "@chakra-ui/icon";
 import gameTheme, { resources, ThemeResource } from "../utils/game_theme";
 import { ResourceType } from "../state/game_types";
-import { Tooltip } from "@chakra-ui/tooltip";
 import CardCount from "./CardCount";
 import { useGameViewState } from "./GameView";
-import { FaCreditCard } from "react-icons/fa";
 import { sum } from "lodash";
 
 const Bank = ({}) => {

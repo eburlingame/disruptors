@@ -180,12 +180,16 @@ const EdgesContainer = styled(Tile)`
   z-index: 2;
 `;
 
-const VertexesContainer = styled(Tile)`
+const RoadsContainer = styled(Tile)`
   z-index: 3;
 `;
 
-const ButtonsContainer = styled(Tile)`
+const VertexesContainer = styled(Tile)`
   z-index: 4;
+`;
+
+const ButtonsContainer = styled(Tile)`
+  z-index: 5;
   width: 0px;
   height: 0px;
 `;
@@ -219,17 +223,21 @@ const rad2deg = (radians: number) => (radians / Math.PI) * 180;
 const deg2rad = (degrees: number) => (degrees / 180) * Math.PI;
 
 const edgeLength = TILE_WIDTH * Math.sin(deg2rad(30));
-const EdgeLine = styled.div<{ index: number; color: string }>`
-  z-index: 2;
+const EdgeLine = styled.div<{
+  index: number;
+  color: string;
+  width: number;
+}>`
+  z-index: 3;
 
   top: 50%;
   left: 50%;
   position: absolute;
   width: ${edgeLength + 14}px;
-  transform: translate(-50%, -5px)
+  transform: translate(-50%, -${(props) => props.width / 2}px)
     rotate(${(props) => props.index * 60 + 30}deg);
 
-  border-top: solid 6px ${(props) => props.color};
+  border-top: solid ${(props) => props.width}px ${(props) => props.color};
   transition: outline 0.6s linear;
   border-radius: 5px;
 `;
@@ -263,6 +271,8 @@ const Building = styled.div<{ playerColor: string }>`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  box-shadow: 0px 0px 14px 1px rgba(50, 50, 50, 0.75);
 `;
 
 const PlaceRobberButtonContainer = styled.div`
@@ -474,9 +484,11 @@ const GameBoard = ({}) => {
       if (player) {
         roadColor = gameTheme.playerColors[player.color].primary;
       }
+
+      return <EdgeLine index={edgeIndex} color={roadColor} width={8} />;
     }
 
-    return <EdgeLine index={edgeIndex} color={roadColor} />;
+    return <></>;
   };
 
   const renderBuilding = (tile: TileCoordinate, vertexIndex: number) => {
@@ -641,10 +653,22 @@ const GameBoard = ({}) => {
                       )
                       .map((index) => (
                         <EdgeContainer index={index}>
-                          {renderRoad({ x, y, z }, index)}
+                          <EdgeLine index={index} color={"#ddd"} width={3} />
                         </EdgeContainer>
                       ))}
                   </EdgesContainer>
+
+                  <RoadsContainer position={locationToPosition({ x, y, z })}>
+                    {range(6)
+                      .filter((index) =>
+                        shouldDrawEdge(tiles, { x, y, z }, index)
+                      )
+                      .map((index) => (
+                        <EdgeContainer index={index}>
+                          {renderRoad({ x, y, z }, index)}
+                        </EdgeContainer>
+                      ))}
+                  </RoadsContainer>
 
                   <VertexesContainer position={locationToPosition({ x, y, z })}>
                     {range(6)

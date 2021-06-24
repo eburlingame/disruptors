@@ -139,7 +139,7 @@ const theme: GameTheme = {
       primary: "#90BE6D",
     },
     [PlayerColor.Blue]: {
-      primary: "#577590",
+      primary: "#708eef",
     },
     [PlayerColor.Purple]: {
       primary: "#F8961E",

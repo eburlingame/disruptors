@@ -44,10 +44,12 @@ const ConnectionStatus = ({}) => {
 
 const Layout = ({
   children,
-  hideQuit = false,
+  showQuit = false,
+  showLeave = false,
 }: {
   children: ReactNode;
-  hideQuit?: boolean;
+  showQuit?: boolean;
+  showLeave?: boolean;
 }) => {
   const history = useHistory();
   const sessionState = useSessionState();
@@ -57,6 +59,10 @@ const Layout = ({
     if (sessionState.room) {
       await leaveRoom();
     }
+    history.push("/");
+  };
+
+  const onLeave = async () => {
     history.push("/");
   };
 
@@ -82,8 +88,8 @@ const Layout = ({
         </Box>
 
         <HStack>
-          {!hideQuit && (
-            <Tooltip label="Leave game">
+          {showQuit && (
+            <Tooltip label="Quit">
               <Button
                 variant="ghost"
                 size="xs"
@@ -91,6 +97,19 @@ const Layout = ({
                 colorScheme="red"
               >
                 Quit
+              </Button>
+            </Tooltip>
+          )}
+
+          {showLeave && (
+            <Tooltip label="Leave game">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={onLeave}
+                colorScheme="red"
+              >
+                Leave
               </Button>
             </Tooltip>
           )}
