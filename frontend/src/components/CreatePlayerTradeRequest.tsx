@@ -84,6 +84,7 @@ const ResourcePicker = ({
                     right="-10px"
                     zIndex="1"
                     backgroundColor="red.600"
+                    color="white"
                     fontSize="md"
                     fontWeight="bold"
                   >

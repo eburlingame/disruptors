@@ -8,6 +8,7 @@ import { useGameAction } from "../hooks/game";
 import { useSessionState } from "../hooks/session";
 import { getRoomPlayer } from "../utils/utils";
 import { TradePreview } from "./AcceptTrade";
+import { Divider } from "@chakra-ui/react";
 
 const CompleteTrade = ({}) => {
   const { room } = useSessionState();
@@ -45,8 +46,10 @@ const CompleteTrade = ({}) => {
   };
 
   return (
-    <VStack alignItems="stretch">
+    <Box alignItems="stretch">
       <TradePreview />
+
+      <Divider marginY="4" />
 
       <VStack>
         {activeTradeRequest.acceptance
@@ -58,7 +61,7 @@ const CompleteTrade = ({}) => {
             player: getRoomPlayer(room, acceptance.playerId),
           }))
           .map(({ acceptance, player }) => (
-            <>
+            <Box width="100%" maxW="300px">
               {acceptance === TradeAcceptance.UNDECIDED && (
                 <HStack justifyContent="space-between">
                   <Box>
@@ -90,16 +93,16 @@ const CompleteTrade = ({}) => {
                   <Box>{player.name} has rejected your trade</Box>
                 </HStack>
               )}
-            </>
+            </Box>
           ))}
       </VStack>
 
-      <HStack justifyContent="stretch">
+      <HStack justifyContent="stretch" marginTop="4">
         <Button colorScheme="red" flex="1" onClick={onCancel}>
           Cancel
         </Button>
       </HStack>
-    </VStack>
+    </Box>
   );
 };
 
