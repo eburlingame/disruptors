@@ -127,7 +127,7 @@ const DiscardPicker = ({}) => {
   );
 };
 
-const Players = ({}) => {
+const Resources = ({}) => {
   const { gameState } = useGameViewState();
   const { you } = gameState.state;
 
@@ -156,7 +156,7 @@ const Players = ({}) => {
   }
 
   return (
-    <HStack justifyContent="space-between">
+    <HStack justifyContent="space-between" minH="84px">
       <HStack alignItems="stretch" overflowY="scroll">
         {resources
           .map((name: ResourceType) => ({
@@ -218,4 +218,4 @@ const Players = ({}) => {
   );
 };
 
-export default Players;
+export default Resources;
