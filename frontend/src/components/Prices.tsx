@@ -117,7 +117,7 @@ const Prices = ({}) => {
       <HStack>
         <Tooltip label={`One development card`}>
           <Center minW="40px" minH="40px">
-            <FaCreditCard />
+            <gameTheme.genericDevelopmentCards.icon />
           </Center>
         </Tooltip>
 
