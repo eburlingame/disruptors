@@ -194,8 +194,10 @@ export type CatanAction =
   | PlayDevCardAction;
 
 export enum BoardType {
-  STATIC = "static",
-  VARIABLE = "variable",
+  STATIC_SMALL = "static-small",
+  VARIABLE_SMALL = "variable-small",
+  STATIC_LARGE = "static-large",
+  VARIABLE_LARGE = "variable-large",
 }
 
 export type CatanConfig = {

@@ -1,5 +1,5 @@
 import { range, shuffle } from "lodash";
-import { GameBoard, PortResource, TileType } from "./types";
+import { BoardType, GameBoard, PortResource, TileType } from "./types";
 
 const frequenciesToList = <V>(frequencies: {
   [key: string]: number;
@@ -403,3 +403,17 @@ export const generateStaticLargeBoard = (): GameBoard => ({
     },
   ],
 });
+
+export const generateBoard = (boardType: BoardType) => {
+  if (boardType === BoardType.STATIC_SMALL) {
+    return generateStaticSmallBoard();
+  }
+  if (boardType === BoardType.VARIABLE_SMALL) {
+    return generateVariableSmallBoard();
+  }
+  if (boardType === BoardType.STATIC_LARGE) {
+    return generateStaticLargeBoard();
+  }
+  // TODO: Make this the variable generate
+  return generateStaticLargeBoard();
+};

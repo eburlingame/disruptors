@@ -1,5 +1,6 @@
 import Game, { GameActionRecord, GamePlayer } from "../model";
 import {
+  generateBoard,
   generateStaticLargeBoard,
   generateStaticSmallBoard,
   generateVariableSmallBoard,
@@ -31,7 +32,7 @@ import {
 
 export const defaultGameConfig: CatanConfig = {
   cardDiscardLimit: 7,
-  boardType: BoardType.VARIABLE,
+  boardType: BoardType.VARIABLE_SMALL,
 };
 
 export default class CatanGame
@@ -64,12 +65,7 @@ export default class CatanGame
 
   startGame(players: GamePlayer[], gameConfig: CatanConfig): CatanState {
     const gamePlayers = shuffle(players);
-
-    // TODO: Generate big board for >4 players
-    const board =
-      gameConfig.boardType === BoardType.VARIABLE
-        ? generateStaticLargeBoard()
-        : generateStaticSmallBoard();
+    const board = generateBoard(gameConfig.boardType);
 
     return {
       board,

@@ -3,8 +3,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
 
-import backerLightImg from "../images/board_backing.svg";
-import backerDarkImg from "../images/board_backing_dark.svg";
+import backerSmallLightImg from "../images/board_small_backing.svg";
+import backerSmallDarkImg from "../images/board_small_backing_dark.svg";
+
+import backerLargeLightImg from "../images/board_large_backing.svg";
+import backerLargeDarkImg from "../images/board_large_backing_dark.svg";
 
 import tileDarkImg from "../images/tile_dark.svg";
 import tileLightImg from "../images/tile_light.svg";
@@ -115,10 +118,9 @@ const TileContainer = styled.div<{
 
 const BackgroundImage = styled.img`
   position: absolute;
-  left: -500px;
-  top: -500px;
-  min-width: 1000px;
-  min-height: 1000px;
+  transform: translate(-50%, -50%);
+  min-width: 1200px;
+  min-height: 1400px;
 `;
 
 const TileOriginContainer = styled.div<{ zoom: number }>`
@@ -223,30 +225,13 @@ const EdgeLine = styled.div<{ index: number; color: string }>`
   top: 50%;
   left: 50%;
   position: absolute;
-  border-top: 4px solid ${(props) => props.color};
   width: ${edgeLength + 14}px;
   transform: translate(-50%, -5px)
     rotate(${(props) => props.index * 60 + 30}deg);
 
-  border-top: solid 4px ${(props) => props.color};
+  border-top: solid 6px ${(props) => props.color};
   transition: outline 0.6s linear;
   border-radius: 5px;
-
-  // @keyframes shimmer {
-  //   0% {
-  //     border-top-style: dashed;
-  //   }
-  //   50% {
-  //     border-top-style: dotted;
-  //   }
-  //   100% {
-  //     border-top-style: dashed;
-  //   }
-  // }
-
-  // animation-name: shimmer;
-  // animation-duration: 0.5s;
-  // animation-iteration-count: infinite;
 `;
 
 const VertexContainer = styled.div<{ index: number }>`
@@ -367,6 +352,11 @@ const shouldDrawEdge = (
   const commonEdge = getCommonEdgeCoordinate(tiles, edgeCoord);
   return edgeCoordinateEqual(commonEdge, edgeCoord);
 };
+
+const boardBackgroundImgs = (tileCount: number) =>
+  tileCount <= 19
+    ? [backerSmallLightImg, backerSmallDarkImg]
+    : [backerLargeLightImg, backerLargeDarkImg];
 
 const GameBoard = ({}) => {
   const { you } = useSessionState();
@@ -585,7 +575,9 @@ const GameBoard = ({}) => {
     placingRobber &&
     !vectorsEqual(state.robber || { x: -1, y: -1, z: -1 }, tile);
 
-  const backerImg = useColorModeValue(backerLightImg, backerDarkImg);
+  const [lightBackerImg, darkBackerImg] = boardBackgroundImgs(tiles.length);
+  const backerImg = useColorModeValue(lightBackerImg, darkBackerImg);
+
   const tileBackgroundImage = useColorModeValue(tileLightImg, tileDarkImg);
   const boardBackgroundColor = useColorModeValue("#fefefe", "#121212");
 

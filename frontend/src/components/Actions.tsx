@@ -197,16 +197,18 @@ const Actions = ({}) => {
       )}
 
       {!diceOverrideEnabled && (
-        <Button
-          flex="4"
-          leftIcon={<FaDice />}
-          justifyContent="left"
-          colorScheme="purple"
-          onClick={onDiceRoll}
-          disabled={!mustRoll}
-        >
-          Roll the dice
-        </Button>
+        <HStack width="100%">
+          <Button
+            flex="4"
+            leftIcon={<FaDice />}
+            justifyContent="left"
+            colorScheme="purple"
+            onClick={onDiceRoll}
+            disabled={!mustRoll}
+          >
+            Roll the dice
+          </Button>
+        </HStack>
       )}
 
       <HStack>

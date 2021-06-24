@@ -20,6 +20,28 @@ import { SessionState } from "../state/atoms";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { BoardType, CatanConfig } from "../state/game_types";
 
+const boardTypeOptions = [
+  {
+    value: BoardType.STATIC_SMALL,
+    label: "Small board (fixed)",
+  },
+
+  {
+    value: BoardType.VARIABLE_SMALL,
+    label: "Small board (random)",
+  },
+
+  {
+    value: BoardType.STATIC_LARGE,
+    label: "Large board (fixed)",
+  },
+
+  {
+    value: BoardType.VARIABLE_LARGE,
+    label: "Large board (random)",
+  },
+];
+
 const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
   const history = useHistory();
   const errorModalDisclosure = useDisclosure();
@@ -187,8 +209,11 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
                       })
                     }
                   >
-                    <option value={BoardType.STATIC}>Beginner board</option>
-                    <option value={BoardType.VARIABLE}>Random Board</option>
+                    {boardTypeOptions.map((option) => (
+                      <option value={option.value} key={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </Select>
                 </Box>
               </HStack>
@@ -219,9 +244,10 @@ const Lobby = ({ sessionState }: { sessionState: SessionState }) => {
                 <Box>Board Type:</Box>
 
                 <Box fontWeight="bold">
-                  {sessionState.room?.gameConfig.boardType === BoardType.STATIC
-                    ? "Beginner board"
-                    : "Random board"}
+                  {boardTypeOptions.find(
+                    (option) =>
+                      option.value === sessionState.room?.gameConfig.boardType
+                  )?.label || "Unknown"}
                 </Box>
               </HStack>
               <HStack width="100%" justifyContent="space-between">
