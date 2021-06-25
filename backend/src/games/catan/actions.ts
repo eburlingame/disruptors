@@ -814,19 +814,44 @@ const placeRobber = (
   state.robber = action.location;
   state.activePlayerTurnState = PlayerTurnState.IDLE;
 
-  const somebodyToStealFrom = state.players
-    .filter((player) => player.playerId !== playerId)
-    .some(
-      (player) =>
-        playerHasBuildingNextToRobber(
-          state.board.tiles,
-          state.robber,
-          state.buildings,
-          player.playerId
-        ) && resourceCount(player) > 0
+  const playersToStealFrom = state.players.filter(
+    (player) =>
+      player.playerId !== playerId &&
+      resourceCount(player) > 0 &&
+      playerHasBuildingNextToRobber(
+        state.board.tiles,
+        state.robber,
+        state.buildings,
+        player.playerId
+      )
+  );
+
+  /// If there is only one person to steal from, perform the steal and move the player to idle
+  // TODO: The steal won't show up in the game log because it isn't a separate action, so we'll have to figure that out
+  if (playersToStealFrom.length === 1) {
+    const [playerToStealFrom] = playersToStealFrom;
+
+    const resourceToSteal = pickRandomResource(
+      state,
+      playerToStealFrom.playerId
     );
 
-  if (somebodyToStealFrom) {
+    if (resourceToSteal) {
+      state = tradePlayerResource(
+        state,
+        playerId,
+        playerToStealFrom.playerId,
+        resourceToSteal,
+        1
+      );
+    } else {
+      console.warn("Player has no cards to steal");
+    }
+
+    state.activePlayerTurnState = PlayerTurnState.IDLE;
+  }
+  /// If there is more than one player to steal from, enter the "must steal" mode
+  else if (playersToStealFrom.length > 1) {
     state.activePlayerTurnState = PlayerTurnState.MUST_STEAL_CARD;
   }
 
