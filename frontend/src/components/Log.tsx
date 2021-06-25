@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
 import { Box, HStack, VStack } from "@chakra-ui/layout";
 import gameTheme from "../utils/game_theme";
 import {
@@ -99,6 +99,12 @@ const ResourceCounts = ({ counts }: { counts: ResourceCount[] }) => {
 const totalResources = (counts: ResourceCount[]) =>
   sum(counts.map(({ count }) => count));
 
+const LogEntry = ({ children }: { children: ReactNode }) => (
+  <Box minH="30px" width="100%">
+    {children}
+  </Box>
+);
+
 const ActionRow = ({
   action,
   player,
@@ -110,30 +116,35 @@ const ActionRow = ({
 }) => {
   const { robber, buildings, resources, developmentCards } = gameTheme;
 
+  let row = null;
+
   switch (action.name) {
     case "buildSettlement":
-      return (
+      row = (
         <Box display="flex" alignItems="center">
           {player.name} built a <InlineIcon icon={buildings.settlement.icon} />
         </Box>
       );
+      break;
 
     case "buildCity":
-      return (
+      row = (
         <Box display="flex" alignItems="center">
           {player.name} built a <InlineIcon icon={buildings.city.icon} />
         </Box>
       );
+      break;
 
     case "buildRoad":
-      return (
+      row = (
         <Box display="flex" alignItems="center">
           {player.name} built a <InlineIcon icon={buildings.road.icon} />
         </Box>
       );
+      break;
 
     case "rollDice":
-      return (
+      row = (
         <>
           <Box display="flex" alignItems="center">
             {player.name} rolled a <DiceIcon number={action.values[0]} /> and{" "}
@@ -150,10 +161,11 @@ const ActionRow = ({
             ))}
         </>
       );
+      break;
 
     case "completeTrade":
       if (action.completeTrade && action.giving && action.seeking) {
-        return (
+        row = (
           <>
             <HStack>
               <Box>
@@ -165,11 +177,12 @@ const ActionRow = ({
             </HStack>
           </>
         );
+        break;
       }
       break;
 
     case "bankTrade":
-      return (
+      row = (
         <>
           <HStack>
             <Box>{player.name} gave the bank</Box>
@@ -179,52 +192,64 @@ const ActionRow = ({
           </HStack>
         </>
       );
+      break;
 
     case "placeRobber":
-      return (
+      row = (
         <Box display="flex" alignItems="center">
           {player.name} placed the <InlineIcon icon={robber.icon} />
         </Box>
       );
+      break;
 
     case "playDevCard":
       if (action.card === DevelopmentCardType.KNIGHT) {
-        return (
+        row = (
           <Box display="flex" alignItems="center">
             {player.name} played a{" "}
             <InlineIcon icon={developmentCards.knight.icon} />
           </Box>
         );
+        break;
       }
       break;
 
     case "buyDevCard":
-      return <Box>{player.name} bought a development card.</Box>;
+      row = <Box>{player.name} bought a development card.</Box>;
+      break;
 
     case "stealCard":
-      return (
+      row = (
         <Box>
           {player.name} stole a card from {players[action.stealFrom].name}
         </Box>
       );
+      break;
 
     case "discardCards":
-      return (
+      row = (
         <Box>
           {player.name} discarded {totalResources(action.discarding)} cards.
         </Box>
       );
+      break;
 
     case "endTurn":
-      return (
+      row = (
         <Box
           width="100%"
+          height="0px"
           borderTop="solid"
           borderTopColor="#999"
           borderTopWidth="1px"
           marginY="4"
         />
       );
+      break;
+  }
+
+  if (row) {
+    return <LogEntry>{row}</LogEntry>;
   }
 
   return <></>;
