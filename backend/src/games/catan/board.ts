@@ -221,97 +221,140 @@ export const generateStaticLargeBoard = (): GameBoard => ({
       location: { x: 2, y: 0, z: -2 },
       diceNumber: 2,
       tileType: TileType.WHEAT,
-      ports: [],
+      ports: [
+        { vertexIndex: 2, resource: PortResource.ORE, ratio: 2 },
+        { vertexIndex: 5, resource: PortResource.WHEAT, ratio: 2 },
+      ],
     },
     {
       location: { x: 1, y: 1, z: -2 },
       diceNumber: 5,
       tileType: TileType.SHEEP,
-      ports: [],
+      ports: [
+        { vertexIndex: 0, resource: PortResource.WHEAT, ratio: 2 },
+        { vertexIndex: 1, resource: PortResource.WHEAT, ratio: 2 },
+      ],
     },
     {
       location: { x: 0, y: 2, z: -2 },
       diceNumber: 4,
       tileType: TileType.WOOD,
-      ports: [],
+      ports: [
+        { vertexIndex: 0, resource: PortResource.ANY, ratio: 3 },
+        { vertexIndex: 5, resource: PortResource.ANY, ratio: 3 },
+      ],
     },
     {
       location: { x: -1, y: 2, z: -1 },
       diceNumber: 6,
       tileType: TileType.ORE,
-      ports: [],
+      ports: [
+        { vertexIndex: 4, resource: PortResource.WOOD, ratio: 2 },
+        { vertexIndex: 5, resource: PortResource.WOOD, ratio: 2 },
+      ],
     },
     {
       location: { x: -2, y: 2, z: 0 },
       diceNumber: -1,
       tileType: TileType.DESERT,
-      ports: [],
+      ports: [{ vertexIndex: 5, resource: PortResource.WOOD, ratio: 2 }],
     },
     {
       location: { x: -3, y: 2, z: 1 },
       diceNumber: 3,
       tileType: TileType.WHEAT,
-      ports: [],
+      ports: [
+        { vertexIndex: 3, resource: PortResource.ANY, ratio: 3 },
+        { vertexIndex: 4, resource: PortResource.ANY, ratio: 3 },
+      ],
     },
     {
       location: { x: -3, y: 1, z: 2 },
       diceNumber: 9,
       tileType: TileType.SHEEP,
-      ports: [],
+      ports: [
+        { vertexIndex: 5, resource: PortResource.ANY, ratio: 3 },
+        { vertexIndex: 3, resource: PortResource.BRICK, ratio: 2 },
+      ],
     },
     {
       location: { x: -3, y: 0, z: 3 },
       diceNumber: 8,
       tileType: TileType.BRICK,
-      ports: [],
+      ports: [
+        { vertexIndex: 4, resource: PortResource.BRICK, ratio: 2 },
+        { vertexIndex: 5, resource: PortResource.BRICK, ratio: 2 },
+      ],
     },
     {
       location: { x: -3, y: -1, z: 4 },
       diceNumber: 11,
       tileType: TileType.ORE,
-      ports: [],
+      ports: [
+        { vertexIndex: 3, resource: PortResource.ANY, ratio: 3 },
+        { vertexIndex: 4, resource: PortResource.ANY, ratio: 3 },
+      ],
     },
     {
       location: { x: -2, y: -2, z: 4 },
       diceNumber: 11,
       tileType: TileType.WHEAT,
-      ports: [],
+      ports: [
+        { vertexIndex: 2, resource: PortResource.ANY, ratio: 3 },
+        { vertexIndex: 3, resource: PortResource.ANY, ratio: 3 },
+      ],
     },
     {
       location: { x: -1, y: -3, z: 4 },
       diceNumber: 10,
       tileType: TileType.WOOD,
-      ports: [],
+      ports: [
+        { vertexIndex: 1, resource: PortResource.ORE, ratio: 2 },
+        { vertexIndex: 2, resource: PortResource.ORE, ratio: 2 },
+        { vertexIndex: 4, resource: PortResource.ANY, ratio: 3 },
+      ],
     },
     {
       location: { x: 0, y: -3, z: 3 },
       diceNumber: 6,
       tileType: TileType.ORE,
-      ports: [],
+      ports: [
+        { vertexIndex: 1, resource: PortResource.SHEEP, ratio: 2 },
+        { vertexIndex: 3, resource: PortResource.ORE, ratio: 2 },
+      ],
     },
     {
       location: { x: 1, y: -3, z: 2 },
       diceNumber: 3,
       tileType: TileType.SHEEP,
-      ports: [],
+      ports: [
+        { vertexIndex: 2, resource: PortResource.SHEEP, ratio: 2 },
+        { vertexIndex: 3, resource: PortResource.SHEEP, ratio: 2 },
+      ],
     },
     {
       location: { x: 2, y: -3, z: 1 },
       diceNumber: 8,
       tileType: TileType.WOOD,
-      ports: [],
+      ports: [{ vertexIndex: 0, resource: PortResource.ANY, ratio: 3 }],
     },
     {
       location: { x: 2, y: -2, z: 0 },
       diceNumber: 4,
       tileType: TileType.WHEAT,
-      ports: [],
+      ports: [
+        { vertexIndex: 1, resource: PortResource.ANY, ratio: 3 },
+        { vertexIndex: 2, resource: PortResource.ANY, ratio: 3 },
+      ],
     },
     {
       location: { x: 2, y: -1, z: -1 },
       diceNumber: 8,
       tileType: TileType.SHEEP,
-      ports: [],
+      ports: [
+        { vertexIndex: 0, resource: PortResource.ORE, ratio: 2 },
+        { vertexIndex: 1, resource: PortResource.ORE, ratio: 2 },
+      ],
     },
 
     // Middle ring
