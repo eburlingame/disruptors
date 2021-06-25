@@ -1,6 +1,5 @@
 import { Box } from "@chakra-ui/layout";
-import React, { useEffect, useRef, useState } from "react";
-import { last } from "lodash";
+import React, { useRef, useState } from "react";
 import { useGameViewState } from "./GameView";
 
 import backerSmallLightImg from "../images/board_small_backing.svg";
@@ -31,8 +30,10 @@ import {
 } from "../state/game_types";
 import gameTheme from "../utils/game_theme";
 import { ButtonGroup, IconButton } from "@chakra-ui/button";
+import { HStack } from "@chakra-ui/layout";
 import {
   FaArrowCircleDown,
+  FaCircle,
   FaHammer,
   FaSearchMinus,
   FaSearchPlus,
@@ -49,6 +50,7 @@ import {
   isValidSettlementPosition,
   widthInTiles,
   heightInTiles,
+  diceFrequencyDots,
 } from "../utils/board_utils";
 import { useSessionState } from "../hooks/session";
 import { useGameAction } from "../hooks/game";
@@ -133,7 +135,7 @@ const TileIconContainer = styled.div`
   text-align: center;
   width: 100px;
   height: 150px;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -51%);
 
   display: flex;
   flex-direction: column;
@@ -273,7 +275,13 @@ const TileIcon = ({
   hasRobber: boolean;
 }) => {
   const resource = tileType as unknown as ResourceType;
+
   const textColor = useColorModeValue("gray.800", "gray.100");
+
+  const dotColor = useColorModeValue("gray.400", "gray.500");
+  const dotColorRed = useColorModeValue("red.600", "red.700");
+
+  const diceDots = diceFrequencyDots[parseInt(diceNumber)];
 
   if (Object.values(ResourceType).includes(resource)) {
     const { label, icon: Icon } = gameTheme.resources[resource];
@@ -293,6 +301,18 @@ const TileIcon = ({
           opacity={hasRobber ? 0.3 : 1.0}
         >
           {diceNumber}
+
+          <Box justifyContent="center" width="30px" display="flex">
+            {range(diceDots).map(() => (
+              <Box
+                backgroundColor={diceDots === 5 ? dotColorRed : dotColor}
+                borderRadius="4px"
+                width="4px"
+                height="4px"
+                marginX="1px"
+              />
+            ))}
+          </Box>
         </Box>
 
         {hasRobber && (
