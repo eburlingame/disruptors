@@ -1,24 +1,13 @@
 import { range, shuffle } from "lodash";
 import { BoardType, GameBoard, PortResource, TileType } from "./types";
 
-const frequenciesToList = <V>(frequencies: {
-  [key: string]: number;
-}): string[] =>
-  Object.entries(frequencies).flatMap(([key, count]) =>
-    range(count).map(() => key)
-  );
-
-const variableSmallBoardTileCounts = {
-  [TileType.ORE]: 3,
-  [TileType.WHEAT]: 4,
-  [TileType.WOOD]: 4,
-  [TileType.SHEEP]: 4,
-  [TileType.BRICK]: 3,
-  [TileType.DESERT]: 1,
-};
-
 const variableSmallBoardDiceNumbers = [
   5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11,
+];
+
+const variableLargeBoardDiceNumbers = [
+  2, 5, 4, 6, 3, 9, 8, 11, 11, 10, 6, 3, 8, 4, 8, 10, 11, 12, 10, 5, 4, 9, 5, 9,
+  12, 3, 12, 6,
 ];
 
 /// This is a static "beginner" board that comes straight out of the directions (for 2-4 players)
@@ -183,11 +172,7 @@ export const generateStaticSmallBoard = (): GameBoard => ({
 export const generateVariableSmallBoard = () => {
   const { tiles: staticTiles } = generateStaticSmallBoard();
 
-  const shuffledTiles = shuffle(
-    frequenciesToList(variableSmallBoardTileCounts).map(
-      (tileType) => tileType as TileType
-    )
-  );
+  const shuffledTiles = shuffle(staticTiles.map(({ tileType }) => tileType));
 
   let diceNumberIndex = 0;
 
@@ -447,6 +432,35 @@ export const generateStaticLargeBoard = (): GameBoard => ({
   ],
 });
 
+export const generateVariableLargeBoard = () => {
+  const { tiles: staticTiles } = generateStaticLargeBoard();
+
+  const shuffledTiles = shuffle(staticTiles.map(({ tileType }) => tileType));
+
+  let diceNumberIndex = 0;
+
+  const variableTiles = staticTiles.map((tile, index) => {
+    const tileType = shuffledTiles[index];
+
+    if (tileType === TileType.DESERT) {
+      return {
+        ...tile,
+        tileType,
+      };
+    }
+
+    return {
+      ...tile,
+      tileType,
+      diceNumber: variableLargeBoardDiceNumbers[diceNumberIndex++],
+    };
+  });
+
+  return {
+    tiles: variableTiles,
+  };
+};
+
 export const generateBoard = (boardType: BoardType) => {
   if (boardType === BoardType.STATIC_SMALL) {
     return generateStaticSmallBoard();
@@ -458,5 +472,5 @@ export const generateBoard = (boardType: BoardType) => {
     return generateStaticLargeBoard();
   }
   // TODO: Make this the variable generate
-  return generateStaticLargeBoard();
+  return generateVariableLargeBoard();
 };
