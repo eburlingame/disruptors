@@ -1,4 +1,4 @@
-import { Box, Center } from "@chakra-ui/layout";
+import { Box } from "@chakra-ui/layout";
 import React, { useEffect, useRef, useState } from "react";
 import { last } from "lodash";
 import { useGameViewState } from "./GameView";
@@ -55,6 +55,7 @@ import { useGameAction } from "../hooks/game";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import useResizeAware from "react-resize-aware";
+import LastRoll from "./LastRoll";
 
 const TILE_WIDTH = 146;
 const TILE_HEIGHT = 169;
@@ -81,24 +82,6 @@ const ZoomControls = styled.div`
   top: 5px;
   left: 5px;
   z-index: 4;
-`;
-
-const DiceValueContainer = styled.div<{ backgroundColor: string }>`
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  z-index: 4;
-  background: ${(props) => props.backgroundColor};
-  border-radius: 0.5em;
-  font-size: 20pt;
-  padding: 0.5em;
-  font-weight: 700;
-`;
-
-const DiceValueContainerTitle = styled.div`
-  font-size: 12pt;
-  color: #777;
-  font-weight: 400;
 `;
 
 const TileContainer = styled.div<{
@@ -219,7 +202,6 @@ const EdgeContainer = styled.div<{ index: number }>`
   height: 25px;
 `;
 
-const rad2deg = (radians: number) => (radians / Math.PI) * 180;
 const deg2rad = (degrees: number) => (degrees / 180) * Math.PI;
 
 const edgeLength = TILE_WIDTH * Math.sin(deg2rad(30));
@@ -381,8 +363,6 @@ const GameBoard = ({}) => {
     robber,
   } = gameState.state;
 
-  const rollBacker = useColorModeValue("#aaa", "#121212");
-
   const boardWidthTiles = widthInTiles(tiles);
   const boardHeightTiles = heightInTiles(tiles);
 
@@ -397,13 +377,6 @@ const GameBoard = ({}) => {
   const scrollRef = useRef<any>();
 
   const { activePlayerId, activePlayerTurnState } = state;
-
-  const lastDiceRoll: RollDiceAction | undefined = last(
-    gameState.actions
-      .map(({ action }) => action)
-      .filter(({ name }) => name === "rollDice")
-      .map((a) => a as RollDiceAction)
-  );
 
   const yourTurn = you && you.playerId === activePlayerId;
 
@@ -614,13 +587,7 @@ const GameBoard = ({}) => {
         </ButtonGroup>
       </ZoomControls>
 
-      {lastDiceRoll && (
-        <DiceValueContainer backgroundColor={rollBacker}>
-          <DiceValueContainerTitle>Last roll:</DiceValueContainerTitle>
-          {lastDiceRoll.values[0]} + {lastDiceRoll.values[1]} ={" "}
-          {lastDiceRoll.values[0] + lastDiceRoll.values[1]}
-        </DiceValueContainer>
-      )}
+      <LastRoll />
 
       <OverflowContainer ref={scrollRef}>
         <TileContainer
