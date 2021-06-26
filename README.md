@@ -1,5 +1,7 @@
 # Disruptors
 
+![image](https://user-images.githubusercontent.com/7151584/123522657-71936400-d673-11eb-96f7-a3c42a240a05.png)
+
 ## Setup
 
 ### Getting started
