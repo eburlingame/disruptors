@@ -18,7 +18,7 @@ import {
 
 const WS_API_URL =
   process.env.NODE_ENV === "production"
-    ? "wss://api.disruptors.ericburlingame.com"
+    ? "wss://disruptors-api.ericburlingame.com"
     : "ws://localhost:8080/ws";
 
 export type Socket = {
