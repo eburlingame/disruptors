@@ -1,15 +1,15 @@
 # build environment
-FROM node:current-alpine3.12 as build
+FROM node:16-alpine3.14 as build
 WORKDIR /usr/app
 
 ENV PATH /usr/app/node_modules/.bin:$PATH
 ENV NODE_ENV production
-ENV NODE_OPTIONS --openssl-legacy-provider
 
 COPY package*.json ./
+COPY yarn.lock ./
 RUN yarn install --frozen-lockfile --production=false
 RUN yarn global add typescript
-RUN yarn global add react-scripts@3.4.1
+RUN yarn global add react-scripts@4.0.3
 
 COPY . .
 RUN yarn run build

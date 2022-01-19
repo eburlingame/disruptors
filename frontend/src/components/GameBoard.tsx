@@ -705,7 +705,7 @@ const GameBoard = ({}) => {
                         .filter((index) =>
                           placingCity
                             ? settlementExists(
-                                you?.playerId,
+                                you?.playerId || "",
                                 { x, y, z },
                                 index
                               )

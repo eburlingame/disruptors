@@ -106,7 +106,7 @@ const DiscardPicker = ({}) => {
                   <CardCount
                     icon={<IconComponent />}
                     label={resource.label}
-                    count={count}
+                    count={count.toString()}
                   />
 
                   {mustDiscard && (
@@ -171,7 +171,7 @@ const Resources = ({}) => {
               <CardCount
                 icon={<IconComponent />}
                 label={resource.label}
-                count={count}
+                count={count.toString()}
               />
             );
           })}
